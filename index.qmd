@@ -1,5 +1,5 @@
 ---
-title: "Coding_Blog"
+title: "Ttl in root index"
 listing:
   contents: posts
   sort: "date desc"
