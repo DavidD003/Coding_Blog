@@ -311,7 +311,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>Path(<span class="vs">r"C:\Invoices"</span>).exists()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="30">
+<div class="cell-output cell-output-display" data-execution_count="16">
 <pre><code>True</code></pre>
 </div>
 </div>
@@ -365,7 +365,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> pthBld(<span class="st">'Invoice 3'</span>, <span class="st">"xlsx"</span>, (<span class="st">'unPaid'</span>, <span class="dv">22</span>))</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>p, <span class="st">"Exists?: "</span><span class="op">+</span><span class="bu">str</span>(Path(p).exists())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="34">
+<div class="cell-output cell-output-display" data-execution_count="20">
 <pre><code>('C:\\Invoices\\Invoices 2022\\unPaid\\Invoice 3.xlsx', 'Exists?: True')</code></pre>
 </div>
 </div>
@@ -406,7 +406,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>list_dir(<span class="vs">r"C:\Invoices"</span>)  <span class="co"># Test it works</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="37">
+<div class="cell-output cell-output-display" data-execution_count="23">
 <pre><code>['C:\\Invoices\\Aggregated_Data.xlsx',
  "C:\\Invoices\\Invoices '21\\junk_Data.xlsx",
  "C:\\Invoices\\Invoices '21\\Paid\\invoice 1.xlsx",
@@ -438,7 +438,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>fls</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="39">
+<div class="cell-output cell-output-display" data-execution_count="25">
 <pre><code>["C:\\Invoices\\Invoices '21\\Paid\\invoice 1.xlsx",
  "C:\\Invoices\\Invoices '21\\Paid\\invoice 2.xlsx",
  "C:\\Invoices\\Invoices '21\\Unpaid\\invoice 3.xlsx",
@@ -500,15 +500,15 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>2\9 C:\Invoices\Invoices '21\Paid\invoice 2.xlsx
-3\9 C:\Invoices\Invoices '21\Unpaid\invoice 3.xlsx</code></pre>
+3\9 C:\Invoices\Invoices '21\Unpaid\invoice 3.xlsx
+4\9 C:\Invoices\Invoices '23\invoice 1.xlsx</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>4\9 C:\Invoices\Invoices '23\invoice 1.xlsx
-5\9 C:\Invoices\Invoices '23\invoice 2.xlsx
-6\9 C:\Invoices\Invoices '23\invoice 3.xlsx</code></pre>
+<pre><code>5\9 C:\Invoices\Invoices '23\invoice 2.xlsx</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>7\9 C:\Invoices\Invoices 2022\Paid\invoice 1.xlsx
+<pre><code>6\9 C:\Invoices\Invoices '23\invoice 3.xlsx
+7\9 C:\Invoices\Invoices 2022\Paid\invoice 1.xlsx
 8\9 C:\Invoices\Invoices 2022\Paid\invoice 2.xlsx</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
@@ -522,7 +522,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check we got what we wanted</span></span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="bu">len</span>(subitems), subitems[<span class="dv">0</span>], <span class="bu">len</span>(invoiceTotal), invoiceTotal[<span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="41">
+<div class="cell-output cell-output-display" data-execution_count="27">
 <pre><code>(9,
  ["C:\\Invoices\\Invoices '21\\Paid\\invoice 1.xlsx",
   34567,
