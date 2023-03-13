@@ -121,9 +121,7 @@ fig.set_size_inches(12, 7)
 plt.show()
 print("(Number, # Factors): "+str([x for x in zip(nums, facts)]))
 ```
-Interesting! It almost looks like a morse code sequence... Here is a great [youtube video](https://www.youtube.com/watch?v=M48319x1Kg4) that actually inspired me to tinker with this idea of factorizations in which the creator puts sound to this sequence. Note that for this plot, I used a log scale on the histogram on the right side since the occurrence of low numbers as factors was so much greater than that of larger numbers. Again, it is interesting to see the way in which these tallies aren't all continuous at a fine level, but looked at broadly, there seem to be these patterns of density cutting across the plot, as shown in the following figure:
-
-![](lines_on_plot.jpg){fig-alt="Repeating diagonal lines of plot density." fig-align="center"}
+Interesting! It almost looks like a morse code sequence... Here is a great [youtube video](https://www.youtube.com/watch?v=M48319x1Kg4) that actually inspired me to tinker with this idea of factorizations in which the creator puts sound to this sequence. Note that for this plot, I used a log scale on the histogram on the right side since the occurrence of low numbers as factors was so much greater than that of larger numbers. Again, it is interesting to see the way in which these tallies aren't all continuous at a fine level, but looked at broadly, there seem to be these patterns of density cutting across the plot...
 
 ## Prime Factorization 
 Let's make a function that yields the prime factorization for a given number input. This will use recursion to keep on digging until all prime factors are found. More info on the method [here](https://www.cuemath.com/numbers/prime-factorization/). And we'll fool around with a different method for captioning Figures since this is still about learning how to use Quarto! Building off of the last example, I thought I should run multiple examples, one up to 1000, the other up to 25000, for the sake of seeing if a different pattern appeared.
