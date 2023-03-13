@@ -1,5 +1,5 @@
 ---
-title: "Ttl in root index"
+title: "Davids Corner of the Internet"
 listing:
   contents: posts
   sort: "date desc"
