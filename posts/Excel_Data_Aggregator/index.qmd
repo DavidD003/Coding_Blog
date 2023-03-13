@@ -13,7 +13,7 @@ format:
 
 
 ## TL;DR
-This article is about using Python to reach into many excel files that have a similar spreadsheet structure so as to pull out data from those sheets, potentially spread across multiple folders, into one place for aggregate use.
+[Here is a video](https://youtu.be/RmFSYdMZLmI)! This article is about using Python to reach into many excel files that have a similar spreadsheet structure so as to pull out data from those sheets, potentially spread across multiple folders, into one place for aggregate use.
 
 # When your Excel is more like Excalibur ^[Don't worry I didnt spend too long thinking about this, it just came to me. And if you don't like it, we agree to disagree.]
 It seems like an all too common tragedy that lots of team operate on the basis of sheets that were thrown together at some point in the distant past with varying degrees of thought put into future use cases. Now here you are, with the data you need like gold ore entombed in mountains of excel sheets. The irretrievable Excalibur in the stone.
@@ -29,7 +29,7 @@ This article is aimed at people who may have never used Python before but have s
 # INSERT VIDEO LINK HERE, and GITHUB link beloW!
 
 ### Try It Yourself!
-If you want to run it yourself, you can find the code on my GitHub page. You'll need to [install Python and Jupyter](https://www.youtube.com/watch?v=qI3P7zMMsgY).^[Not my video, but I recommend it. It might seem daunting or like overkill, but trust me, it's the right way to go.] Python is the programming langauge we're using, Jupyter is the tool for organizing and executing blocks of Python commands so that we can understand, debug, and execute bits and peices of code at a time instead of always running the whole thing.
+If you want to run it yourself, you can [find the code on my GitHub page](https://github.com/DavidD003/Python-Tools). You'll need to [install Python and Jupyter](https://www.youtube.com/watch?v=qI3P7zMMsgY).^[Not my video, but I recommend it. It might seem daunting or like overkill, but trust me, it's the right way to go.] Python is the programming langauge we're using, Jupyter is the tool for organizing and executing blocks of Python commands so that we can understand, debug, and execute bits and peices of code at a time instead of always running the whole thing.
 
 # Code Walkthrough
 ## Example Files

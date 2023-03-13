@@ -1,321 +1,110 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
-<head>
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.335">
 
-  <meta charset="utf-8">
-  <meta name="generator" content="quarto-1.2.335">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="David De Sa">
+<meta name="dcterms.date" content="2023-03-12">
 
-  <meta name="author" content="David De Sa">
-  <meta name="dcterms.date" content="2023-03-12">
-
-  <title>David's Coding - Getting Data From Many Excel Workbooks, with Python</title>
-  <style>
-    code {
-      white-space: pre-wrap;
-    }
-
-    span.smallcaps {
-      font-variant: small-caps;
-    }
-
-    div.columns {
-      display: flex;
-      gap: min(4vw, 1.5em);
-    }
-
-    div.column {
-      flex: auto;
-      overflow-x: auto;
-    }
-
-    div.hanging-indent {
-      margin-left: 1.5em;
-      text-indent: -1.5em;
-    }
-
-    ul.task-list {
-      list-style: none;
-    }
-
-    ul.task-list li input[type="checkbox"] {
-      width: 0.8em;
-      margin: 0 0.8em 0.2em -1.6em;
-      vertical-align: middle;
-    }
-
-    pre>code.sourceCode {
-      white-space: pre;
-      position: relative;
-    }
-
-    pre>code.sourceCode>span {
-      display: inline-block;
-      line-height: 1.25;
-    }
-
-    pre>code.sourceCode>span:empty {
-      height: 1.2em;
-    }
-
-    .sourceCode {
-      overflow: visible;
-    }
-
-    code.sourceCode>span {
-      color: inherit;
-      text-decoration: inherit;
-    }
-
-    div.sourceCode {
-      margin: 1em 0;
-    }
-
-    pre.sourceCode {
-      margin: 0;
-    }
-
-    @media screen {
-      div.sourceCode {
-        overflow: auto;
-      }
-    }
-
-    @media print {
-      pre>code.sourceCode {
-        white-space: pre-wrap;
-      }
-
-      pre>code.sourceCode>span {
-        text-indent: -5em;
-        padding-left: 5em;
-      }
-    }
-
-    pre.numberSource code {
-      counter-reset: source-line 0;
-    }
-
-    pre.numberSource code>span {
-      position: relative;
-      left: -4em;
-      counter-increment: source-line;
-    }
-
-    pre.numberSource code>span>a:first-child::before {
-      content: counter(source-line);
-      position: relative;
-      left: -1em;
-      text-align: right;
-      vertical-align: baseline;
-      border: none;
-      display: inline-block;
-      -webkit-touch-callout: none;
-      -webkit-user-select: none;
-      -khtml-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
-      padding: 0 4px;
-      width: 4em;
-      color: #aaaaaa;
-    }
-
-    pre.numberSource {
-      margin-left: 3em;
-      border-left: 1px solid #aaaaaa;
-      padding-left: 4px;
-    }
-
-    div.sourceCode {}
-
-    @media screen {
-      pre>code.sourceCode>span>a:first-child::before {
-        text-decoration: underline;
-      }
-    }
-
-    code span.al {
-      color: #ff0000;
-      font-weight: bold;
-    }
-
-    /* Alert */
-    code span.an {
-      color: #60a0b0;
-      font-weight: bold;
-      font-style: italic;
-    }
-
-    /* Annotation */
-    code span.at {
-      color: #7d9029;
-    }
-
-    /* Attribute */
-    code span.bn {
-      color: #40a070;
-    }
-
-    /* BaseN */
-    code span.bu {
-      color: #008000;
-    }
-
-    /* BuiltIn */
-    code span.cf {
-      color: #007020;
-      font-weight: bold;
-    }
-
-    /* ControlFlow */
-    code span.ch {
-      color: #4070a0;
-    }
-
-    /* Char */
-    code span.cn {
-      color: #880000;
-    }
-
-    /* Constant */
-    code span.co {
-      color: #60a0b0;
-      font-style: italic;
-    }
-
-    /* Comment */
-    code span.cv {
-      color: #60a0b0;
-      font-weight: bold;
-      font-style: italic;
-    }
-
-    /* CommentVar */
-    code span.do {
-      color: #ba2121;
-      font-style: italic;
-    }
-
-    /* Documentation */
-    code span.dt {
-      color: #902000;
-    }
-
-    /* DataType */
-    code span.dv {
-      color: #40a070;
-    }
-
-    /* DecVal */
-    code span.er {
-      color: #ff0000;
-      font-weight: bold;
-    }
-
-    /* Error */
-    code span.ex {}
-
-    /* Extension */
-    code span.fl {
-      color: #40a070;
-    }
-
-    /* Float */
-    code span.fu {
-      color: #06287e;
-    }
-
-    /* Function */
-    code span.im {
-      color: #008000;
-      font-weight: bold;
-    }
-
-    /* Import */
-    code span.in {
-      color: #60a0b0;
-      font-weight: bold;
-      font-style: italic;
-    }
-
-    /* Information */
-    code span.kw {
-      color: #007020;
-      font-weight: bold;
-    }
-
-    /* Keyword */
-    code span.op {
-      color: #666666;
-    }
-
-    /* Operator */
-    code span.ot {
-      color: #007020;
-    }
-
-    /* Other */
-    code span.pp {
-      color: #bc7a00;
-    }
-
-    /* Preprocessor */
-    code span.sc {
-      color: #4070a0;
-    }
-
-    /* SpecialChar */
-    code span.ss {
-      color: #bb6688;
-    }
-
-    /* SpecialString */
-    code span.st {
-      color: #4070a0;
-    }
-
-    /* String */
-    code span.va {
-      color: #19177c;
-    }
-
-    /* Variable */
-    code span.vs {
-      color: #4070a0;
-    }
-
-    /* VerbatimString */
-    code span.wa {
-      color: #60a0b0;
-      font-weight: bold;
-      font-style: italic;
-    }
-
-    /* Warning */
-  </style>
+<title>Coding_Blog - Getting Data From Many Excel Workbooks, with Python</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
 
 
-  <script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
-  <script src="../../site_libs/quarto-nav/headroom.min.js"></script>
-  <script src="../../site_libs/clipboard/clipboard.min.js"></script>
-  <script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
-  <script src="../../site_libs/quarto-search/fuse.min.js"></script>
-  <script src="../../site_libs/quarto-search/quarto-search.js"></script>
-  <meta name="quarto:offset" content="../../">
-  <script src="../../site_libs/quarto-html/quarto.js"></script>
-  <script src="../../site_libs/quarto-html/popper.min.js"></script>
-  <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
-  <script src="../../site_libs/quarto-html/anchor.min.js"></script>
-  <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-  <link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet"
-    id="quarto-text-highlighting-styles">
-  <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
-  <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-  <link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
-  <script id="quarto-search-options" type="application/json">{
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
   "collapse-after": 3,
@@ -336,312 +125,225 @@
 }</script>
 
 
-  <link rel="stylesheet" href="../../styles.css">
+<link rel="stylesheet" href="../../styles.css">
 </head>
 
 <body class="nav-fixed">
 
-  <div id="quarto-search-results"></div>
+<div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg navbar-dark ">
       <div class="navbar-container container-fluid">
-        <div class="navbar-brand-container">
-          <a class="navbar-brand" href="../../index.html">
-            <span class="navbar-title">David's Coding</span>
-          </a>
-        </div>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
-          aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation"
-          onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarCollapse">
-          <ul class="navbar-nav navbar-nav-scroll ms-auto">
-            <li class="nav-item">
-              <a class="nav-link" href="../../about.html">
-                <span class="menu-text">About</span></a>
-            </li>
-          </ul>
-          <div id="quarto-search" class="" title="Search"></div>
-        </div> <!-- /navcollapse -->
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Coding_Blog</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com"><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
       </div> <!-- /container-fluid -->
     </nav>
-  </header>
-  <!-- content -->
-  <header id="title-block-header" class="quarto-title-block default page-columns page-full">
-    <div class="quarto-title-banner page-columns page-full">
-      <div class="quarto-title column-body">
-        <div class="quarto-title-block">
-          <div>
-            <h1 class="title">Getting Data From Many Excel Workbooks, with Python</h1><button type="button"
-              class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown"
-              aria-expanded="false"><i class="bi"></i> Code</button>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu">
-              <li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All
-                  Code</a></li>
-              <li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All
-                  Code</a></li>
-              <li>
-                <hr class="dropdown-divider">
-              </li>
-              <li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View
-                  Source</a></li>
-            </ul>
-          </div>
-        </div>
-        <div class="quarto-categories">
-          <div class="quarto-category">python</div>
-          <div class="quarto-category">excel</div>
-          <div class="quarto-category">automation</div>
-        </div>
-      </div>
-    </div>
-
-
-    <div class="quarto-title-meta">
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <div class="quarto-title-block"><div><h1 class="title">Getting Data From Many Excel Workbooks, with Python</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+                                <div class="quarto-categories">
+                <div class="quarto-category">python</div>
+                <div class="quarto-category">excel</div>
+                <div class="quarto-category">automation</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
 
       <div>
-        <div class="quarto-title-meta-heading">Author</div>
-        <div class="quarto-title-meta-contents">
-          <p>David De Sa </p>
-        </div>
-      </div>
-
-      <div>
-        <div class="quarto-title-meta-heading">Published</div>
-        <div class="quarto-title-meta-contents">
-          <p class="date">March 12, 2023</p>
-        </div>
-      </div>
-
-
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>David De Sa </p>
+            </div>
     </div>
-
-
-  </header>
-  <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
-    <!-- sidebar -->
-    <!-- margin-sidebar -->
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">March 12, 2023</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-      <nav id="TOC" role="doc-toc" class="toc-active">
-        <h2 id="toc-title">On this page</h2>
-
-        <ul>
-          <li><a href="#tldr" id="toc-tldr" class="nav-link active" data-scroll-target="#tldr">TL;DR</a></li>
-          <li><a href="#when-your-excel-is-more-like-excalibur" id="toc-when-your-excel-is-more-like-excalibur"
-              class="nav-link" data-scroll-target="#when-your-excel-is-more-like-excalibur">When your Excel is more like
-              Excalibur </a>
-            <ul class="collapse">
-              <li><a href="#what-exactly-does-this-code-do" id="toc-what-exactly-does-this-code-do" class="nav-link"
-                  data-scroll-target="#what-exactly-does-this-code-do">What Exactly Does This Code Do?</a></li>
-              <li><a href="#is-this-for-you" id="toc-is-this-for-you" class="nav-link"
-                  data-scroll-target="#is-this-for-you">Is This For You?</a></li>
-            </ul>
-          </li>
-          <li><a href="#insert-video-link-here-and-github-link-below"
-              id="toc-insert-video-link-here-and-github-link-below" class="nav-link"
-              data-scroll-target="#insert-video-link-here-and-github-link-below">INSERT VIDEO LINK HERE, and GITHUB link
-              beloW!</a>
-            <ul class="collapse">
-              <li><a href="#try-it-yourself" id="toc-try-it-yourself" class="nav-link"
-                  data-scroll-target="#try-it-yourself">Try It Yourself!</a></li>
-            </ul>
-          </li>
-          <li><a href="#code-walkthrough" id="toc-code-walkthrough" class="nav-link"
-              data-scroll-target="#code-walkthrough">Code Walkthrough</a>
-            <ul class="collapse">
-              <li><a href="#example-files" id="toc-example-files" class="nav-link"
-                  data-scroll-target="#example-files">Example Files</a></li>
-              <li><a href="#dependencies" id="toc-dependencies" class="nav-link"
-                  data-scroll-target="#dependencies">Dependencies</a></li>
-              <li><a href="#debugging" id="toc-debugging" class="nav-link" data-scroll-target="#debugging">Debugging</a>
-              </li>
-              <li><a href="#specifying-which-files" id="toc-specifying-which-files" class="nav-link"
-                  data-scroll-target="#specifying-which-files">Specifying Which Files</a>
-                <ul class="collapse">
-                  <li><a href="#option-1-naming-each-file" id="toc-option-1-naming-each-file" class="nav-link"
-                      data-scroll-target="#option-1-naming-each-file">Option 1: Naming Each File</a></li>
-                  <li><a href="#option-2-full-directory-search-on-file-names"
-                      id="toc-option-2-full-directory-search-on-file-names" class="nav-link"
-                      data-scroll-target="#option-2-full-directory-search-on-file-names">Option 2: Full Directory Search
-                      on File names</a></li>
-                </ul>
-              </li>
-              <li><a href="#retrieving-the-data" id="toc-retrieving-the-data" class="nav-link"
-                  data-scroll-target="#retrieving-the-data">Retrieving The Data</a></li>
-              <li><a href="#compile-in-excel" id="toc-compile-in-excel" class="nav-link"
-                  data-scroll-target="#compile-in-excel">Compile In Excel</a></li>
-              <li><a href="#output" id="toc-output" class="nav-link" data-scroll-target="#output">Output</a></li>
-            </ul>
-          </li>
-          <li><a href="#afterthoughts" id="toc-afterthoughts" class="nav-link"
-              data-scroll-target="#afterthoughts">Afterthoughts</a></li>
-        </ul>
-      </nav>
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#tldr" id="toc-tldr" class="nav-link active" data-scroll-target="#tldr">TL;DR</a></li>
+  <li><a href="#when-your-excel-is-more-like-excalibur" id="toc-when-your-excel-is-more-like-excalibur" class="nav-link" data-scroll-target="#when-your-excel-is-more-like-excalibur">When your Excel is more like Excalibur </a>
+  <ul class="collapse">
+  <li><a href="#what-exactly-does-this-code-do" id="toc-what-exactly-does-this-code-do" class="nav-link" data-scroll-target="#what-exactly-does-this-code-do">What Exactly Does This Code Do?</a></li>
+  <li><a href="#is-this-for-you" id="toc-is-this-for-you" class="nav-link" data-scroll-target="#is-this-for-you">Is This For You?</a></li>
+  </ul></li>
+  <li><a href="#insert-video-link-here-and-github-link-below" id="toc-insert-video-link-here-and-github-link-below" class="nav-link" data-scroll-target="#insert-video-link-here-and-github-link-below">INSERT VIDEO LINK HERE, and GITHUB link beloW!</a>
+  <ul class="collapse">
+  <li><a href="#try-it-yourself" id="toc-try-it-yourself" class="nav-link" data-scroll-target="#try-it-yourself">Try It Yourself!</a></li>
+  </ul></li>
+  <li><a href="#code-walkthrough" id="toc-code-walkthrough" class="nav-link" data-scroll-target="#code-walkthrough">Code Walkthrough</a>
+  <ul class="collapse">
+  <li><a href="#example-files" id="toc-example-files" class="nav-link" data-scroll-target="#example-files">Example Files</a></li>
+  <li><a href="#dependencies" id="toc-dependencies" class="nav-link" data-scroll-target="#dependencies">Dependencies</a></li>
+  <li><a href="#debugging" id="toc-debugging" class="nav-link" data-scroll-target="#debugging">Debugging</a></li>
+  <li><a href="#specifying-which-files" id="toc-specifying-which-files" class="nav-link" data-scroll-target="#specifying-which-files">Specifying Which Files</a>
+  <ul class="collapse">
+  <li><a href="#option-1-naming-each-file" id="toc-option-1-naming-each-file" class="nav-link" data-scroll-target="#option-1-naming-each-file">Option 1: Naming Each File</a></li>
+  <li><a href="#option-2-full-directory-search-on-file-names" id="toc-option-2-full-directory-search-on-file-names" class="nav-link" data-scroll-target="#option-2-full-directory-search-on-file-names">Option 2: Full Directory Search on File names</a></li>
+  </ul></li>
+  <li><a href="#retrieving-the-data" id="toc-retrieving-the-data" class="nav-link" data-scroll-target="#retrieving-the-data">Retrieving The Data</a></li>
+  <li><a href="#compile-in-excel" id="toc-compile-in-excel" class="nav-link" data-scroll-target="#compile-in-excel">Compile In Excel</a></li>
+  <li><a href="#output" id="toc-output" class="nav-link" data-scroll-target="#output">Output</a></li>
+  </ul></li>
+  <li><a href="#afterthoughts" id="toc-afterthoughts" class="nav-link" data-scroll-target="#afterthoughts">Afterthoughts</a></li>
+  </ul>
+</nav>
     </div>
-    <!-- main -->
-    <main class="content quarto-banner-title-block" id="quarto-document-content">
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
 
 
 
 
-      <section id="tldr" class="level2">
-        <h2 class="anchored" data-anchor-id="tldr">TL;DR</h2>
-        <p>This article is about using Python to reach into many excel files that have a similar spreadsheet structure
-          so as to pull out data from those sheets, potentially spread across multiple folders, into one place for
-          aggregate use.</p>
-      </section>
-      <section id="when-your-excel-is-more-like-excalibur" class="level1">
-        <h1>When your Excel is more like Excalibur <a href="#fn1" class="footnote-ref" id="fnref1"
-            role="doc-noteref"><sup>1</sup></a></h1>
-        <p>It seems like an all too common tragedy that lots of team operate on the basis of sheets that were thrown
-          together at some point in the distant past with varying degrees of thought put into future use cases. Now here
-          you are, with the data you need like gold ore entombed in mountains of excel sheets. The irretrievable
-          Excalibur in the stone.</p>
-        <p>I encountered a problem where I had hundreds of excel sheets (each for a specific week) with data tables in
-          each, and I needed to know which records in them met a certain criteria. I made some code in Python to pull
-          the data out, this article will walk through it along with the video:</p>
-        <section id="what-exactly-does-this-code-do" class="level2">
-          <h2 class="anchored" data-anchor-id="what-exactly-does-this-code-do">What Exactly Does This Code Do?</h2>
-          <p>This code goes over all excel files with a name matching a specified pattern in a given folder (and its
-            subfolders). In this example, these are invoices. The code will generate two master data tables in a new
-            worksheet, one table with a row for each line item across all invoices, and another table with one row for
-            each invoice with the bottom line information.</p>
-        </section>
-        <section id="is-this-for-you" class="level2">
-          <h2 class="anchored" data-anchor-id="is-this-for-you">Is This For You?</h2>
-          <p>This article is aimed at people who may have never used Python before but have some experience with coding
-            of one form or another; I’ll go through each line so you can understand and customize the code to your own
-            use case. This is built on an assumption that the many sheets you want to dig into have at least some
-            rhyme/reason as to their naming conventions, and internal sheet structure. Anything is possible with
-            programming, but the more consistent your sheets, the simpler this code can be.</p>
-        </section>
-      </section>
-      <section id="insert-video-link-here-and-github-link-below" class="level1">
-        <h1>INSERT VIDEO LINK HERE, and GITHUB link beloW!</h1>
-        <section id="try-it-yourself" class="level3">
-          <h3 class="anchored" data-anchor-id="try-it-yourself">Try It Yourself!</h3>
-          <p>If you want to run it yourself, you can find the code on my GitHub page. You’ll need to <a
-              href="https://www.youtube.com/watch?v=qI3P7zMMsgY">install Python and Jupyter</a>.<a href="#fn2"
-              class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> Python is the programming langauge
-            we’re using, Jupyter is the tool for organizing and executing blocks of Python commands so that we can
-            understand, debug, and execute bits and peices of code at a time instead of always running the whole thing.
-          </p>
-        </section>
-      </section>
-      <section id="code-walkthrough" class="level1">
-        <h1>Code Walkthrough</h1>
-        <section id="example-files" class="level2">
-          <h2 class="anchored" data-anchor-id="example-files">Example Files</h2>
-          <p>I’m using an invoice template I picked up from <a
-              href="https://www.myexcelonline.com/blog/free-excel-templates-and-spreadsheets/#section66">this
-              website</a>.<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a></p>
-          <p>I have a master Invoice folder, with sub folders for each year. To simulate rela world messiness, some of
-            these subfolders have different name patterns, and some have “Paid” vs “Unpaid” secondary folders wheres as
-            some do not.</p>
-          <div id="fig-f1" class="quarto-figure quarto-figure-center anchored">
-            <figure class="figure">
-              <p><img src="Folders1.png" class="img-fluid figure-img"></p>
-              <p></p>
-              <figcaption class="figure-caption">Figure&nbsp;1: Main Folder</figcaption>
-              <p></p>
-            </figure>
-          </div>
-          <div id="fig-f2" class="quarto-figure quarto-figure-center anchored">
-            <figure class="figure">
-              <p><img src="Folders2.png" class="img-fluid figure-img"></p>
-              <p></p>
-              <figcaption class="figure-caption">Figure&nbsp;2: A Sub-Folder</figcaption>
-              <p></p>
-            </figure>
-          </div>
-          <div id="fig-f3" class="quarto-figure quarto-figure-center anchored">
-            <figure class="figure">
-              <p><img src="Folders3.png" class="img-fluid figure-img"></p>
-              <p></p>
-              <figcaption class="figure-caption">Figure&nbsp;3: Another Sub-Folder</figcaption>
-              <p></p>
-            </figure>
-          </div>
-        </section>
-        <section id="dependencies" class="level2">
-          <h2 class="anchored" data-anchor-id="dependencies">Dependencies</h2>
-          <p>The opensource tools from <a href="https://openpyxl.readthedocs.io/en/stable/">Openpyxl</a> are what make
-            this possible. Big thanks to everyone who has built them up. Other than that we’re just using really
-            standard Python libraries<a href="#fn4" class="footnote-ref" id="fnref4"
-              role="doc-noteref"><sup>4</sup></a>.</p>
-          <div class="cell" data-execution_count="1">
-            <details>
-              <summary>Code</summary>
-              <div class="sourceCode cell-code" id="cb1">
-                <pre
-                  class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> openpyxl <span class="im">import</span> load_workbook</span>
+<section id="tldr" class="level2">
+<h2 class="anchored" data-anchor-id="tldr">TL;DR</h2>
+<p><a href="https://youtu.be/RmFSYdMZLmI">Here is a video</a>! This article is about using Python to reach into many excel files that have a similar spreadsheet structure so as to pull out data from those sheets, potentially spread across multiple folders, into one place for aggregate use.</p>
+</section>
+<section id="when-your-excel-is-more-like-excalibur" class="level1">
+<h1>When your Excel is more like Excalibur <a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></h1>
+<p>It seems like an all too common tragedy that lots of team operate on the basis of sheets that were thrown together at some point in the distant past with varying degrees of thought put into future use cases. Now here you are, with the data you need like gold ore entombed in mountains of excel sheets. The irretrievable Excalibur in the stone.</p>
+<p>I encountered a problem where I had hundreds of excel sheets (each for a specific week) with data tables in each, and I needed to know which records in them met a certain criteria. I made some code in Python to pull the data out, this article will walk through it along with the video:</p>
+<section id="what-exactly-does-this-code-do" class="level2">
+<h2 class="anchored" data-anchor-id="what-exactly-does-this-code-do">What Exactly Does This Code Do?</h2>
+<p>This code goes over all excel files with a name matching a specified pattern in a given folder (and its subfolders). In this example, these are invoices. The code will generate two master data tables in a new worksheet, one table with a row for each line item across all invoices, and another table with one row for each invoice with the bottom line information.</p>
+</section>
+<section id="is-this-for-you" class="level2">
+<h2 class="anchored" data-anchor-id="is-this-for-you">Is This For You?</h2>
+<p>This article is aimed at people who may have never used Python before but have some experience with coding of one form or another; I’ll go through each line so you can understand and customize the code to your own use case. This is built on an assumption that the many sheets you want to dig into have at least some rhyme/reason as to their naming conventions, and internal sheet structure. Anything is possible with programming, but the more consistent your sheets, the simpler this code can be.</p>
+</section>
+</section>
+<section id="insert-video-link-here-and-github-link-below" class="level1">
+<h1>INSERT VIDEO LINK HERE, and GITHUB link beloW!</h1>
+<section id="try-it-yourself" class="level3">
+<h3 class="anchored" data-anchor-id="try-it-yourself">Try It Yourself!</h3>
+<p>If you want to run it yourself, you can <a href="https://github.com/DavidD003/Python-Tools">find the code on my GitHub page</a>. You’ll need to <a href="https://www.youtube.com/watch?v=qI3P7zMMsgY">install Python and Jupyter</a>.<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> Python is the programming langauge we’re using, Jupyter is the tool for organizing and executing blocks of Python commands so that we can understand, debug, and execute bits and peices of code at a time instead of always running the whole thing.</p>
+</section>
+</section>
+<section id="code-walkthrough" class="level1">
+<h1>Code Walkthrough</h1>
+<section id="example-files" class="level2">
+<h2 class="anchored" data-anchor-id="example-files">Example Files</h2>
+<p>I’m using an invoice template I picked up from <a href="https://www.myexcelonline.com/blog/free-excel-templates-and-spreadsheets/#section66">this website</a>.<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a></p>
+<p>I have a master Invoice folder, with sub folders for each year. To simulate rela world messiness, some of these subfolders have different name patterns, and some have “Paid” vs “Unpaid” secondary folders wheres as some do not.</p>
+<div id="fig-f1" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="Folders1.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;1: Main Folder</figcaption><p></p>
+</figure>
+</div>
+<div id="fig-f2" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="Folders2.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;2: A Sub-Folder</figcaption><p></p>
+</figure>
+</div>
+<div id="fig-f3" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="Folders3.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;3: Another Sub-Folder</figcaption><p></p>
+</figure>
+</div>
+</section>
+<section id="dependencies" class="level2">
+<h2 class="anchored" data-anchor-id="dependencies">Dependencies</h2>
+<p>The opensource tools from <a href="https://openpyxl.readthedocs.io/en/stable/">Openpyxl</a> are what make this possible. Big thanks to everyone who has built them up. Other than that we’re just using really standard Python libraries<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>.</p>
+<div class="cell" data-execution_count="1">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> openpyxl <span class="im">import</span> load_workbook</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> openpyxl <span class="im">as</span> pyxl</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datetime <span class="im">import</span> datetime</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre>
-              </div>
-            </details>
-          </div>
-        </section>
-        <section id="debugging" class="level2">
-          <h2 class="anchored" data-anchor-id="debugging">Debugging</h2>
-          <p>The most common thing I tripped over in making this was typos and what not in my file paths. You can use
-            this function to test whether or not a path you’ve entered is valid.</p>
-          <div class="cell" data-execution_count="2">
-            <details>
-              <summary>Code</summary>
-              <div class="sourceCode cell-code" id="cb2">
-                <pre
-                  class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>Path(<span class="vs">r"C:\Invoices"</span>).exists()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre>
-              </div>
-            </details>
-            <div class="cell-output cell-output-display" data-execution_count="16">
-              <pre><code>True</code></pre>
-            </div>
-          </div>
-        </section>
-        <section id="specifying-which-files" class="level2">
-          <h2 class="anchored" data-anchor-id="specifying-which-files">Specifying Which Files</h2>
-          <p>I made code blocks for 2 options; specifying all files manually, or specifying a directory and file name
-            pattern to search for. Either way we start by initializing the container that our data will be stored in:
-          </p>
-          <div class="cell" data-execution_count="3">
-            <details>
-              <summary>Code</summary>
-              <div class="sourceCode cell-code" id="cb4">
-                <pre
-                  class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>subitems <span class="op">=</span> []  <span class="co"># Will contain the data we're aggregating for all items on invoices</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datetime <span class="im">import</span> datetime</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="debugging" class="level2">
+<h2 class="anchored" data-anchor-id="debugging">Debugging</h2>
+<p>The most common thing I tripped over in making this was typos and what not in my file paths. You can use this function to test whether or not a path you’ve entered is valid.</p>
+<div class="cell" data-execution_count="2">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>Path(<span class="vs">r"C:\Invoices"</span>).exists()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="16">
+<pre><code>True</code></pre>
+</div>
+</div>
+</section>
+<section id="specifying-which-files" class="level2">
+<h2 class="anchored" data-anchor-id="specifying-which-files">Specifying Which Files</h2>
+<p>I made code blocks for 2 options; specifying all files manually, or specifying a directory and file name pattern to search for. Either way we start by initializing the container that our data will be stored in:</p>
+<div class="cell" data-execution_count="3">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>subitems <span class="op">=</span> []  <span class="co"># Will contain the data we're aggregating for all items on invoices</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>invoiceTotal <span class="op">=</span> []  <span class="co"># Will contain the final bottom-line data for each invoice</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>fls <span class="op">=</span> []  <span class="co"># Stores file paths for excel files to be searched</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre>
-              </div>
-            </details>
-          </div>
-          <section id="option-1-naming-each-file" class="level3">
-            <h3 class="anchored" data-anchor-id="option-1-naming-each-file">Option 1: Naming Each File</h3>
-            <p>The most controlled way would be to list all the files with the full path, something like this:</p>
-            <div class="cell" data-execution_count="4">
-              <details>
-                <summary>Code</summary>
-                <div class="sourceCode cell-code" id="cb5">
-                  <pre
-                    class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"fls.append(r</span><span class="ch">\"</span><span class="st">C:\Invoices\Invoices 2022\Invoice 1.xlsx</span><span class="ch">\"</span><span class="st">)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre>
-                </div>
-              </details>
-              <div class="cell-output cell-output-stdout">
-                <pre><code>fls.append(r"C:\Invoices\Invoices 2022\Invoice 1.xlsx")</code></pre>
-              </div>
-            </div>
-            <p>But I felt it was such an eyesore, and the folder structure made me prone to typo mistakes. So I made a
-              helper function that would tighten things up, requiring only the file name and invoice year, and ‘paid’ vs
-              ‘unpaid’ as input, and then spitting out the whole file path. The function uses the file year to decide
-              which folder naming structure to use.</p>
-            <div class="cell" data-execution_count="5">
-              <details>
-                <summary>Code</summary>
-                <div class="sourceCode cell-code" id="cb7">
-                  <pre
-                    class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Helper function to build path strings when iterating through multiple files</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>fls <span class="op">=</span> []  <span class="co"># Stores file paths for excel files to be searched</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="option-1-naming-each-file" class="level3">
+<h3 class="anchored" data-anchor-id="option-1-naming-each-file">Option 1: Naming Each File</h3>
+<p>The most controlled way would be to list all the files with the full path, something like this:</p>
+<div class="cell" data-execution_count="4">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"fls.append(r</span><span class="ch">\"</span><span class="st">C:\Invoices\Invoices 2022\Invoice 1.xlsx</span><span class="ch">\"</span><span class="st">)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>fls.append(r"C:\Invoices\Invoices 2022\Invoice 1.xlsx")</code></pre>
+</div>
+</div>
+<p>But I felt it was such an eyesore, and the folder structure made me prone to typo mistakes. So I made a helper function that would tighten things up, requiring only the file name and invoice year, and ‘paid’ vs ‘unpaid’ as input, and then spitting out the whole file path. The function uses the file year to decide which folder naming structure to use.</p>
+<div class="cell" data-execution_count="5">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Helper function to build path strings when iterating through multiple files</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> pthBld(flNm, flExtn<span class="op">=</span><span class="st">""</span>, path_building_variable<span class="op">=</span>(<span class="st">'Paid'</span>, <span class="dv">0</span>)):</span>
@@ -653,52 +355,38 @@
 <span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> yr <span class="op">==</span> <span class="dv">22</span>:</span>
 <span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> (<span class="vs">r"C:\Invoices\Invoices 2022"</span><span class="op">+</span><span class="bu">chr</span>(<span class="dv">92</span>)<span class="op">+</span>tp<span class="op">+</span><span class="bu">chr</span>(<span class="dv">92</span>)<span class="op">+</span>flNm<span class="op">+</span>flExtn)</span>
 <span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> (<span class="vs">r"C:\Invoices\Invoices '"</span><span class="op">+</span><span class="bu">str</span>(yr)<span class="op">+</span><span class="bu">chr</span>(<span class="dv">92</span>)<span class="op">+</span>tp<span class="op">+</span><span class="bu">chr</span>(<span class="dv">92</span>)<span class="op">+</span>flNm<span class="op">+</span>flExtn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre>
-                </div>
-              </details>
-            </div>
-            <p>Always good to test a function is working after making it.</p>
-            <div class="cell" data-execution_count="6">
-              <details>
-                <summary>Code</summary>
-                <div class="sourceCode cell-code" id="cb8">
-                  <pre
-                    class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> pthBld(<span class="st">'Invoice 3'</span>, <span class="st">"xlsx"</span>, (<span class="st">'unPaid'</span>, <span class="dv">22</span>))</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>p, <span class="st">"Exists?: "</span><span class="op">+</span><span class="bu">str</span>(Path(p).exists())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre>
-                </div>
-              </details>
-              <div class="cell-output cell-output-display" data-execution_count="20">
-                <pre><code>('C:\\Invoices\\Invoices 2022\\unPaid\\Invoice 3.xlsx', 'Exists?: True')</code></pre>
-              </div>
-            </div>
-            <p>Then, the process of specifying all the files to search by individual names is just running a bunch of
-              commands like this:</p>
-            <div class="cell" data-execution_count="7">
-              <details>
-                <summary>Code</summary>
-                <div class="sourceCode cell-code" id="cb10">
-                  <pre
-                    class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"fls.append(pthBld('Invoice 1',</span><span class="ch">\"</span><span class="st">xlsx</span><span class="ch">\"</span><span class="st">,('Paid',22)))"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre>
-                </div>
-              </details>
-              <div class="cell-output cell-output-stdout">
-                <pre><code>fls.append(pthBld('Invoice 1',"xlsx",('Paid',22)))</code></pre>
-              </div>
-            </div>
-          </section>
-          <section id="option-2-full-directory-search-on-file-names" class="level3">
-            <h3 class="anchored" data-anchor-id="option-2-full-directory-search-on-file-names">Option 2: Full Directory
-              Search on File names</h3>
-            <p>If there are too many files names to sepcify one by one, or if there is some identifying pattern to the
-              file names of interest, this option can be used. The code looked through the specified folder in entirety,
-              including subfolders, and if a file name meets a criteria, saves the path to perform the data retrieval on
-              that file.</p>
-            <div class="cell" data-execution_count="8">
-              <details>
-                <summary>Code</summary>
-                <div class="sourceCode cell-code" id="cb12">
-                  <pre
-                    class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> list_dir(directory):</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> (<span class="vs">r"C:\Invoices\Invoices '"</span><span class="op">+</span><span class="bu">str</span>(yr)<span class="op">+</span><span class="bu">chr</span>(<span class="dv">92</span>)<span class="op">+</span>tp<span class="op">+</span><span class="bu">chr</span>(<span class="dv">92</span>)<span class="op">+</span>flNm<span class="op">+</span>flExtn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Always good to test a function is working after making it.</p>
+<div class="cell" data-execution_count="6">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> pthBld(<span class="st">'Invoice 3'</span>, <span class="st">"xlsx"</span>, (<span class="st">'unPaid'</span>, <span class="dv">22</span>))</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>p, <span class="st">"Exists?: "</span><span class="op">+</span><span class="bu">str</span>(Path(p).exists())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="20">
+<pre><code>('C:\\Invoices\\Invoices 2022\\unPaid\\Invoice 3.xlsx', 'Exists?: True')</code></pre>
+</div>
+</div>
+<p>Then, the process of specifying all the files to search by individual names is just running a bunch of commands like this:</p>
+<div class="cell" data-execution_count="7">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"fls.append(pthBld('Invoice 1',</span><span class="ch">\"</span><span class="st">xlsx</span><span class="ch">\"</span><span class="st">,('Paid',22)))"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>fls.append(pthBld('Invoice 1',"xlsx",('Paid',22)))</code></pre>
+</div>
+</div>
+</section>
+<section id="option-2-full-directory-search-on-file-names" class="level3">
+<h3 class="anchored" data-anchor-id="option-2-full-directory-search-on-file-names">Option 2: Full Directory Search on File names</h3>
+<p>If there are too many files names to sepcify one by one, or if there is some identifying pattern to the file names of interest, this option can be used. The code looked through the specified folder in entirety, including subfolders, and if a file name meets a criteria, saves the path to perform the data retrieval on that file.</p>
+<div class="cell" data-execution_count="8">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> list_dir(directory):</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""This function will print out the path for every file in the specified directory (and any further nested directories)"""</span></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    output <span class="op">=</span> []  <span class="co"># initialize</span></span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> filename <span class="kw">in</span> os.listdir(directory):</span>
@@ -708,24 +396,18 @@
 <span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>            output.append(f)</span>
 <span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> os.path.isdir(f):</span>
 <span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>            output.extend(list_dir(f))</span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> output</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre>
-                </div>
-              </details>
-            </div>
-            <p>What if you wanted to omit one or multiple folders entirely? The ‘else if’ branch in the above function
-              could have an extra required condition added to it such that only folders with a certain name structure,
-              for example, are searched.</p>
-            <p>Here is what we get when we test that function:</p>
-            <div class="cell" data-execution_count="9">
-              <details>
-                <summary>Code</summary>
-                <div class="sourceCode cell-code" id="cb13">
-                  <pre
-                    class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>list_dir(<span class="vs">r"C:\Invoices"</span>)  <span class="co"># Test it works</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre>
-                </div>
-              </details>
-              <div class="cell-output cell-output-display" data-execution_count="23">
-                <pre><code>['C:\\Invoices\\Aggregated_Data.xlsx',
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> output</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>What if you wanted to omit one or multiple folders entirely? The ‘else if’ branch in the above function could have an extra required condition added to it such that only folders with a certain name structure, for example, are searched.</p>
+<p>Here is what we get when we test that function:</p>
+<div class="cell" data-execution_count="9">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>list_dir(<span class="vs">r"C:\Invoices"</span>)  <span class="co"># Test it works</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="23">
+<pre><code>['C:\\Invoices\\Aggregated_Data.xlsx',
  "C:\\Invoices\\Invoices '21\\junk_Data.xlsx",
  "C:\\Invoices\\Invoices '21\\Paid\\invoice 1.xlsx",
  "C:\\Invoices\\Invoices '21\\Paid\\invoice 2.xlsx",
@@ -739,33 +421,25 @@
  'C:\\Invoices\\Invoices 2022\\Paid\\invoice 2.xlsx',
  'C:\\Invoices\\Invoices 2022\\Paid\\junk_Data.xlsx',
  'C:\\Invoices\\Invoices 2022\\Unpaid\\invoice 3.xlsx']</code></pre>
-              </div>
-            </div>
-            <p>Having a list of <em>all</em> files within the directory, we need to screen for just the ones we want.
-              For the sake of this example I simply keep the file paths that have the text “invoice” in the last 15
-              characters of the path:</p>
-            <div class="cell" data-execution_count="10">
-              <details>
-                <summary>Code</summary>
-                <div class="sourceCode cell-code" id="cb15">
-                  <pre
-                    class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> f <span class="kw">in</span> list_dir(<span class="vs">r"C:\Invoices"</span>):</span>
+</div>
+</div>
+<p>Having a list of <em>all</em> files within the directory, we need to screen for just the ones we want. For the sake of this example I simply keep the file paths that have the text “invoice” in the last 15 characters of the path:</p>
+<div class="cell" data-execution_count="10">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> f <span class="kw">in</span> list_dir(<span class="vs">r"C:\Invoices"</span>):</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="st">"invoice"</span> <span class="kw">in</span> f.lower()[<span class="op">-</span><span class="dv">15</span>:]:</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>        fls.append(f)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre>
-                </div>
-              </details>
-            </div>
-            <p>And testing the output is as expected;</p>
-            <div class="cell" data-execution_count="11">
-              <details>
-                <summary>Code</summary>
-                <div class="sourceCode cell-code" id="cb16">
-                  <pre
-                    class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>fls</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre>
-                </div>
-              </details>
-              <div class="cell-output cell-output-display" data-execution_count="25">
-                <pre><code>["C:\\Invoices\\Invoices '21\\Paid\\invoice 1.xlsx",
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>        fls.append(f)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>And testing the output is as expected;</p>
+<div class="cell" data-execution_count="11">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>fls</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="25">
+<pre><code>["C:\\Invoices\\Invoices '21\\Paid\\invoice 1.xlsx",
  "C:\\Invoices\\Invoices '21\\Paid\\invoice 2.xlsx",
  "C:\\Invoices\\Invoices '21\\Unpaid\\invoice 3.xlsx",
  "C:\\Invoices\\Invoices '23\\invoice 1.xlsx",
@@ -774,32 +448,20 @@
  'C:\\Invoices\\Invoices 2022\\Paid\\invoice 1.xlsx',
  'C:\\Invoices\\Invoices 2022\\Paid\\invoice 2.xlsx',
  'C:\\Invoices\\Invoices 2022\\Unpaid\\invoice 3.xlsx']</code></pre>
-              </div>
-            </div>
-            <p>We got rid of the junk_data.xlsx files.</p>
-          </section>
-        </section>
-        <section id="retrieving-the-data" class="level2">
-          <h2 class="anchored" data-anchor-id="retrieving-the-data">Retrieving The Data</h2>
-          <p>Having specified all the files paths for our excel files, we need to reach into them and grab that data
-            into memory using Python. To do that, we iterate over the list of filepaths, opening the workbook using
-            openpyxl. In this example I’m grabbing all data in each item row of the invoice to one table, and the
-            bottom-line information to a second table. For the first operation, I iterate through the cells in which I
-            know the data could be, just recording something if data is found. I use a list comprehension to carry out
-            the workbook.cell(row,col).value function in one line of code but across all columns of the table, casting
-            the date value to a string so that python doesn’t convert it to a more complex datetime format which is
-            admittedly more handy for anything but transferring back into excel.</p>
-          <p>In the second portion of the retrieval function for a given file, I use a more verbose and explicit way of
-            grabbing all the data. There isn’t any question for these data as to whether or nto they will be there,
-            since each invoice has one of these data points, where as number of line items was variable.</p>
-          <p>While iterating over the various workbooks, the data from each is stored in 2 lists. Each list is sent to a
-            list of lists which will be used for reporting.</p>
-          <div class="cell" data-execution_count="12">
-            <details>
-              <summary>Code</summary>
-              <div class="sourceCode cell-code" id="cb18">
-                <pre
-                  class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> fl <span class="kw">in</span> fls:</span>
+</div>
+</div>
+<p>We got rid of the junk_data.xlsx files.</p>
+</section>
+</section>
+<section id="retrieving-the-data" class="level2">
+<h2 class="anchored" data-anchor-id="retrieving-the-data">Retrieving The Data</h2>
+<p>Having specified all the files paths for our excel files, we need to reach into them and grab that data into memory using Python. To do that, we iterate over the list of filepaths, opening the workbook using openpyxl. In this example I’m grabbing all data in each item row of the invoice to one table, and the bottom-line information to a second table. For the first operation, I iterate through the cells in which I know the data could be, just recording something if data is found. I use a list comprehension to carry out the workbook.cell(row,col).value function in one line of code but across all columns of the table, casting the date value to a string so that python doesn’t convert it to a more complex datetime format which is admittedly more handy for anything but transferring back into excel.</p>
+<p>In the second portion of the retrieval function for a given file, I use a more verbose and explicit way of grabbing all the data. There isn’t any question for these data as to whether or nto they will be there, since each invoice has one of these data points, where as number of line items was variable.</p>
+<p>While iterating over the various workbooks, the data from each is stored in 2 lists. Each list is sent to a list of lists which will be used for reporting.</p>
+<div class="cell" data-execution_count="12">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> fl <span class="kw">in</span> fls:</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    wb <span class="op">=</span> load_workbook(filename<span class="op">=</span>fl, data_only<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># First record data for the sub-items list</span></span>
 <span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="bu">str</span>(<span class="dv">1</span><span class="op">+</span>fls.index(fl))<span class="op">+</span><span class="bu">chr</span>(<span class="dv">92</span>)<span class="op">+</span><span class="bu">str</span>(<span class="bu">len</span>(fls)), fl)</span>
@@ -831,43 +493,33 @@
 <span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a>        row<span class="op">=</span><span class="dv">17</span>, column<span class="op">=</span><span class="dv">8</span>).value)  <span class="co"># Deposit Recieved</span></span>
 <span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a>    data2.append(wb[<span class="st">'Commercial Invoice'</span>].cell(</span>
 <span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a>        row<span class="op">=</span><span class="dv">18</span>, column<span class="op">=</span><span class="dv">8</span>).value)  <span class="co"># Total</span></span>
-<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a>    invoiceTotal.append(data2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre>
-              </div>
-            </details>
-            <div class="cell-output cell-output-stdout">
-              <pre><code>1\9 C:\Invoices\Invoices '21\Paid\invoice 1.xlsx</code></pre>
-            </div>
-            <div class="cell-output cell-output-stdout">
-              <pre><code>2\9 C:\Invoices\Invoices '21\Paid\invoice 2.xlsx
+<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a>    invoiceTotal.append(data2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>1\9 C:\Invoices\Invoices '21\Paid\invoice 1.xlsx
+2\9 C:\Invoices\Invoices '21\Paid\invoice 2.xlsx
 3\9 C:\Invoices\Invoices '21\Unpaid\invoice 3.xlsx
 4\9 C:\Invoices\Invoices '23\invoice 1.xlsx</code></pre>
-            </div>
-            <div class="cell-output cell-output-stdout">
-              <pre><code>5\9 C:\Invoices\Invoices '23\invoice 2.xlsx</code></pre>
-            </div>
-            <div class="cell-output cell-output-stdout">
-              <pre><code>6\9 C:\Invoices\Invoices '23\invoice 3.xlsx
-7\9 C:\Invoices\Invoices 2022\Paid\invoice 1.xlsx
-8\9 C:\Invoices\Invoices 2022\Paid\invoice 2.xlsx</code></pre>
-            </div>
-            <div class="cell-output cell-output-stdout">
-              <pre><code>9\9 C:\Invoices\Invoices 2022\Unpaid\invoice 3.xlsx</code></pre>
-            </div>
-          </div>
-          <p>As always, good to test that it worked. here we can see how many dsub items in total we observed across all
-            invoices and see a sample of the first one. Likewise for the number of quotes overall, and a sample of the
-            bottom line info collected.</p>
-          <div class="cell" data-execution_count="13">
-            <details>
-              <summary>Code</summary>
-              <div class="sourceCode cell-code" id="cb24">
-                <pre
-                  class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check we got what we wanted</span></span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="bu">len</span>(subitems), subitems[<span class="dv">0</span>], <span class="bu">len</span>(invoiceTotal), invoiceTotal[<span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre>
-              </div>
-            </details>
-            <div class="cell-output cell-output-display" data-execution_count="27">
-              <pre><code>(9,
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>5\9 C:\Invoices\Invoices '23\invoice 2.xlsx
+6\9 C:\Invoices\Invoices '23\invoice 3.xlsx</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>7\9 C:\Invoices\Invoices 2022\Paid\invoice 1.xlsx
+8\9 C:\Invoices\Invoices 2022\Paid\invoice 2.xlsx
+9\9 C:\Invoices\Invoices 2022\Unpaid\invoice 3.xlsx</code></pre>
+</div>
+</div>
+<p>As always, good to test that it worked. here we can see how many dsub items in total we observed across all invoices and see a sample of the first one. Likewise for the number of quotes overall, and a sample of the bottom line info collected.</p>
+<div class="cell" data-execution_count="13">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check we got what we wanted</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="bu">len</span>(subitems), subitems[<span class="dv">0</span>], <span class="bu">len</span>(invoiceTotal), invoiceTotal[<span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="27">
+<pre><code>(9,
  ["C:\\Invoices\\Invoices '21\\Paid\\invoice 1.xlsx",
   34567,
   '2023-03-12 00:00:00',
@@ -887,555 +539,496 @@
   5,
   0,
   49.1045])</code></pre>
-            </div>
-          </div>
-        </section>
-        <section id="compile-in-excel" class="level2">
-          <h2 class="anchored" data-anchor-id="compile-in-excel">Compile In Excel</h2>
-          <p>So, having all of the data we want in memory in Python, we just need to print it to an Excel table. First
-            we open a new table, then, using simple iterating indexes for row and column print-out references to avoid
-            issues with duplicate invoice entries, we iterate through the recorded data and print it out to a worksheet
-            cell. A new sheet is created for the Bottom Line Info and the same process executed, and the workbook saved.
-          </p>
-          <div class="cell" data-execution_count="14">
-            <details>
-              <summary>Code</summary>
-              <div class="sourceCode cell-code" id="cb26">
-                <pre
-                  class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Finally, print our aggregated data to a single subitems table</span></span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>wb <span class="op">=</span> pyxl.Workbook()</span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>ws <span class="op">=</span> wb.active</span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> row <span class="kw">in</span> subitems:</span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    r <span class="op">=</span> r<span class="op">+</span><span class="dv">1</span></span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>    c <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> index <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(row)):</span>
-<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>        c <span class="op">=</span> c<span class="op">+</span><span class="dv">1</span></span>
-<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>        ws.cell(row<span class="op">=</span>r, column<span class="op">=</span>c).value <span class="op">=</span> row[index]</span>
-<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>wb.create_sheet(<span class="st">'Bottom Line Info'</span>)</span>
-<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>ws <span class="op">=</span> wb[<span class="st">'Bottom Line Info'</span>]</span>
-<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> row <span class="kw">in</span> invoiceTotal:</span>
-<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>    r <span class="op">=</span> r<span class="op">+</span><span class="dv">1</span></span>
-<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>    c <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> index <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(row)):</span>
-<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>        c <span class="op">=</span> c<span class="op">+</span><span class="dv">1</span></span>
-<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a>        ws.cell(row<span class="op">=</span>r, column<span class="op">=</span>c).value <span class="op">=</span> row[index]</span>
-<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a>wb.save(<span class="vs">r"C:\Invoices\Aggregated_Data.xlsx"</span>)</span>
-<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a>wb.close()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre>
-              </div>
-            </details>
-          </div>
-          <p>And huzzah! The file appears;</p>
-          <div id="fig-f4" class="quarto-figure quarto-figure-center anchored">
-            <figure class="figure">
-              <p><img src="Folders4.png" class="img-fluid figure-img"></p>
-              <p></p>
-              <figcaption class="figure-caption">Figure&nbsp;4: Main Folder</figcaption>
-              <p></p>
-            </figure>
-          </div>
-        </section>
-        <section id="output" class="level2">
-          <h2 class="anchored" data-anchor-id="output">Output</h2>
-          <p>Taking a look at the contents, we can see the plain data laid out. Knowing how we got it, we can manually
-            add the titles and format as a table for sorting and filtering (although this could’ve been done with
-            openpyxl as well!)</p>
-          <div id="fig-f5" class="quarto-figure quarto-figure-center anchored">
-            <figure class="figure">
-              <p><img src="Folders5.png" class="img-fluid figure-img"></p>
-              <p></p>
-              <figcaption class="figure-caption">Figure&nbsp;5: Result</figcaption>
-              <p></p>
-            </figure>
-          </div>
-        </section>
-      </section>
-      <section id="afterthoughts" class="level1">
-        <h1>Afterthoughts</h1>
-        <p>I hope that you see the same potential as I did when I first really cracked open this openpyxl tool. It is so
-          liberating to understand that we can use python to get into the guts of excel. Taken to the nth degree, you
-          can really make excel dance with this toolset. The way I look at it is that Excel really just becomes the
-          user-friendly GUI for whatever in the world we want to program, the upper limit on complexity really just
-          being what we can think up and program. In that vein, I’ve put together nother project I hope to share
-          sometime soon.</p>
-        <p>Another thought is as to what else we can do in the world integrating python with our ubiquitous MS Office
-          tools! As foor for thought, here is a <a
-            href="https://blog.aspose.com/words/python-ms-word-automation-create-edit-or-convert-ms-word-documents-using-python/#Parse-Word-Documents-using-Python">blog
-            post</a> showing how we can create and peer into Word documents using Python. I can imagine this being
-          useful for finding a document we know is hiding somewhere in a huge directory by having the code crawl the
-          whole directory, opening word files and performing a key word search on them.</p>
+</div>
+</div>
+</section>
+<section id="compile-in-excel" class="level2">
+<h2 class="anchored" data-anchor-id="compile-in-excel">Compile In Excel</h2>
+<p>So, having all of the data we want in memory in Python, we just need to print it to an Excel table. First we open a new table, then, using simple iterating indexes for row and column print-out references to avoid issues with duplicate invoice entries, we iterate through the recorded data and print it out to a worksheet cell. A new sheet is created for the Bottom Line Info and the same process executed, and the workbook saved.</p>
+<div class="cell" data-execution_count="14">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Finally, print our aggregated data to a single subitems table</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>wb <span class="op">=</span> pyxl.Workbook()</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>ws <span class="op">=</span> wb.active</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> row <span class="kw">in</span> subitems:</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    r <span class="op">=</span> r<span class="op">+</span><span class="dv">1</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    c <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> index <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(row)):</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>        c <span class="op">=</span> c<span class="op">+</span><span class="dv">1</span></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>        ws.cell(row<span class="op">=</span>r, column<span class="op">=</span>c).value <span class="op">=</span> row[index]</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>wb.create_sheet(<span class="st">'Bottom Line Info'</span>)</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>ws <span class="op">=</span> wb[<span class="st">'Bottom Line Info'</span>]</span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> row <span class="kw">in</span> invoiceTotal:</span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>    r <span class="op">=</span> r<span class="op">+</span><span class="dv">1</span></span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>    c <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> index <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(row)):</span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>        c <span class="op">=</span> c<span class="op">+</span><span class="dv">1</span></span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a>        ws.cell(row<span class="op">=</span>r, column<span class="op">=</span>c).value <span class="op">=</span> row[index]</span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a>wb.save(<span class="vs">r"C:\Invoices\Aggregated_Data.xlsx"</span>)</span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a>wb.close()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>And huzzah! The file appears;</p>
+<div id="fig-f4" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="Folders4.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;4: Main Folder</figcaption><p></p>
+</figure>
+</div>
+</section>
+<section id="output" class="level2">
+<h2 class="anchored" data-anchor-id="output">Output</h2>
+<p>Taking a look at the contents, we can see the plain data laid out. Knowing how we got it, we can manually add the titles and format as a table for sorting and filtering (although this could’ve been done with openpyxl as well!)</p>
+<div id="fig-f5" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="Folders5.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;5: Result</figcaption><p></p>
+</figure>
+</div>
+</section>
+</section>
+<section id="afterthoughts" class="level1">
+<h1>Afterthoughts</h1>
+<p>I hope that you see the same potential as I did when I first really cracked open this openpyxl tool. It is so liberating to understand that we can use python to get into the guts of excel. Taken to the nth degree, you can really make excel dance with this toolset. The way I look at it is that Excel really just becomes the user-friendly GUI for whatever in the world we want to program, the upper limit on complexity really just being what we can think up and program. In that vein, I’ve put together nother project I hope to share sometime soon.</p>
+<p>Another thought is as to what else we can do in the world integrating python with our ubiquitous MS Office tools! As foor for thought, here is a <a href="https://blog.aspose.com/words/python-ms-word-automation-create-edit-or-convert-ms-word-documents-using-python/#Parse-Word-Documents-using-Python">blog post</a> showing how we can create and peer into Word documents using Python. I can imagine this being useful for finding a document we know is hiding somewhere in a huge directory by having the code crawl the whole directory, opening word files and performing a key word search on them.</p>
 
 
-        <!-- -->
+<!-- -->
 
-      </section>
+</section>
 
 
-      <div id="quarto-appendix" class="default">
-        <section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
-          <h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 
-          <ol>
-            <li id="fn1">
-              <p>Don’t worry I didnt spend too long thinking about this, it just came to me. And if you don’t like it,
-                we agree to disagree.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p>
-            </li>
-            <li id="fn2">
-              <p>Not my video, but I recommend it. It might seem daunting or like overkill, but trust me, it’s the right
-                way to go.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p>
-            </li>
-            <li id="fn3">
-              <p>I’m not affiliated with it.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p>
-            </li>
-            <li id="fn4">
-              <p>A library is a collection of code files defining functions and other kinds of code objects that we can
-                use ourselves and build on. Like a toolbox.<a href="#fnref4" class="footnote-back"
-                  role="doc-backlink">↩︎</a></p>
-            </li>
-          </ol>
-        </section>
-      </div>
-    </main> <!-- /main -->
-    <script id="quarto-html-after-body" type="application/javascript">
-      window.document.addEventListener("DOMContentLoaded", function (event) {
-        const toggleBodyColorMode = (bsSheetEl) => {
-          const mode = bsSheetEl.getAttribute("data-mode");
-          const bodyEl = window.document.querySelector("body");
-          if (mode === "dark") {
-            bodyEl.classList.add("quarto-dark");
-            bodyEl.classList.remove("quarto-light");
-          } else {
-            bodyEl.classList.add("quarto-light");
-            bodyEl.classList.remove("quarto-dark");
-          }
+<ol>
+<li id="fn1"><p>Don’t worry I didnt spend too long thinking about this, it just came to me. And if you don’t like it, we agree to disagree.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>Not my video, but I recommend it. It might seem daunting or like overkill, but trust me, it’s the right way to go.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>I’m not affiliated with it.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>A library is a collection of code files defining functions and other kinds of code objects that we can use ourselves and build on. Like a toolbox.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
         }
-        const toggleBodyColorPrimary = () => {
-          const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
-          if (bsSheetEl) {
-            toggleBodyColorMode(bsSheetEl);
-          }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
         }
-        toggleBodyColorPrimary();
-        const icon = "";
-        const anchorJS = new window.AnchorJS();
-        anchorJS.options = {
-          placement: 'right',
-          icon: icon
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
         };
-        anchorJS.add('.anchored');
-        const clipboard = new window.ClipboardJS('.code-copy-button', {
-          target: function (trigger) {
-            return trigger.previousElementSibling;
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
           }
+          popup.appendChild(citeDiv);
         });
-        clipboard.on('success', function (e) {
-          // button target
-          const button = e.trigger;
-          // don't keep focus
-          button.blur();
-          // flash "checked"
-          button.classList.add('code-copy-button-checked');
-          var currentTitle = button.getAttribute("title");
-          button.setAttribute("title", "Copied!");
-          let tooltip;
-          if (window.bootstrap) {
-            button.setAttribute("data-bs-toggle", "tooltip");
-            button.setAttribute("data-bs-placement", "left");
-            button.setAttribute("data-bs-title", "Copied!");
-            tooltip = new bootstrap.Tooltip(button,
-              {
-                trigger: "manual",
-                customClass: "code-copy-button-tooltip",
-                offset: [0, -8]
-              });
-            tooltip.show();
-          }
-          setTimeout(function () {
-            if (tooltip) {
-              tooltip.hide();
-              button.removeAttribute("data-bs-title");
-              button.removeAttribute("data-bs-toggle");
-              button.removeAttribute("data-bs-placement");
-            }
-            button.setAttribute("title", currentTitle);
-            button.classList.remove('code-copy-button-checked');
-          }, 1000);
-          // clear code selection
-          e.clearSelection();
-        });
-        const viewSource = window.document.getElementById('quarto-view-source') ||
-          window.document.getElementById('quarto-code-tools-source');
-        if (viewSource) {
-          const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
-          viewSource.addEventListener("click", function (e) {
-            if (sourceUrl) {
-              // rstudio viewer pane
-              if (/\bcapabilities=\b/.test(window.location)) {
-                window.open(sourceUrl);
-              } else {
-                window.location.href = sourceUrl;
-              }
-            } else {
-              const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
-              modal.show();
-            }
-            return false;
-          });
-        }
-        function toggleCodeHandler(show) {
-          return function (e) {
-            const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
-            for (let i = 0; i < detailsSrc.length; i++) {
-              const details = detailsSrc[i].parentElement;
-              if (show) {
-                details.open = true;
-              } else {
-                details.removeAttribute("open");
-              }
-            }
-            const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
-            const fromCls = show ? "hidden" : "unhidden";
-            const toCls = show ? "unhidden" : "hidden";
-            for (let i = 0; i < cellCodeDivs.length; i++) {
-              const codeDiv = cellCodeDivs[i];
-              if (codeDiv.classList.contains(fromCls)) {
-                codeDiv.classList.remove(fromCls);
-                codeDiv.classList.add(toCls);
-              }
-            }
-            return false;
-          }
-        }
-        const hideAllCode = window.document.getElementById("quarto-hide-all-code");
-        if (hideAllCode) {
-          hideAllCode.addEventListener("click", toggleCodeHandler(false));
-        }
-        const showAllCode = window.document.getElementById("quarto-show-all-code");
-        if (showAllCode) {
-          showAllCode.addEventListener("click", toggleCodeHandler(true));
-        }
-        function tippyHover(el, contentFn) {
-          const config = {
-            allowHTML: true,
-            content: contentFn,
-            maxWidth: 500,
-            delay: 100,
-            arrow: false,
-            appendTo: function (el) {
-              return el.parentElement;
-            },
-            interactive: true,
-            interactiveBorder: 10,
-            theme: 'quarto',
-            placement: 'bottom-start'
-          };
-          window.tippy(el, config);
-        }
-        const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
-        for (var i = 0; i < noterefs.length; i++) {
-          const ref = noterefs[i];
-          tippyHover(ref, function () {
-            // use id or data attribute instead here
-            let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
-            try { href = new URL(href).hash; } catch { }
-            const id = href.replace(/^#\/?/, "");
-            const note = window.document.getElementById(id);
-            return note.innerHTML;
-          });
-        }
-        const findCites = (el) => {
-          const parentEl = el.parentElement;
-          if (parentEl) {
-            const cites = parentEl.dataset.cites;
-            if (cites) {
-              return {
-                el,
-                cites: cites.split(' ')
-              };
-            } else {
-              return findCites(el.parentElement)
-            }
-          } else {
-            return undefined;
-          }
-        };
-        var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
-        for (var i = 0; i < bibliorefs.length; i++) {
-          const ref = bibliorefs[i];
-          const citeInfo = findCites(ref);
-          if (citeInfo) {
-            tippyHover(citeInfo.el, function () {
-              var popup = window.document.createElement('div');
-              citeInfo.cites.forEach(function (cite) {
-                var citeDiv = window.document.createElement('div');
-                citeDiv.classList.add('hanging-indent');
-                citeDiv.classList.add('csl-entry');
-                var biblioDiv = window.document.getElementById('ref-' + cite);
-                if (biblioDiv) {
-                  citeDiv.innerHTML = biblioDiv.innerHTML;
-                }
-                popup.appendChild(citeDiv);
-              });
-              return popup.innerHTML;
-            });
-          }
-        }
+        return popup.innerHTML;
       });
-    </script>
-    <div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1"
-      aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-scrollable">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button
-              class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-            <div class="">
-              <div class="sourceCode" id="cb27" data-shortcodes="false">
-                <pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Getting Data From Many Excel Workbooks, with Python"</span></span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "David De Sa"</span></span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> "2023-03-12"</span></span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="an">categories:</span><span class="co"> [python, excel, automation]</span></span>
-<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
-<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
-<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a><span class="co">    code-fold: true</span></span>
-<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a><span class="co">    toc: true</span></span>
-<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools: true</span></span>
-<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a><span class="co">    image: "Display_pic.png"</span></span>
-<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a><span class="fu">## TL;DR</span></span>
-<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>This article is about using Python to reach into many excel files that have a similar spreadsheet structure so as to pull out data from those sheets, potentially spread across multiple folders, into one place for aggregate use.</span>
-<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a><span class="fu"># When your Excel is more like Excalibur ^[Don't worry I didnt spend too long thinking about this, it just came to me. And if you don't like it, we agree to disagree.]</span></span>
-<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a>It seems like an all too common tragedy that lots of team operate on the basis of sheets that were thrown together at some point in the distant past with varying degrees of thought put into future use cases. Now here you are, with the data you need like gold ore entombed in mountains of excel sheets. The irretrievable Excalibur in the stone.</span>
-<span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-21"><a href="#cb27-21" aria-hidden="true" tabindex="-1"></a>I encountered a problem where I had hundreds of excel sheets (each for a specific week) with data tables in each, and I needed to know which records in them met a certain criteria. I made some code in Python to pull the data out, this article will walk through it along with the video: </span>
-<span id="cb27-22"><a href="#cb27-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-23"><a href="#cb27-23" aria-hidden="true" tabindex="-1"></a><span class="fu">## What Exactly Does This Code Do?</span></span>
-<span id="cb27-24"><a href="#cb27-24" aria-hidden="true" tabindex="-1"></a>This code goes over all excel files with a name matching a specified pattern in a given folder (and its subfolders). In this example, these are invoices. The code will generate two master data tables in a new worksheet, one table with a row for each line item across all invoices, and another table with one row for each invoice with the bottom line information. </span>
-<span id="cb27-25"><a href="#cb27-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-26"><a href="#cb27-26" aria-hidden="true" tabindex="-1"></a><span class="fu">## Is This For You?</span></span>
-<span id="cb27-27"><a href="#cb27-27" aria-hidden="true" tabindex="-1"></a>This article is aimed at people who may have never used Python before but have some experience with coding of one form or another; I'll go through each line so you can understand and customize the code to your own use case. This is built on an assumption that the many sheets you want to dig into have at least some rhyme/reason as to their naming conventions, and internal sheet structure. Anything is possible with programming, but the more consistent your sheets, the simpler this code can be.</span>
-<span id="cb27-28"><a href="#cb27-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-29"><a href="#cb27-29" aria-hidden="true" tabindex="-1"></a><span class="fu"># INSERT VIDEO LINK HERE, and GITHUB link beloW!</span></span>
-<span id="cb27-30"><a href="#cb27-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-31"><a href="#cb27-31" aria-hidden="true" tabindex="-1"></a><span class="fu">### Try It Yourself!</span></span>
-<span id="cb27-32"><a href="#cb27-32" aria-hidden="true" tabindex="-1"></a>If you want to run it yourself, you can find the code on my GitHub page. You'll need to <span class="co">[</span><span class="ot">install Python and Jupyter</span><span class="co">](https://www.youtube.com/watch?v=qI3P7zMMsgY)</span>.^<span class="co">[</span><span class="ot">Not my video, but I recommend it. It might seem daunting or like overkill, but trust me, it's the right way to go.</span><span class="co">]</span> Python is the programming langauge we're using, Jupyter is the tool for organizing and executing blocks of Python commands so that we can understand, debug, and execute bits and peices of code at a time instead of always running the whole thing.</span>
-<span id="cb27-33"><a href="#cb27-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-34"><a href="#cb27-34" aria-hidden="true" tabindex="-1"></a><span class="fu"># Code Walkthrough</span></span>
-<span id="cb27-35"><a href="#cb27-35" aria-hidden="true" tabindex="-1"></a><span class="fu">## Example Files</span></span>
-<span id="cb27-36"><a href="#cb27-36" aria-hidden="true" tabindex="-1"></a>I'm using an invoice template I picked up from <span class="co">[</span><span class="ot">this website</span><span class="co">](https://www.myexcelonline.com/blog/free-excel-templates-and-spreadsheets/#section66)</span>.^<span class="co">[</span><span class="ot">I'm not affiliated with it.</span><span class="co">]</span></span>
-<span id="cb27-37"><a href="#cb27-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-38"><a href="#cb27-38" aria-hidden="true" tabindex="-1"></a>I have a master Invoice folder, with sub folders for each year. To simulate rela world messiness, some of these subfolders have different name patterns, and some have "Paid" vs "Unpaid" secondary folders wheres as some do not.</span>
-<span id="cb27-39"><a href="#cb27-39" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-40"><a href="#cb27-40" aria-hidden="true" tabindex="-1"></a><span class="al">![Main Folder](Folders1.png)</span>{#fig-f1}  </span>
-<span id="cb27-41"><a href="#cb27-41" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-42"><a href="#cb27-42" aria-hidden="true" tabindex="-1"></a><span class="al">![A Sub-Folder](Folders2.png)</span>{#fig-f2}</span>
-<span id="cb27-43"><a href="#cb27-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-44"><a href="#cb27-44" aria-hidden="true" tabindex="-1"></a><span class="al">![Another Sub-Folder](Folders3.png)</span>{#fig-f3}</span>
-<span id="cb27-45"><a href="#cb27-45" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-46"><a href="#cb27-46" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-47"><a href="#cb27-47" aria-hidden="true" tabindex="-1"></a><span class="fu">## Dependencies</span></span>
-<span id="cb27-48"><a href="#cb27-48" aria-hidden="true" tabindex="-1"></a>The opensource tools from <span class="co">[</span><span class="ot">Openpyxl</span><span class="co">](https://openpyxl.readthedocs.io/en/stable/)</span> are what make this possible. Big thanks to everyone who has built them up. Other than that we're just using really standard Python libraries^<span class="co">[</span><span class="ot">A library is a collection of code files defining functions and other kinds of code objects that we can use ourselves and build on. Like a toolbox.</span><span class="co">]</span>.</span>
-<span id="cb27-51"><a href="#cb27-51" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-52"><a href="#cb27-52" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> openpyxl <span class="im">import</span> load_workbook</span>
-<span id="cb27-53"><a href="#cb27-53" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> openpyxl <span class="im">as</span> pyxl</span>
-<span id="cb27-54"><a href="#cb27-54" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
-<span id="cb27-55"><a href="#cb27-55" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
-<span id="cb27-56"><a href="#cb27-56" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datetime <span class="im">import</span> datetime</span>
-<span id="cb27-57"><a href="#cb27-57" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-58"><a href="#cb27-58" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-59"><a href="#cb27-59" aria-hidden="true" tabindex="-1"></a><span class="fu">## Debugging</span></span>
-<span id="cb27-60"><a href="#cb27-60" aria-hidden="true" tabindex="-1"></a>The most common thing I tripped over in making this was typos and what not in my file paths. You can use this function to test whether or not a path you've entered is valid. </span>
-<span id="cb27-63"><a href="#cb27-63" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-64"><a href="#cb27-64" aria-hidden="true" tabindex="-1"></a>Path(<span class="vs">r"C:\Invoices"</span>).exists()</span>
-<span id="cb27-65"><a href="#cb27-65" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-66"><a href="#cb27-66" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-67"><a href="#cb27-67" aria-hidden="true" tabindex="-1"></a><span class="fu">## Specifying Which Files</span></span>
-<span id="cb27-68"><a href="#cb27-68" aria-hidden="true" tabindex="-1"></a>I made code blocks for 2 options; specifying all files manually, or specifying a directory and file name pattern to search for. Either way we start by initializing the container that our data will be stored in:</span>
-<span id="cb27-71"><a href="#cb27-71" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-72"><a href="#cb27-72" aria-hidden="true" tabindex="-1"></a>subitems <span class="op">=</span> []  <span class="co"># Will contain the data we're aggregating for all items on invoices</span></span>
-<span id="cb27-73"><a href="#cb27-73" aria-hidden="true" tabindex="-1"></a>invoiceTotal <span class="op">=</span> []  <span class="co"># Will contain the final bottom-line data for each invoice</span></span>
-<span id="cb27-74"><a href="#cb27-74" aria-hidden="true" tabindex="-1"></a>fls <span class="op">=</span> []  <span class="co"># Stores file paths for excel files to be searched</span></span>
-<span id="cb27-75"><a href="#cb27-75" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-76"><a href="#cb27-76" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-77"><a href="#cb27-77" aria-hidden="true" tabindex="-1"></a><span class="fu">### Option 1: Naming Each File</span></span>
-<span id="cb27-78"><a href="#cb27-78" aria-hidden="true" tabindex="-1"></a>The most controlled way would be to list all the files with the full path, something like this:</span>
-<span id="cb27-81"><a href="#cb27-81" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-82"><a href="#cb27-82" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"fls.append(r</span><span class="ch">\"</span><span class="st">C:\Invoices\Invoices 2022\Invoice 1.xlsx</span><span class="ch">\"</span><span class="st">)"</span>)</span>
-<span id="cb27-83"><a href="#cb27-83" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-84"><a href="#cb27-84" aria-hidden="true" tabindex="-1"></a>But I felt it was such an eyesore, and the folder structure made me prone to typo mistakes. So I made a helper function that would tighten things up, requiring only the file name and invoice year, and 'paid' vs 'unpaid' as input, and then spitting out the whole file path. The function uses the file year to decide which folder naming structure to use.</span>
-<span id="cb27-87"><a href="#cb27-87" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-88"><a href="#cb27-88" aria-hidden="true" tabindex="-1"></a><span class="co"># Helper function to build path strings when iterating through multiple files</span></span>
-<span id="cb27-89"><a href="#cb27-89" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-90"><a href="#cb27-90" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-91"><a href="#cb27-91" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> pthBld(flNm, flExtn<span class="op">=</span><span class="st">""</span>, path_building_variable<span class="op">=</span>(<span class="st">'Paid'</span>, <span class="dv">0</span>)):</span>
-<span id="cb27-92"><a href="#cb27-92" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Take a file name and expected file type, and based on some other input, add the rest of the file path for reference by workbook opening function"""</span></span>
-<span id="cb27-93"><a href="#cb27-93" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> flExtn <span class="op">!=</span> <span class="st">""</span>:</span>
-<span id="cb27-94"><a href="#cb27-94" aria-hidden="true" tabindex="-1"></a>        flExtn <span class="op">=</span> <span class="st">"."</span><span class="op">+</span>flExtn</span>
-<span id="cb27-95"><a href="#cb27-95" aria-hidden="true" tabindex="-1"></a>    tp <span class="op">=</span> path_building_variable[<span class="dv">0</span>]</span>
-<span id="cb27-96"><a href="#cb27-96" aria-hidden="true" tabindex="-1"></a>    yr <span class="op">=</span> path_building_variable[<span class="dv">1</span>]</span>
-<span id="cb27-97"><a href="#cb27-97" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> yr <span class="op">==</span> <span class="dv">22</span>:</span>
-<span id="cb27-98"><a href="#cb27-98" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> (<span class="vs">r"C:\Invoices\Invoices 2022"</span><span class="op">+</span><span class="bu">chr</span>(<span class="dv">92</span>)<span class="op">+</span>tp<span class="op">+</span><span class="bu">chr</span>(<span class="dv">92</span>)<span class="op">+</span>flNm<span class="op">+</span>flExtn)</span>
-<span id="cb27-99"><a href="#cb27-99" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
-<span id="cb27-100"><a href="#cb27-100" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> (<span class="vs">r"C:\Invoices\Invoices '"</span><span class="op">+</span><span class="bu">str</span>(yr)<span class="op">+</span><span class="bu">chr</span>(<span class="dv">92</span>)<span class="op">+</span>tp<span class="op">+</span><span class="bu">chr</span>(<span class="dv">92</span>)<span class="op">+</span>flNm<span class="op">+</span>flExtn)</span>
-<span id="cb27-101"><a href="#cb27-101" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-102"><a href="#cb27-102" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-103"><a href="#cb27-103" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-104"><a href="#cb27-104" aria-hidden="true" tabindex="-1"></a>Always good to test a function is working after making it.</span>
-<span id="cb27-107"><a href="#cb27-107" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-108"><a href="#cb27-108" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> pthBld(<span class="st">'Invoice 3'</span>, <span class="st">"xlsx"</span>, (<span class="st">'unPaid'</span>, <span class="dv">22</span>))</span>
-<span id="cb27-109"><a href="#cb27-109" aria-hidden="true" tabindex="-1"></a>p, <span class="st">"Exists?: "</span><span class="op">+</span><span class="bu">str</span>(Path(p).exists())</span>
-<span id="cb27-110"><a href="#cb27-110" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-111"><a href="#cb27-111" aria-hidden="true" tabindex="-1"></a>Then, the process of specifying all the files to search by individual names is just running a bunch of commands like this:</span>
-<span id="cb27-114"><a href="#cb27-114" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-115"><a href="#cb27-115" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"fls.append(pthBld('Invoice 1',</span><span class="ch">\"</span><span class="st">xlsx</span><span class="ch">\"</span><span class="st">,('Paid',22)))"</span>)</span>
-<span id="cb27-116"><a href="#cb27-116" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-117"><a href="#cb27-117" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-118"><a href="#cb27-118" aria-hidden="true" tabindex="-1"></a><span class="fu">### Option 2: Full Directory Search on File names</span></span>
-<span id="cb27-119"><a href="#cb27-119" aria-hidden="true" tabindex="-1"></a>If there are too many files names to sepcify one by one, or if there is some identifying pattern to the file names of interest, this option can be used. The code looked through the specified folder in entirety, including subfolders, and if a file name meets a criteria, saves the path to perform the data retrieval on that file.</span>
-<span id="cb27-120"><a href="#cb27-120" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-123"><a href="#cb27-123" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-124"><a href="#cb27-124" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> list_dir(directory):</span>
-<span id="cb27-125"><a href="#cb27-125" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""This function will print out the path for every file in the specified directory (and any further nested directories)"""</span></span>
-<span id="cb27-126"><a href="#cb27-126" aria-hidden="true" tabindex="-1"></a>    output <span class="op">=</span> []  <span class="co"># initialize</span></span>
-<span id="cb27-127"><a href="#cb27-127" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> filename <span class="kw">in</span> os.listdir(directory):</span>
-<span id="cb27-128"><a href="#cb27-128" aria-hidden="true" tabindex="-1"></a>        f <span class="op">=</span> os.path.join(directory, filename)</span>
-<span id="cb27-129"><a href="#cb27-129" aria-hidden="true" tabindex="-1"></a>        <span class="co"># checking if it is a file</span></span>
-<span id="cb27-130"><a href="#cb27-130" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> os.path.isfile(f):</span>
-<span id="cb27-131"><a href="#cb27-131" aria-hidden="true" tabindex="-1"></a>            output.append(f)</span>
-<span id="cb27-132"><a href="#cb27-132" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> os.path.isdir(f):</span>
-<span id="cb27-133"><a href="#cb27-133" aria-hidden="true" tabindex="-1"></a>            output.extend(list_dir(f))</span>
-<span id="cb27-134"><a href="#cb27-134" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> output</span>
-<span id="cb27-135"><a href="#cb27-135" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-136"><a href="#cb27-136" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-137"><a href="#cb27-137" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-138"><a href="#cb27-138" aria-hidden="true" tabindex="-1"></a>What if you wanted to omit one or multiple folders entirely? The 'else if' branch in the above function could have an extra required condition added to it such that only folders with a certain name structure, for example, are searched.</span>
-<span id="cb27-139"><a href="#cb27-139" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-140"><a href="#cb27-140" aria-hidden="true" tabindex="-1"></a>Here is what we get when we test that function:</span>
-<span id="cb27-143"><a href="#cb27-143" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-144"><a href="#cb27-144" aria-hidden="true" tabindex="-1"></a>list_dir(<span class="vs">r"C:\Invoices"</span>)  <span class="co"># Test it works</span></span>
-<span id="cb27-145"><a href="#cb27-145" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-146"><a href="#cb27-146" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-147"><a href="#cb27-147" aria-hidden="true" tabindex="-1"></a>Having a list of *all* files within the directory, we need to screen for just the ones we want. For the sake of this example I simply keep the file paths that have the text "invoice" in the last 15 characters of the path:</span>
-<span id="cb27-150"><a href="#cb27-150" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-151"><a href="#cb27-151" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> f <span class="kw">in</span> list_dir(<span class="vs">r"C:\Invoices"</span>):</span>
-<span id="cb27-152"><a href="#cb27-152" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="st">"invoice"</span> <span class="kw">in</span> f.lower()[<span class="op">-</span><span class="dv">15</span>:]:</span>
-<span id="cb27-153"><a href="#cb27-153" aria-hidden="true" tabindex="-1"></a>        fls.append(f)</span>
-<span id="cb27-154"><a href="#cb27-154" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-155"><a href="#cb27-155" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-156"><a href="#cb27-156" aria-hidden="true" tabindex="-1"></a>And testing the output is as expected;</span>
-<span id="cb27-159"><a href="#cb27-159" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-160"><a href="#cb27-160" aria-hidden="true" tabindex="-1"></a>fls</span>
-<span id="cb27-161"><a href="#cb27-161" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-162"><a href="#cb27-162" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-163"><a href="#cb27-163" aria-hidden="true" tabindex="-1"></a>We got rid of the junk_data.xlsx files.</span>
-<span id="cb27-164"><a href="#cb27-164" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-165"><a href="#cb27-165" aria-hidden="true" tabindex="-1"></a><span class="fu">## Retrieving The Data</span></span>
-<span id="cb27-166"><a href="#cb27-166" aria-hidden="true" tabindex="-1"></a>Having specified all the files paths for our excel files, we need to reach into them and grab that data into memory using Python. To do that, we iterate over the list of filepaths, opening the workbook using openpyxl. In this example I'm grabbing all data in each item row of the invoice to one table, and the bottom-line information to a second table. For the first operation, I iterate through the cells in which I know the data could be, just recording something if data is found. I use a list comprehension to carry out the workbook.cell(row,col).value function in one line of code but across all columns of the table, casting the date value to a string so that python doesn't convert it to a more complex datetime format which is admittedly more handy for anything but transferring back into excel.</span>
-<span id="cb27-167"><a href="#cb27-167" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-168"><a href="#cb27-168" aria-hidden="true" tabindex="-1"></a>In the second portion of the retrieval function for a given file, I use a more verbose and explicit way of grabbing all the data. There isn't any question for these data as to whether or nto they will be there, since each invoice has one of these data points, where as number of line items was variable. </span>
-<span id="cb27-169"><a href="#cb27-169" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-170"><a href="#cb27-170" aria-hidden="true" tabindex="-1"></a>While iterating over the various workbooks, the data from each is stored in 2 lists. Each list is sent to a list of lists which will be used for reporting.</span>
-<span id="cb27-171"><a href="#cb27-171" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-174"><a href="#cb27-174" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-175"><a href="#cb27-175" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> fl <span class="kw">in</span> fls:</span>
-<span id="cb27-176"><a href="#cb27-176" aria-hidden="true" tabindex="-1"></a>    wb <span class="op">=</span> load_workbook(filename<span class="op">=</span>fl, data_only<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb27-177"><a href="#cb27-177" aria-hidden="true" tabindex="-1"></a>    <span class="co"># First record data for the sub-items list</span></span>
-<span id="cb27-178"><a href="#cb27-178" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="bu">str</span>(<span class="dv">1</span><span class="op">+</span>fls.index(fl))<span class="op">+</span><span class="bu">chr</span>(<span class="dv">92</span>)<span class="op">+</span><span class="bu">str</span>(<span class="bu">len</span>(fls)), fl)</span>
-<span id="cb27-179"><a href="#cb27-179" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">8</span>, <span class="dv">30</span>):  <span class="co"># Note arbitrary assumption on row limit. Starting point from existing sheet structure</span></span>
-<span id="cb27-180"><a href="#cb27-180" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Grab invoice admin data</span></span>
-<span id="cb27-181"><a href="#cb27-181" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> wb[<span class="st">'Commercial Invoice'</span>].cell(row<span class="op">=</span>i, column<span class="op">=</span><span class="dv">3</span>).value <span class="op">!=</span> <span class="va">None</span>:</span>
-<span id="cb27-182"><a href="#cb27-182" aria-hidden="true" tabindex="-1"></a>            data <span class="op">=</span> [fl]  <span class="co"># include filepath in data dump</span></span>
-<span id="cb27-183"><a href="#cb27-183" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Invoice number to data dump</span></span>
-<span id="cb27-184"><a href="#cb27-184" aria-hidden="true" tabindex="-1"></a>            data.append(wb[<span class="st">'Commercial Invoice'</span>].cell(row<span class="op">=</span><span class="dv">3</span>, column<span class="op">=</span><span class="dv">8</span>).value)</span>
-<span id="cb27-185"><a href="#cb27-185" aria-hidden="true" tabindex="-1"></a>            data.extend([wb[<span class="st">'Commercial Invoice'</span>].cell(row<span class="op">=</span>i, column<span class="op">=</span>c).value <span class="cf">if</span> <span class="bu">type</span>(wb[<span class="st">'Commercial Invoice'</span>].cell(row<span class="op">=</span>i, column<span class="op">=</span>c).value) <span class="op">!=</span> datetime <span class="cf">else</span> <span class="bu">str</span>(</span>
-<span id="cb27-186"><a href="#cb27-186" aria-hidden="true" tabindex="-1"></a>                wb[<span class="st">'Commercial Invoice'</span>].cell(row<span class="op">=</span>i, column<span class="op">=</span>c).value) <span class="cf">for</span> c <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2</span>, <span class="dv">9</span>)])  <span class="co"># Convert any data to string.. when re printed to excel it will cast to appropriate type</span></span>
-<span id="cb27-187"><a href="#cb27-187" aria-hidden="true" tabindex="-1"></a>            subitems.append(data)</span>
-<span id="cb27-188"><a href="#cb27-188" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
-<span id="cb27-189"><a href="#cb27-189" aria-hidden="true" tabindex="-1"></a>            <span class="cf">pass</span></span>
-<span id="cb27-190"><a href="#cb27-190" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Now record to totals</span></span>
-<span id="cb27-191"><a href="#cb27-191" aria-hidden="true" tabindex="-1"></a>    data2 <span class="op">=</span> [fl]  <span class="co"># initialize with filepath</span></span>
-<span id="cb27-192"><a href="#cb27-192" aria-hidden="true" tabindex="-1"></a>    data2.append(<span class="bu">str</span>(wb[<span class="st">'Commercial Invoice'</span>].cell(</span>
-<span id="cb27-193"><a href="#cb27-193" aria-hidden="true" tabindex="-1"></a>        row<span class="op">=</span><span class="dv">4</span>, column<span class="op">=</span><span class="dv">8</span>).value))  <span class="co"># invoice data</span></span>
-<span id="cb27-194"><a href="#cb27-194" aria-hidden="true" tabindex="-1"></a>    data2.append(wb[<span class="st">'Commercial Invoice'</span>].cell(</span>
-<span id="cb27-195"><a href="#cb27-195" aria-hidden="true" tabindex="-1"></a>        row<span class="op">=</span><span class="dv">3</span>, column<span class="op">=</span><span class="dv">8</span>).value)  <span class="co"># invoice num</span></span>
-<span id="cb27-196"><a href="#cb27-196" aria-hidden="true" tabindex="-1"></a>    data2.append(wb[<span class="st">'Commercial Invoice'</span>].cell(</span>
-<span id="cb27-197"><a href="#cb27-197" aria-hidden="true" tabindex="-1"></a>        row<span class="op">=</span><span class="dv">13</span>, column<span class="op">=</span><span class="dv">8</span>).value)  <span class="co"># subtotal</span></span>
-<span id="cb27-198"><a href="#cb27-198" aria-hidden="true" tabindex="-1"></a>    data2.append(wb[<span class="st">'Commercial Invoice'</span>].cell(row<span class="op">=</span><span class="dv">14</span>, column<span class="op">=</span><span class="dv">8</span>).value)  <span class="co"># VAT</span></span>
-<span id="cb27-199"><a href="#cb27-199" aria-hidden="true" tabindex="-1"></a>    data2.append(wb[<span class="st">'Commercial Invoice'</span>].cell(</span>
-<span id="cb27-200"><a href="#cb27-200" aria-hidden="true" tabindex="-1"></a>        row<span class="op">=</span><span class="dv">15</span>, column<span class="op">=</span><span class="dv">8</span>).value)  <span class="co"># Other Tax</span></span>
-<span id="cb27-201"><a href="#cb27-201" aria-hidden="true" tabindex="-1"></a>    data2.append(wb[<span class="st">'Commercial Invoice'</span>].cell(</span>
-<span id="cb27-202"><a href="#cb27-202" aria-hidden="true" tabindex="-1"></a>        row<span class="op">=</span><span class="dv">16</span>, column<span class="op">=</span><span class="dv">8</span>).value)  <span class="co"># Delivery</span></span>
-<span id="cb27-203"><a href="#cb27-203" aria-hidden="true" tabindex="-1"></a>    data2.append(wb[<span class="st">'Commercial Invoice'</span>].cell(</span>
-<span id="cb27-204"><a href="#cb27-204" aria-hidden="true" tabindex="-1"></a>        row<span class="op">=</span><span class="dv">17</span>, column<span class="op">=</span><span class="dv">8</span>).value)  <span class="co"># Deposit Recieved</span></span>
-<span id="cb27-205"><a href="#cb27-205" aria-hidden="true" tabindex="-1"></a>    data2.append(wb[<span class="st">'Commercial Invoice'</span>].cell(</span>
-<span id="cb27-206"><a href="#cb27-206" aria-hidden="true" tabindex="-1"></a>        row<span class="op">=</span><span class="dv">18</span>, column<span class="op">=</span><span class="dv">8</span>).value)  <span class="co"># Total</span></span>
-<span id="cb27-207"><a href="#cb27-207" aria-hidden="true" tabindex="-1"></a>    invoiceTotal.append(data2)</span>
-<span id="cb27-208"><a href="#cb27-208" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-209"><a href="#cb27-209" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-210"><a href="#cb27-210" aria-hidden="true" tabindex="-1"></a>As always, good to test that it worked. here we can see how many dsub items in total we observed across all invoices and see a sample of the first one. Likewise for the number of quotes overall, and a sample of the bottom line info collected.</span>
-<span id="cb27-213"><a href="#cb27-213" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-214"><a href="#cb27-214" aria-hidden="true" tabindex="-1"></a><span class="co"># Check we got what we wanted</span></span>
-<span id="cb27-215"><a href="#cb27-215" aria-hidden="true" tabindex="-1"></a><span class="bu">len</span>(subitems), subitems[<span class="dv">0</span>], <span class="bu">len</span>(invoiceTotal), invoiceTotal[<span class="dv">0</span>]</span>
-<span id="cb27-216"><a href="#cb27-216" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-217"><a href="#cb27-217" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-218"><a href="#cb27-218" aria-hidden="true" tabindex="-1"></a><span class="fu">## Compile In Excel</span></span>
-<span id="cb27-219"><a href="#cb27-219" aria-hidden="true" tabindex="-1"></a>So, having all of the data we want in memory in Python, we just need to print it to an Excel table. First we open a new table, then, using simple iterating indexes for row and column print-out references to avoid issues with duplicate invoice entries, we iterate through the recorded data and print it out to a worksheet cell. A new sheet is created for the Bottom Line Info and the same process executed, and the workbook saved.</span>
-<span id="cb27-220"><a href="#cb27-220" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-223"><a href="#cb27-223" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-224"><a href="#cb27-224" aria-hidden="true" tabindex="-1"></a><span class="co"># Finally, print our aggregated data to a single subitems table</span></span>
-<span id="cb27-225"><a href="#cb27-225" aria-hidden="true" tabindex="-1"></a>wb <span class="op">=</span> pyxl.Workbook()</span>
-<span id="cb27-226"><a href="#cb27-226" aria-hidden="true" tabindex="-1"></a>ws <span class="op">=</span> wb.active</span>
-<span id="cb27-227"><a href="#cb27-227" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb27-228"><a href="#cb27-228" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> row <span class="kw">in</span> subitems:</span>
-<span id="cb27-229"><a href="#cb27-229" aria-hidden="true" tabindex="-1"></a>    r <span class="op">=</span> r<span class="op">+</span><span class="dv">1</span></span>
-<span id="cb27-230"><a href="#cb27-230" aria-hidden="true" tabindex="-1"></a>    c <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb27-231"><a href="#cb27-231" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> index <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(row)):</span>
-<span id="cb27-232"><a href="#cb27-232" aria-hidden="true" tabindex="-1"></a>        c <span class="op">=</span> c<span class="op">+</span><span class="dv">1</span></span>
-<span id="cb27-233"><a href="#cb27-233" aria-hidden="true" tabindex="-1"></a>        ws.cell(row<span class="op">=</span>r, column<span class="op">=</span>c).value <span class="op">=</span> row[index]</span>
-<span id="cb27-234"><a href="#cb27-234" aria-hidden="true" tabindex="-1"></a>wb.create_sheet(<span class="st">'Bottom Line Info'</span>)</span>
-<span id="cb27-235"><a href="#cb27-235" aria-hidden="true" tabindex="-1"></a>ws <span class="op">=</span> wb[<span class="st">'Bottom Line Info'</span>]</span>
-<span id="cb27-236"><a href="#cb27-236" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb27-237"><a href="#cb27-237" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> row <span class="kw">in</span> invoiceTotal:</span>
-<span id="cb27-238"><a href="#cb27-238" aria-hidden="true" tabindex="-1"></a>    r <span class="op">=</span> r<span class="op">+</span><span class="dv">1</span></span>
-<span id="cb27-239"><a href="#cb27-239" aria-hidden="true" tabindex="-1"></a>    c <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb27-240"><a href="#cb27-240" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> index <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(row)):</span>
-<span id="cb27-241"><a href="#cb27-241" aria-hidden="true" tabindex="-1"></a>        c <span class="op">=</span> c<span class="op">+</span><span class="dv">1</span></span>
-<span id="cb27-242"><a href="#cb27-242" aria-hidden="true" tabindex="-1"></a>        ws.cell(row<span class="op">=</span>r, column<span class="op">=</span>c).value <span class="op">=</span> row[index]</span>
-<span id="cb27-243"><a href="#cb27-243" aria-hidden="true" tabindex="-1"></a>wb.save(<span class="vs">r"C:\Invoices\Aggregated_Data.xlsx"</span>)</span>
-<span id="cb27-244"><a href="#cb27-244" aria-hidden="true" tabindex="-1"></a>wb.close()</span>
-<span id="cb27-245"><a href="#cb27-245" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-246"><a href="#cb27-246" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-247"><a href="#cb27-247" aria-hidden="true" tabindex="-1"></a>And huzzah! The file appears;</span>
-<span id="cb27-248"><a href="#cb27-248" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-249"><a href="#cb27-249" aria-hidden="true" tabindex="-1"></a><span class="al">![Main Folder](Folders4.png)</span>{#fig-f4}  </span>
-<span id="cb27-250"><a href="#cb27-250" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-251"><a href="#cb27-251" aria-hidden="true" tabindex="-1"></a><span class="fu">## Output</span></span>
-<span id="cb27-252"><a href="#cb27-252" aria-hidden="true" tabindex="-1"></a>Taking a look at the contents, we can see the plain data laid out. Knowing how we got it, we can manually add the titles and format as a table for sorting and filtering (although this could've been done with openpyxl as well!)</span>
-<span id="cb27-253"><a href="#cb27-253" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-254"><a href="#cb27-254" aria-hidden="true" tabindex="-1"></a><span class="al">![Result](Folders5.png)</span>{#fig-f5}  </span>
-<span id="cb27-255"><a href="#cb27-255" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-256"><a href="#cb27-256" aria-hidden="true" tabindex="-1"></a><span class="fu"># Afterthoughts</span></span>
-<span id="cb27-257"><a href="#cb27-257" aria-hidden="true" tabindex="-1"></a>I hope that you see the same potential as I did when I first really cracked open this openpyxl tool. It is so liberating to understand that we can use python to get into the guts of excel. Taken to the nth degree, you can really make excel dance with this toolset. The way I look at it is that Excel really just becomes the user-friendly GUI for whatever in the world we want to program, the upper limit on complexity really just being what we can think up and program. In that vein, I've put together nother project I hope to share sometime soon.</span>
-<span id="cb27-258"><a href="#cb27-258" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-259"><a href="#cb27-259" aria-hidden="true" tabindex="-1"></a>Another thought is as to what else we can do in the world integrating python with our ubiquitous MS Office tools! As foor for thought, here is a <span class="co">[</span><span class="ot">blog post</span><span class="co">](https://blog.aspose.com/words/python-ms-word-automation-create-edit-or-convert-ms-word-documents-using-python/#Parse-Word-Documents-using-Python)</span> showing how we can create and peer into Word documents using Python. I can imagine this being useful for finding a document we know is hiding somewhere in a huge directory by having the code crawl the whole directory, opening word files and performing a key word search on them.</span>
-</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div> <!-- /content -->
+    }
+  }
+});
+</script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb25" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Getting Data From Many Excel Workbooks, with Python"</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "David De Sa"</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> "2023-03-12"</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="an">categories:</span><span class="co"> [python, excel, automation]</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a><span class="co">    code-fold: true</span></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a><span class="co">    toc: true</span></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools: true</span></span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a><span class="co">    image: "Display_pic.png"</span></span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a><span class="fu">## TL;DR</span></span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Here is a video</span><span class="co">](https://youtu.be/RmFSYdMZLmI)</span>! This article is about using Python to reach into many excel files that have a similar spreadsheet structure so as to pull out data from those sheets, potentially spread across multiple folders, into one place for aggregate use.</span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a><span class="fu"># When your Excel is more like Excalibur ^[Don't worry I didnt spend too long thinking about this, it just came to me. And if you don't like it, we agree to disagree.]</span></span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>It seems like an all too common tragedy that lots of team operate on the basis of sheets that were thrown together at some point in the distant past with varying degrees of thought put into future use cases. Now here you are, with the data you need like gold ore entombed in mountains of excel sheets. The irretrievable Excalibur in the stone.</span>
+<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a>I encountered a problem where I had hundreds of excel sheets (each for a specific week) with data tables in each, and I needed to know which records in them met a certain criteria. I made some code in Python to pull the data out, this article will walk through it along with the video: </span>
+<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a><span class="fu">## What Exactly Does This Code Do?</span></span>
+<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a>This code goes over all excel files with a name matching a specified pattern in a given folder (and its subfolders). In this example, these are invoices. The code will generate two master data tables in a new worksheet, one table with a row for each line item across all invoices, and another table with one row for each invoice with the bottom line information. </span>
+<span id="cb25-25"><a href="#cb25-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-26"><a href="#cb25-26" aria-hidden="true" tabindex="-1"></a><span class="fu">## Is This For You?</span></span>
+<span id="cb25-27"><a href="#cb25-27" aria-hidden="true" tabindex="-1"></a>This article is aimed at people who may have never used Python before but have some experience with coding of one form or another; I'll go through each line so you can understand and customize the code to your own use case. This is built on an assumption that the many sheets you want to dig into have at least some rhyme/reason as to their naming conventions, and internal sheet structure. Anything is possible with programming, but the more consistent your sheets, the simpler this code can be.</span>
+<span id="cb25-28"><a href="#cb25-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-29"><a href="#cb25-29" aria-hidden="true" tabindex="-1"></a><span class="fu"># INSERT VIDEO LINK HERE, and GITHUB link beloW!</span></span>
+<span id="cb25-30"><a href="#cb25-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-31"><a href="#cb25-31" aria-hidden="true" tabindex="-1"></a><span class="fu">### Try It Yourself!</span></span>
+<span id="cb25-32"><a href="#cb25-32" aria-hidden="true" tabindex="-1"></a>If you want to run it yourself, you can <span class="co">[</span><span class="ot">find the code on my GitHub page</span><span class="co">](https://github.com/DavidD003/Python-Tools)</span>. You'll need to <span class="co">[</span><span class="ot">install Python and Jupyter</span><span class="co">](https://www.youtube.com/watch?v=qI3P7zMMsgY)</span>.^<span class="co">[</span><span class="ot">Not my video, but I recommend it. It might seem daunting or like overkill, but trust me, it's the right way to go.</span><span class="co">]</span> Python is the programming langauge we're using, Jupyter is the tool for organizing and executing blocks of Python commands so that we can understand, debug, and execute bits and peices of code at a time instead of always running the whole thing.</span>
+<span id="cb25-33"><a href="#cb25-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-34"><a href="#cb25-34" aria-hidden="true" tabindex="-1"></a><span class="fu"># Code Walkthrough</span></span>
+<span id="cb25-35"><a href="#cb25-35" aria-hidden="true" tabindex="-1"></a><span class="fu">## Example Files</span></span>
+<span id="cb25-36"><a href="#cb25-36" aria-hidden="true" tabindex="-1"></a>I'm using an invoice template I picked up from <span class="co">[</span><span class="ot">this website</span><span class="co">](https://www.myexcelonline.com/blog/free-excel-templates-and-spreadsheets/#section66)</span>.^<span class="co">[</span><span class="ot">I'm not affiliated with it.</span><span class="co">]</span></span>
+<span id="cb25-37"><a href="#cb25-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-38"><a href="#cb25-38" aria-hidden="true" tabindex="-1"></a>I have a master Invoice folder, with sub folders for each year. To simulate rela world messiness, some of these subfolders have different name patterns, and some have "Paid" vs "Unpaid" secondary folders wheres as some do not.</span>
+<span id="cb25-39"><a href="#cb25-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-40"><a href="#cb25-40" aria-hidden="true" tabindex="-1"></a><span class="al">![Main Folder](Folders1.png)</span>{#fig-f1}  </span>
+<span id="cb25-41"><a href="#cb25-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-42"><a href="#cb25-42" aria-hidden="true" tabindex="-1"></a><span class="al">![A Sub-Folder](Folders2.png)</span>{#fig-f2}</span>
+<span id="cb25-43"><a href="#cb25-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-44"><a href="#cb25-44" aria-hidden="true" tabindex="-1"></a><span class="al">![Another Sub-Folder](Folders3.png)</span>{#fig-f3}</span>
+<span id="cb25-45"><a href="#cb25-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-46"><a href="#cb25-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-47"><a href="#cb25-47" aria-hidden="true" tabindex="-1"></a><span class="fu">## Dependencies</span></span>
+<span id="cb25-48"><a href="#cb25-48" aria-hidden="true" tabindex="-1"></a>The opensource tools from <span class="co">[</span><span class="ot">Openpyxl</span><span class="co">](https://openpyxl.readthedocs.io/en/stable/)</span> are what make this possible. Big thanks to everyone who has built them up. Other than that we're just using really standard Python libraries^<span class="co">[</span><span class="ot">A library is a collection of code files defining functions and other kinds of code objects that we can use ourselves and build on. Like a toolbox.</span><span class="co">]</span>.</span>
+<span id="cb25-51"><a href="#cb25-51" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb25-52"><a href="#cb25-52" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> openpyxl <span class="im">import</span> load_workbook</span>
+<span id="cb25-53"><a href="#cb25-53" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> openpyxl <span class="im">as</span> pyxl</span>
+<span id="cb25-54"><a href="#cb25-54" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb25-55"><a href="#cb25-55" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb25-56"><a href="#cb25-56" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datetime <span class="im">import</span> datetime</span>
+<span id="cb25-57"><a href="#cb25-57" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb25-58"><a href="#cb25-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-59"><a href="#cb25-59" aria-hidden="true" tabindex="-1"></a><span class="fu">## Debugging</span></span>
+<span id="cb25-60"><a href="#cb25-60" aria-hidden="true" tabindex="-1"></a>The most common thing I tripped over in making this was typos and what not in my file paths. You can use this function to test whether or not a path you've entered is valid. </span>
+<span id="cb25-63"><a href="#cb25-63" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb25-64"><a href="#cb25-64" aria-hidden="true" tabindex="-1"></a>Path(<span class="vs">r"C:\Invoices"</span>).exists()</span>
+<span id="cb25-65"><a href="#cb25-65" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb25-66"><a href="#cb25-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-67"><a href="#cb25-67" aria-hidden="true" tabindex="-1"></a><span class="fu">## Specifying Which Files</span></span>
+<span id="cb25-68"><a href="#cb25-68" aria-hidden="true" tabindex="-1"></a>I made code blocks for 2 options; specifying all files manually, or specifying a directory and file name pattern to search for. Either way we start by initializing the container that our data will be stored in:</span>
+<span id="cb25-71"><a href="#cb25-71" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb25-72"><a href="#cb25-72" aria-hidden="true" tabindex="-1"></a>subitems <span class="op">=</span> []  <span class="co"># Will contain the data we're aggregating for all items on invoices</span></span>
+<span id="cb25-73"><a href="#cb25-73" aria-hidden="true" tabindex="-1"></a>invoiceTotal <span class="op">=</span> []  <span class="co"># Will contain the final bottom-line data for each invoice</span></span>
+<span id="cb25-74"><a href="#cb25-74" aria-hidden="true" tabindex="-1"></a>fls <span class="op">=</span> []  <span class="co"># Stores file paths for excel files to be searched</span></span>
+<span id="cb25-75"><a href="#cb25-75" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb25-76"><a href="#cb25-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-77"><a href="#cb25-77" aria-hidden="true" tabindex="-1"></a><span class="fu">### Option 1: Naming Each File</span></span>
+<span id="cb25-78"><a href="#cb25-78" aria-hidden="true" tabindex="-1"></a>The most controlled way would be to list all the files with the full path, something like this:</span>
+<span id="cb25-81"><a href="#cb25-81" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb25-82"><a href="#cb25-82" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"fls.append(r</span><span class="ch">\"</span><span class="st">C:\Invoices\Invoices 2022\Invoice 1.xlsx</span><span class="ch">\"</span><span class="st">)"</span>)</span>
+<span id="cb25-83"><a href="#cb25-83" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb25-84"><a href="#cb25-84" aria-hidden="true" tabindex="-1"></a>But I felt it was such an eyesore, and the folder structure made me prone to typo mistakes. So I made a helper function that would tighten things up, requiring only the file name and invoice year, and 'paid' vs 'unpaid' as input, and then spitting out the whole file path. The function uses the file year to decide which folder naming structure to use.</span>
+<span id="cb25-87"><a href="#cb25-87" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb25-88"><a href="#cb25-88" aria-hidden="true" tabindex="-1"></a><span class="co"># Helper function to build path strings when iterating through multiple files</span></span>
+<span id="cb25-89"><a href="#cb25-89" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-90"><a href="#cb25-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-91"><a href="#cb25-91" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> pthBld(flNm, flExtn<span class="op">=</span><span class="st">""</span>, path_building_variable<span class="op">=</span>(<span class="st">'Paid'</span>, <span class="dv">0</span>)):</span>
+<span id="cb25-92"><a href="#cb25-92" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Take a file name and expected file type, and based on some other input, add the rest of the file path for reference by workbook opening function"""</span></span>
+<span id="cb25-93"><a href="#cb25-93" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> flExtn <span class="op">!=</span> <span class="st">""</span>:</span>
+<span id="cb25-94"><a href="#cb25-94" aria-hidden="true" tabindex="-1"></a>        flExtn <span class="op">=</span> <span class="st">"."</span><span class="op">+</span>flExtn</span>
+<span id="cb25-95"><a href="#cb25-95" aria-hidden="true" tabindex="-1"></a>    tp <span class="op">=</span> path_building_variable[<span class="dv">0</span>]</span>
+<span id="cb25-96"><a href="#cb25-96" aria-hidden="true" tabindex="-1"></a>    yr <span class="op">=</span> path_building_variable[<span class="dv">1</span>]</span>
+<span id="cb25-97"><a href="#cb25-97" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> yr <span class="op">==</span> <span class="dv">22</span>:</span>
+<span id="cb25-98"><a href="#cb25-98" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> (<span class="vs">r"C:\Invoices\Invoices 2022"</span><span class="op">+</span><span class="bu">chr</span>(<span class="dv">92</span>)<span class="op">+</span>tp<span class="op">+</span><span class="bu">chr</span>(<span class="dv">92</span>)<span class="op">+</span>flNm<span class="op">+</span>flExtn)</span>
+<span id="cb25-99"><a href="#cb25-99" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb25-100"><a href="#cb25-100" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> (<span class="vs">r"C:\Invoices\Invoices '"</span><span class="op">+</span><span class="bu">str</span>(yr)<span class="op">+</span><span class="bu">chr</span>(<span class="dv">92</span>)<span class="op">+</span>tp<span class="op">+</span><span class="bu">chr</span>(<span class="dv">92</span>)<span class="op">+</span>flNm<span class="op">+</span>flExtn)</span>
+<span id="cb25-101"><a href="#cb25-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-102"><a href="#cb25-102" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-103"><a href="#cb25-103" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb25-104"><a href="#cb25-104" aria-hidden="true" tabindex="-1"></a>Always good to test a function is working after making it.</span>
+<span id="cb25-107"><a href="#cb25-107" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb25-108"><a href="#cb25-108" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> pthBld(<span class="st">'Invoice 3'</span>, <span class="st">"xlsx"</span>, (<span class="st">'unPaid'</span>, <span class="dv">22</span>))</span>
+<span id="cb25-109"><a href="#cb25-109" aria-hidden="true" tabindex="-1"></a>p, <span class="st">"Exists?: "</span><span class="op">+</span><span class="bu">str</span>(Path(p).exists())</span>
+<span id="cb25-110"><a href="#cb25-110" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb25-111"><a href="#cb25-111" aria-hidden="true" tabindex="-1"></a>Then, the process of specifying all the files to search by individual names is just running a bunch of commands like this:</span>
+<span id="cb25-114"><a href="#cb25-114" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb25-115"><a href="#cb25-115" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"fls.append(pthBld('Invoice 1',</span><span class="ch">\"</span><span class="st">xlsx</span><span class="ch">\"</span><span class="st">,('Paid',22)))"</span>)</span>
+<span id="cb25-116"><a href="#cb25-116" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb25-117"><a href="#cb25-117" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-118"><a href="#cb25-118" aria-hidden="true" tabindex="-1"></a><span class="fu">### Option 2: Full Directory Search on File names</span></span>
+<span id="cb25-119"><a href="#cb25-119" aria-hidden="true" tabindex="-1"></a>If there are too many files names to sepcify one by one, or if there is some identifying pattern to the file names of interest, this option can be used. The code looked through the specified folder in entirety, including subfolders, and if a file name meets a criteria, saves the path to perform the data retrieval on that file.</span>
+<span id="cb25-120"><a href="#cb25-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-123"><a href="#cb25-123" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb25-124"><a href="#cb25-124" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> list_dir(directory):</span>
+<span id="cb25-125"><a href="#cb25-125" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""This function will print out the path for every file in the specified directory (and any further nested directories)"""</span></span>
+<span id="cb25-126"><a href="#cb25-126" aria-hidden="true" tabindex="-1"></a>    output <span class="op">=</span> []  <span class="co"># initialize</span></span>
+<span id="cb25-127"><a href="#cb25-127" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> filename <span class="kw">in</span> os.listdir(directory):</span>
+<span id="cb25-128"><a href="#cb25-128" aria-hidden="true" tabindex="-1"></a>        f <span class="op">=</span> os.path.join(directory, filename)</span>
+<span id="cb25-129"><a href="#cb25-129" aria-hidden="true" tabindex="-1"></a>        <span class="co"># checking if it is a file</span></span>
+<span id="cb25-130"><a href="#cb25-130" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> os.path.isfile(f):</span>
+<span id="cb25-131"><a href="#cb25-131" aria-hidden="true" tabindex="-1"></a>            output.append(f)</span>
+<span id="cb25-132"><a href="#cb25-132" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> os.path.isdir(f):</span>
+<span id="cb25-133"><a href="#cb25-133" aria-hidden="true" tabindex="-1"></a>            output.extend(list_dir(f))</span>
+<span id="cb25-134"><a href="#cb25-134" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> output</span>
+<span id="cb25-135"><a href="#cb25-135" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-136"><a href="#cb25-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-137"><a href="#cb25-137" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb25-138"><a href="#cb25-138" aria-hidden="true" tabindex="-1"></a>What if you wanted to omit one or multiple folders entirely? The 'else if' branch in the above function could have an extra required condition added to it such that only folders with a certain name structure, for example, are searched.</span>
+<span id="cb25-139"><a href="#cb25-139" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-140"><a href="#cb25-140" aria-hidden="true" tabindex="-1"></a>Here is what we get when we test that function:</span>
+<span id="cb25-143"><a href="#cb25-143" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb25-144"><a href="#cb25-144" aria-hidden="true" tabindex="-1"></a>list_dir(<span class="vs">r"C:\Invoices"</span>)  <span class="co"># Test it works</span></span>
+<span id="cb25-145"><a href="#cb25-145" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb25-146"><a href="#cb25-146" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-147"><a href="#cb25-147" aria-hidden="true" tabindex="-1"></a>Having a list of *all* files within the directory, we need to screen for just the ones we want. For the sake of this example I simply keep the file paths that have the text "invoice" in the last 15 characters of the path:</span>
+<span id="cb25-150"><a href="#cb25-150" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb25-151"><a href="#cb25-151" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> f <span class="kw">in</span> list_dir(<span class="vs">r"C:\Invoices"</span>):</span>
+<span id="cb25-152"><a href="#cb25-152" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="st">"invoice"</span> <span class="kw">in</span> f.lower()[<span class="op">-</span><span class="dv">15</span>:]:</span>
+<span id="cb25-153"><a href="#cb25-153" aria-hidden="true" tabindex="-1"></a>        fls.append(f)</span>
+<span id="cb25-154"><a href="#cb25-154" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb25-155"><a href="#cb25-155" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-156"><a href="#cb25-156" aria-hidden="true" tabindex="-1"></a>And testing the output is as expected;</span>
+<span id="cb25-159"><a href="#cb25-159" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb25-160"><a href="#cb25-160" aria-hidden="true" tabindex="-1"></a>fls</span>
+<span id="cb25-161"><a href="#cb25-161" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb25-162"><a href="#cb25-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-163"><a href="#cb25-163" aria-hidden="true" tabindex="-1"></a>We got rid of the junk_data.xlsx files.</span>
+<span id="cb25-164"><a href="#cb25-164" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-165"><a href="#cb25-165" aria-hidden="true" tabindex="-1"></a><span class="fu">## Retrieving The Data</span></span>
+<span id="cb25-166"><a href="#cb25-166" aria-hidden="true" tabindex="-1"></a>Having specified all the files paths for our excel files, we need to reach into them and grab that data into memory using Python. To do that, we iterate over the list of filepaths, opening the workbook using openpyxl. In this example I'm grabbing all data in each item row of the invoice to one table, and the bottom-line information to a second table. For the first operation, I iterate through the cells in which I know the data could be, just recording something if data is found. I use a list comprehension to carry out the workbook.cell(row,col).value function in one line of code but across all columns of the table, casting the date value to a string so that python doesn't convert it to a more complex datetime format which is admittedly more handy for anything but transferring back into excel.</span>
+<span id="cb25-167"><a href="#cb25-167" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-168"><a href="#cb25-168" aria-hidden="true" tabindex="-1"></a>In the second portion of the retrieval function for a given file, I use a more verbose and explicit way of grabbing all the data. There isn't any question for these data as to whether or nto they will be there, since each invoice has one of these data points, where as number of line items was variable. </span>
+<span id="cb25-169"><a href="#cb25-169" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-170"><a href="#cb25-170" aria-hidden="true" tabindex="-1"></a>While iterating over the various workbooks, the data from each is stored in 2 lists. Each list is sent to a list of lists which will be used for reporting.</span>
+<span id="cb25-171"><a href="#cb25-171" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-174"><a href="#cb25-174" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb25-175"><a href="#cb25-175" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> fl <span class="kw">in</span> fls:</span>
+<span id="cb25-176"><a href="#cb25-176" aria-hidden="true" tabindex="-1"></a>    wb <span class="op">=</span> load_workbook(filename<span class="op">=</span>fl, data_only<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb25-177"><a href="#cb25-177" aria-hidden="true" tabindex="-1"></a>    <span class="co"># First record data for the sub-items list</span></span>
+<span id="cb25-178"><a href="#cb25-178" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="bu">str</span>(<span class="dv">1</span><span class="op">+</span>fls.index(fl))<span class="op">+</span><span class="bu">chr</span>(<span class="dv">92</span>)<span class="op">+</span><span class="bu">str</span>(<span class="bu">len</span>(fls)), fl)</span>
+<span id="cb25-179"><a href="#cb25-179" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">8</span>, <span class="dv">30</span>):  <span class="co"># Note arbitrary assumption on row limit. Starting point from existing sheet structure</span></span>
+<span id="cb25-180"><a href="#cb25-180" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Grab invoice admin data</span></span>
+<span id="cb25-181"><a href="#cb25-181" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> wb[<span class="st">'Commercial Invoice'</span>].cell(row<span class="op">=</span>i, column<span class="op">=</span><span class="dv">3</span>).value <span class="op">!=</span> <span class="va">None</span>:</span>
+<span id="cb25-182"><a href="#cb25-182" aria-hidden="true" tabindex="-1"></a>            data <span class="op">=</span> [fl]  <span class="co"># include filepath in data dump</span></span>
+<span id="cb25-183"><a href="#cb25-183" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Invoice number to data dump</span></span>
+<span id="cb25-184"><a href="#cb25-184" aria-hidden="true" tabindex="-1"></a>            data.append(wb[<span class="st">'Commercial Invoice'</span>].cell(row<span class="op">=</span><span class="dv">3</span>, column<span class="op">=</span><span class="dv">8</span>).value)</span>
+<span id="cb25-185"><a href="#cb25-185" aria-hidden="true" tabindex="-1"></a>            data.extend([wb[<span class="st">'Commercial Invoice'</span>].cell(row<span class="op">=</span>i, column<span class="op">=</span>c).value <span class="cf">if</span> <span class="bu">type</span>(wb[<span class="st">'Commercial Invoice'</span>].cell(row<span class="op">=</span>i, column<span class="op">=</span>c).value) <span class="op">!=</span> datetime <span class="cf">else</span> <span class="bu">str</span>(</span>
+<span id="cb25-186"><a href="#cb25-186" aria-hidden="true" tabindex="-1"></a>                wb[<span class="st">'Commercial Invoice'</span>].cell(row<span class="op">=</span>i, column<span class="op">=</span>c).value) <span class="cf">for</span> c <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2</span>, <span class="dv">9</span>)])  <span class="co"># Convert any data to string.. when re printed to excel it will cast to appropriate type</span></span>
+<span id="cb25-187"><a href="#cb25-187" aria-hidden="true" tabindex="-1"></a>            subitems.append(data)</span>
+<span id="cb25-188"><a href="#cb25-188" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb25-189"><a href="#cb25-189" aria-hidden="true" tabindex="-1"></a>            <span class="cf">pass</span></span>
+<span id="cb25-190"><a href="#cb25-190" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Now record to totals</span></span>
+<span id="cb25-191"><a href="#cb25-191" aria-hidden="true" tabindex="-1"></a>    data2 <span class="op">=</span> [fl]  <span class="co"># initialize with filepath</span></span>
+<span id="cb25-192"><a href="#cb25-192" aria-hidden="true" tabindex="-1"></a>    data2.append(<span class="bu">str</span>(wb[<span class="st">'Commercial Invoice'</span>].cell(</span>
+<span id="cb25-193"><a href="#cb25-193" aria-hidden="true" tabindex="-1"></a>        row<span class="op">=</span><span class="dv">4</span>, column<span class="op">=</span><span class="dv">8</span>).value))  <span class="co"># invoice data</span></span>
+<span id="cb25-194"><a href="#cb25-194" aria-hidden="true" tabindex="-1"></a>    data2.append(wb[<span class="st">'Commercial Invoice'</span>].cell(</span>
+<span id="cb25-195"><a href="#cb25-195" aria-hidden="true" tabindex="-1"></a>        row<span class="op">=</span><span class="dv">3</span>, column<span class="op">=</span><span class="dv">8</span>).value)  <span class="co"># invoice num</span></span>
+<span id="cb25-196"><a href="#cb25-196" aria-hidden="true" tabindex="-1"></a>    data2.append(wb[<span class="st">'Commercial Invoice'</span>].cell(</span>
+<span id="cb25-197"><a href="#cb25-197" aria-hidden="true" tabindex="-1"></a>        row<span class="op">=</span><span class="dv">13</span>, column<span class="op">=</span><span class="dv">8</span>).value)  <span class="co"># subtotal</span></span>
+<span id="cb25-198"><a href="#cb25-198" aria-hidden="true" tabindex="-1"></a>    data2.append(wb[<span class="st">'Commercial Invoice'</span>].cell(row<span class="op">=</span><span class="dv">14</span>, column<span class="op">=</span><span class="dv">8</span>).value)  <span class="co"># VAT</span></span>
+<span id="cb25-199"><a href="#cb25-199" aria-hidden="true" tabindex="-1"></a>    data2.append(wb[<span class="st">'Commercial Invoice'</span>].cell(</span>
+<span id="cb25-200"><a href="#cb25-200" aria-hidden="true" tabindex="-1"></a>        row<span class="op">=</span><span class="dv">15</span>, column<span class="op">=</span><span class="dv">8</span>).value)  <span class="co"># Other Tax</span></span>
+<span id="cb25-201"><a href="#cb25-201" aria-hidden="true" tabindex="-1"></a>    data2.append(wb[<span class="st">'Commercial Invoice'</span>].cell(</span>
+<span id="cb25-202"><a href="#cb25-202" aria-hidden="true" tabindex="-1"></a>        row<span class="op">=</span><span class="dv">16</span>, column<span class="op">=</span><span class="dv">8</span>).value)  <span class="co"># Delivery</span></span>
+<span id="cb25-203"><a href="#cb25-203" aria-hidden="true" tabindex="-1"></a>    data2.append(wb[<span class="st">'Commercial Invoice'</span>].cell(</span>
+<span id="cb25-204"><a href="#cb25-204" aria-hidden="true" tabindex="-1"></a>        row<span class="op">=</span><span class="dv">17</span>, column<span class="op">=</span><span class="dv">8</span>).value)  <span class="co"># Deposit Recieved</span></span>
+<span id="cb25-205"><a href="#cb25-205" aria-hidden="true" tabindex="-1"></a>    data2.append(wb[<span class="st">'Commercial Invoice'</span>].cell(</span>
+<span id="cb25-206"><a href="#cb25-206" aria-hidden="true" tabindex="-1"></a>        row<span class="op">=</span><span class="dv">18</span>, column<span class="op">=</span><span class="dv">8</span>).value)  <span class="co"># Total</span></span>
+<span id="cb25-207"><a href="#cb25-207" aria-hidden="true" tabindex="-1"></a>    invoiceTotal.append(data2)</span>
+<span id="cb25-208"><a href="#cb25-208" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb25-209"><a href="#cb25-209" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-210"><a href="#cb25-210" aria-hidden="true" tabindex="-1"></a>As always, good to test that it worked. here we can see how many dsub items in total we observed across all invoices and see a sample of the first one. Likewise for the number of quotes overall, and a sample of the bottom line info collected.</span>
+<span id="cb25-213"><a href="#cb25-213" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb25-214"><a href="#cb25-214" aria-hidden="true" tabindex="-1"></a><span class="co"># Check we got what we wanted</span></span>
+<span id="cb25-215"><a href="#cb25-215" aria-hidden="true" tabindex="-1"></a><span class="bu">len</span>(subitems), subitems[<span class="dv">0</span>], <span class="bu">len</span>(invoiceTotal), invoiceTotal[<span class="dv">0</span>]</span>
+<span id="cb25-216"><a href="#cb25-216" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb25-217"><a href="#cb25-217" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-218"><a href="#cb25-218" aria-hidden="true" tabindex="-1"></a><span class="fu">## Compile In Excel</span></span>
+<span id="cb25-219"><a href="#cb25-219" aria-hidden="true" tabindex="-1"></a>So, having all of the data we want in memory in Python, we just need to print it to an Excel table. First we open a new table, then, using simple iterating indexes for row and column print-out references to avoid issues with duplicate invoice entries, we iterate through the recorded data and print it out to a worksheet cell. A new sheet is created for the Bottom Line Info and the same process executed, and the workbook saved.</span>
+<span id="cb25-220"><a href="#cb25-220" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-223"><a href="#cb25-223" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb25-224"><a href="#cb25-224" aria-hidden="true" tabindex="-1"></a><span class="co"># Finally, print our aggregated data to a single subitems table</span></span>
+<span id="cb25-225"><a href="#cb25-225" aria-hidden="true" tabindex="-1"></a>wb <span class="op">=</span> pyxl.Workbook()</span>
+<span id="cb25-226"><a href="#cb25-226" aria-hidden="true" tabindex="-1"></a>ws <span class="op">=</span> wb.active</span>
+<span id="cb25-227"><a href="#cb25-227" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb25-228"><a href="#cb25-228" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> row <span class="kw">in</span> subitems:</span>
+<span id="cb25-229"><a href="#cb25-229" aria-hidden="true" tabindex="-1"></a>    r <span class="op">=</span> r<span class="op">+</span><span class="dv">1</span></span>
+<span id="cb25-230"><a href="#cb25-230" aria-hidden="true" tabindex="-1"></a>    c <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb25-231"><a href="#cb25-231" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> index <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(row)):</span>
+<span id="cb25-232"><a href="#cb25-232" aria-hidden="true" tabindex="-1"></a>        c <span class="op">=</span> c<span class="op">+</span><span class="dv">1</span></span>
+<span id="cb25-233"><a href="#cb25-233" aria-hidden="true" tabindex="-1"></a>        ws.cell(row<span class="op">=</span>r, column<span class="op">=</span>c).value <span class="op">=</span> row[index]</span>
+<span id="cb25-234"><a href="#cb25-234" aria-hidden="true" tabindex="-1"></a>wb.create_sheet(<span class="st">'Bottom Line Info'</span>)</span>
+<span id="cb25-235"><a href="#cb25-235" aria-hidden="true" tabindex="-1"></a>ws <span class="op">=</span> wb[<span class="st">'Bottom Line Info'</span>]</span>
+<span id="cb25-236"><a href="#cb25-236" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb25-237"><a href="#cb25-237" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> row <span class="kw">in</span> invoiceTotal:</span>
+<span id="cb25-238"><a href="#cb25-238" aria-hidden="true" tabindex="-1"></a>    r <span class="op">=</span> r<span class="op">+</span><span class="dv">1</span></span>
+<span id="cb25-239"><a href="#cb25-239" aria-hidden="true" tabindex="-1"></a>    c <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb25-240"><a href="#cb25-240" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> index <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(row)):</span>
+<span id="cb25-241"><a href="#cb25-241" aria-hidden="true" tabindex="-1"></a>        c <span class="op">=</span> c<span class="op">+</span><span class="dv">1</span></span>
+<span id="cb25-242"><a href="#cb25-242" aria-hidden="true" tabindex="-1"></a>        ws.cell(row<span class="op">=</span>r, column<span class="op">=</span>c).value <span class="op">=</span> row[index]</span>
+<span id="cb25-243"><a href="#cb25-243" aria-hidden="true" tabindex="-1"></a>wb.save(<span class="vs">r"C:\Invoices\Aggregated_Data.xlsx"</span>)</span>
+<span id="cb25-244"><a href="#cb25-244" aria-hidden="true" tabindex="-1"></a>wb.close()</span>
+<span id="cb25-245"><a href="#cb25-245" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb25-246"><a href="#cb25-246" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-247"><a href="#cb25-247" aria-hidden="true" tabindex="-1"></a>And huzzah! The file appears;</span>
+<span id="cb25-248"><a href="#cb25-248" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-249"><a href="#cb25-249" aria-hidden="true" tabindex="-1"></a><span class="al">![Main Folder](Folders4.png)</span>{#fig-f4}  </span>
+<span id="cb25-250"><a href="#cb25-250" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-251"><a href="#cb25-251" aria-hidden="true" tabindex="-1"></a><span class="fu">## Output</span></span>
+<span id="cb25-252"><a href="#cb25-252" aria-hidden="true" tabindex="-1"></a>Taking a look at the contents, we can see the plain data laid out. Knowing how we got it, we can manually add the titles and format as a table for sorting and filtering (although this could've been done with openpyxl as well!)</span>
+<span id="cb25-253"><a href="#cb25-253" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-254"><a href="#cb25-254" aria-hidden="true" tabindex="-1"></a><span class="al">![Result](Folders5.png)</span>{#fig-f5}  </span>
+<span id="cb25-255"><a href="#cb25-255" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-256"><a href="#cb25-256" aria-hidden="true" tabindex="-1"></a><span class="fu"># Afterthoughts</span></span>
+<span id="cb25-257"><a href="#cb25-257" aria-hidden="true" tabindex="-1"></a>I hope that you see the same potential as I did when I first really cracked open this openpyxl tool. It is so liberating to understand that we can use python to get into the guts of excel. Taken to the nth degree, you can really make excel dance with this toolset. The way I look at it is that Excel really just becomes the user-friendly GUI for whatever in the world we want to program, the upper limit on complexity really just being what we can think up and program. In that vein, I've put together nother project I hope to share sometime soon.</span>
+<span id="cb25-258"><a href="#cb25-258" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-259"><a href="#cb25-259" aria-hidden="true" tabindex="-1"></a>Another thought is as to what else we can do in the world integrating python with our ubiquitous MS Office tools! As foor for thought, here is a <span class="co">[</span><span class="ot">blog post</span><span class="co">](https://blog.aspose.com/words/python-ms-word-automation-create-edit-or-convert-ms-word-documents-using-python/#Parse-Word-Documents-using-Python)</span> showing how we can create and peer into Word documents using Python. I can imagine this being useful for finding a document we know is hiding somewhere in a huge directory by having the code crawl the whole directory, opening word files and performing a key word search on them.</span>
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
 
 
 
-</body>
-
-</html>
+</body></html>
