@@ -3,6 +3,7 @@ title: "Learning Quarto with Factors"
 author: "David De Sa"
 date: "2023-03-09"
 categories: [math,python]
+image: "thumbnail.png"
 format:
   html:
     code-fold: true

@@ -1,5 +1,5 @@
 ---
-title: "David's Coding Space"
+title: "Home"
 listing:
   contents: posts
   sort: "date desc"

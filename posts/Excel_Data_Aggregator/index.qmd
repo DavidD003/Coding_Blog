@@ -3,12 +3,12 @@ title: "Getting Data From Many Excel Workbooks, with Python"
 author: "David De Sa"
 date: "2023-03-12"
 categories: [python, excel, automation]
+image: "ExcelAgg.png"
 format:
   html:
     code-fold: true
     toc: true
     code-tools: true
-    image: "Display_pic.png"
 ---
 
 
@@ -18,7 +18,7 @@ format:
 # When your Excel is more like Excalibur ^[Don't worry I didnt spend too long thinking about this, it just came to me. And if you don't like it, we agree to disagree.]
 It seems like an all too common tragedy that lots of team operate on the basis of sheets that were thrown together at some point in the distant past with varying degrees of thought put into future use cases. Now here you are, with the data you need like gold ore entombed in mountains of excel sheets. The irretrievable Excalibur in the stone.
 
-I encountered a problem where I had hundreds of excel sheets (each for a specific week) with data tables in each, and I needed to know which records in them met a certain criteria. I made some code in Python to pull the data out, this article will walk through it along with the video: 
+I encountered a problem where I had hundreds of excel sheets (each for a specific week) with data tables in each, and I needed to know which records in them met a certain criteria. I made some code in Python to pull the data out, this article will walk through it along with the video: {{< video https://youtu.be/RmFSYdMZLmI >}} 
 
 ## What Exactly Does This Code Do?
 This code goes over all excel files with a name matching a specified pattern in a given folder (and its subfolders). In this example, these are invoices. The code will generate two master data tables in a new worksheet, one table with a row for each line item across all invoices, and another table with one row for each invoice with the bottom line information. 
@@ -183,7 +183,7 @@ for fl in fls:
     invoiceTotal.append(data2)
 ```
 
-As always, good to test that it worked. here we can see how many dsub items in total we observed across all invoices and see a sample of the first one. Likewise for the number of quotes overall, and a sample of the bottom line info collected.
+As always, good to test that it worked. here we can see how many sub items in total we observed across all invoices and see a sample of the first one. Likewise for the number of quotes overall, and a sample of the bottom line info collected.
 ```{python}
 # Check we got what we wanted
 len(subitems), subitems[0], len(invoiceTotal), invoiceTotal[0]
