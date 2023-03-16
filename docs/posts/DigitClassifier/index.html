@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.335">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="David De Sa">
+<meta name="dcterms.date" content="2023-03-14">
+
+<title>Davids Coding - A Simple Digit Classifier</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../EigenFlower.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Davids Coding</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/daviddesa03/"><i class="bi bi-linkedin" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://youtube.com/@davidscoding"><i class="bi bi-youtube" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/DavidD003"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <div class="quarto-title-block"><div><h1 class="title">A Simple Digit Classifier</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+                                <div class="quarto-categories">
+                <div class="quarto-category">python</div>
+                <div class="quarto-category">pyTorch</div>
+                <div class="quarto-category">NeuralNetworks</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>David De Sa </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">March 14, 2023</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#tldr" id="toc-tldr" class="nav-link active" data-scroll-target="#tldr">TL;DR</a></li>
+  <li><a href="#overview" id="toc-overview" class="nav-link" data-scroll-target="#overview">Overview</a>
+  <ul class="collapse">
+  <li><a href="#what" id="toc-what" class="nav-link" data-scroll-target="#what">What?</a></li>
+  <li><a href="#why" id="toc-why" class="nav-link" data-scroll-target="#why">Why?</a></li>
+  <li><a href="#who" id="toc-who" class="nav-link" data-scroll-target="#who">Who?</a></li>
+  <li><a href="#how" id="toc-how" class="nav-link" data-scroll-target="#how">How?</a></li>
+  </ul></li>
+  <li><a href="#code-review" id="toc-code-review" class="nav-link" data-scroll-target="#code-review">Code Review</a>
+  <ul class="collapse">
+  <li><a href="#data-acquisition" id="toc-data-acquisition" class="nav-link" data-scroll-target="#data-acquisition">Data Acquisition</a>
+  <ul class="collapse">
+  <li><a href="#picturing-inputs" id="toc-picturing-inputs" class="nav-link" data-scroll-target="#picturing-inputs">Picturing Inputs</a></li>
+  <li><a href="#bucketing-classes" id="toc-bucketing-classes" class="nav-link" data-scroll-target="#bucketing-classes">Bucketing Classes</a></li>
+  <li><a href="#segmentation" id="toc-segmentation" class="nav-link" data-scroll-target="#segmentation">Segmentation</a></li>
+  </ul></li>
+  <li><a href="#building-benchmark-function" id="toc-building-benchmark-function" class="nav-link" data-scroll-target="#building-benchmark-function">Building Benchmark Function</a>
+  <ul class="collapse">
+  <li><a href="#the-average-digit" id="toc-the-average-digit" class="nav-link" data-scroll-target="#the-average-digit">The ‘Average’ Digit</a></li>
+  <li><a href="#least-difference-as-decision" id="toc-least-difference-as-decision" class="nav-link" data-scroll-target="#least-difference-as-decision">Least-Difference As Decision</a></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block page-columns page-full" id="quarto-document-content">
+
+
+
+
+<section id="tldr" class="level2">
+<h2 class="anchored" data-anchor-id="tldr">TL;DR</h2>
+<p>The best way to learn is to teach, so in this post I try to teach the reader how my first neural network implementation works! I built this in following along with the awesome lessons over at <a href="course.fast.ai">fast.ai</a>. Many thanks to that team.</p>
+</section>
+<section id="overview" class="level1">
+<h1>Overview</h1>
+<section id="what" class="level3">
+<h3 class="anchored" data-anchor-id="what">What?</h3>
+<p>We’re going to make a function that, given a picture of a numeric digit, identifes the number.</p>
+</section>
+<section id="why" class="level3">
+<h3 class="anchored" data-anchor-id="why">Why?</h3>
+<p>You need to crawl before you can <a href="https://www.reddit.com/r/oddlysatisfying/comments/zw3iwq/machine_that_rejects_unripe_tomatoes">reject unripe tomatoes</a><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>, and that before you can comfortably learn to tie a necktie while your Tesla is whipping around corners with you in the drivers seat.</p>
+</section>
+<section id="who" class="level3">
+<h3 class="anchored" data-anchor-id="who">Who?</h3>
+<p><a href="https://davidd003.github.io/Coding_Blog/about.html">Who am I</a>!? Who are you?!</p>
+</section>
+<section id="how" class="level3">
+<h3 class="anchored" data-anchor-id="how">How?</h3>
+<p>Using <a href="https://pytorch.org/">PyTorch</a><a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>, an opensource toolkit for building neural networks. Truly the shoulders of giants at our finger tips.</p>
+</section>
+</section>
+<section id="code-review" class="level1 page-columns page-full">
+<h1>Code Review</h1>
+<p>Making a neural network to solve a problem is a bunch of mumbo jumbo if we’re not actually performing better than a simpler heuristic function. To test that, we will start off by constructing a simple classification that classifies a digit based on which average digit image it is nearest to (You’ll see what I mean later). Then we will build a simple neural network (not too deep, not too convolutional, just right), and try to out perform the naive function!</p>
+<p>Let’s get into it!</p>
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Note
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The required dependencies!:<code>scikit-learn</code>, <code>fastbook</code>, <code>matplotlib</code></p>
+</div>
+</div>
+</div>
+<div class="cell" data-execution_count="1">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Install dependency</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastbook <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastai.vision.<span class="bu">all</span> <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> load_digits</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> fastbook</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>fastbook.setup_book()</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>matplotlib.rc(<span class="st">"image"</span>, cmap<span class="op">=</span><span class="st">"Greys"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="data-acquisition" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="data-acquisition">Data Acquisition</h2>
+<p>In any real world ML application, data acquisition can be one of the more costly parts of the process, luckily not so for this simple learning example.</p>
+<p>We’re using a variant of the classic NIST database, a collection of images of hand drawn numbers that provided the means for benchmarking in earlier days of ML.</p>
+<p>I had trouble wrangling with the various sources for this database online, the simplest workable solution I could find for us to get a grip on these images was to just import the datasets library that comes with installing the scikit-learn package.</p>
+<div class="callout-tip callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Understand Your Input!
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Pre-processing data before even touching any neural net methods can improve your final performance. Note the data set information offered at the <a href="https://archive.ics.uci.edu/ml/datasets/Optical+Recognition+of+Handwritten+Digits">source page</a>:</p>
+<blockquote class="blockquote">
+<p>We used preprocessing programs made available by NIST to extract normalized bitmaps of handwritten digits from a preprinted form. From a total of 43 people, 30 contributed to the training set and different 13 to the test set. 32x32 bitmaps are divided into nonoverlapping blocks of 4x4 and the number of on pixels are counted in each block. This generates an input matrix of 8x8 where each element is an integer in the range 0..16. This reduces dimensionality and gives invariance to small distortions.</p>
+</blockquote>
+</div>
+</div>
+</div>
+<div class="cell" data-execution_count="2">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>mnist <span class="op">=</span> load_digits()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Always good to get to know your data..</p>
+<div class="cell" data-execution_count="3">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>mnist.keys()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="55">
+<pre><code>dict_keys(['data', 'target', 'frame', 'feature_names', 'target_names', 'images', 'DESCR'])</code></pre>
+</div>
+</div>
+<p>What’s in here?</p>
+<div class="cell" data-execution_count="4">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Observing y value for data sequence</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>mnist[<span class="st">"target"</span>], <span class="st">"# targets: "</span> <span class="op">+</span> <span class="bu">str</span>(<span class="bu">len</span>(mnist[<span class="st">"target"</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="56">
+<pre><code>(array([0, 1, 2, ..., 8, 9, 8]), '# targets: 1797')</code></pre>
+</div>
+</div>
+<p>So we have 1797 numbers in this data set.</p>
+<div class="cell" data-execution_count="5">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>n0 <span class="op">=</span> [[n <span class="cf">for</span> n <span class="kw">in</span> mnist[<span class="st">"data"</span>][<span class="dv">0</span>][i <span class="op">*</span> <span class="dv">8</span>: i <span class="op">*</span> <span class="dv">8</span> <span class="op">+</span> <span class="dv">7</span>]] <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, <span class="dv">8</span>)]</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>n0, mnist[<span class="st">"images"</span>][<span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="57">
+<pre><code>([[0.0, 0.0, 5.0, 13.0, 9.0, 1.0, 0.0],
+  [0.0, 0.0, 13.0, 15.0, 10.0, 15.0, 5.0],
+  [0.0, 3.0, 15.0, 2.0, 0.0, 11.0, 8.0],
+  [0.0, 4.0, 12.0, 0.0, 0.0, 8.0, 8.0],
+  [0.0, 5.0, 8.0, 0.0, 0.0, 9.0, 8.0],
+  [0.0, 4.0, 11.0, 0.0, 1.0, 12.0, 7.0],
+  [0.0, 2.0, 14.0, 5.0, 10.0, 12.0, 0.0],
+  [0.0, 0.0, 6.0, 13.0, 10.0, 0.0, 0.0]],
+ array([[ 0.,  0.,  5., 13.,  9.,  1.,  0.,  0.],
+        [ 0.,  0., 13., 15., 10., 15.,  5.,  0.],
+        [ 0.,  3., 15.,  2.,  0., 11.,  8.,  0.],
+        [ 0.,  4., 12.,  0.,  0.,  8.,  8.,  0.],
+        [ 0.,  5.,  8.,  0.,  0.,  9.,  8.,  0.],
+        [ 0.,  4., 11.,  0.,  1., 12.,  7.,  0.],
+        [ 0.,  2., 14.,  5., 10., 12.,  0.,  0.],
+        [ 0.,  0.,  6., 13., 10.,  0.,  0.,  0.]]))</code></pre>
+</div>
+</div>
+<p>And it looks like the ‘data’ entity is a list of one dimensional vectors, listing out the 64 pixels of each image, whereas the ‘images’ entity is the same info already organized into the 8x8 array of pixels.</p>
+<p>The values in the arrays are from 0-16, as described in the source documentation. Important to keep in mind that we might want to normalize them all to a range from 0 to 1 for our purposes. We’ll do that later.</p>
+<p>I had to do some funny indexing to tease that out. Something I learned along the way was the fantastic .view() function of the Tensor object in pyTorch. Tensors are like a numpy array, have a lot of features that will be critical for quickly creating neural nets. This object type was imported with fastbook.</p>
+<div class="cell" data-execution_count="6">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>Tensor(mnist[<span class="st">"data"</span>][<span class="dv">0</span>]).view(<span class="op">-</span><span class="dv">1</span>, <span class="dv">8</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="58">
+<pre><code>tensor([[ 0.,  0.,  5., 13.,  9.,  1.,  0.,  0.],
+        [ 0.,  0., 13., 15., 10., 15.,  5.,  0.],
+        [ 0.,  3., 15.,  2.,  0., 11.,  8.,  0.],
+        [ 0.,  4., 12.,  0.,  0.,  8.,  8.,  0.],
+        [ 0.,  5.,  8.,  0.,  0.,  9.,  8.,  0.],
+        [ 0.,  4., 11.,  0.,  1., 12.,  7.,  0.],
+        [ 0.,  2., 14.,  5., 10., 12.,  0.,  0.],
+        [ 0.,  0.,  6., 13., 10.,  0.,  0.,  0.]])</code></pre>
+</div>
+</div>
+<div class="callout-tip callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Tensor Views
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Using -1 in the argument for the view function will auto-size the tensor based on the number of elements in the array, and the other dimensions specified. This should come in handy!</p>
+</div>
+</div>
+<p>For a <a href="https://docs.aws.amazon.com/machine-learning/latest/dg/types-of-ml-models.html">classification task</a> such as this, it’s important to keep in mind that our data should be balanced in quantity per class. Let’s take a look at how many we’ve got.</p>
+<div class="cell" data-execution_count="7">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>[<span class="bu">str</span>(i) <span class="op">+</span> <span class="st">": "</span> <span class="op">+</span> <span class="bu">str</span>(<span class="bu">list</span>(mnist[<span class="st">"target"</span>]).count(i))</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a> <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>)]  <span class="co"># Count of each digit in dataset</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="59">
+<pre><code>['0: 178',
+ '1: 182',
+ '2: 177',
+ '3: 183',
+ '4: 181',
+ '5: 182',
+ '6: 181',
+ '7: 179',
+ '8: 174',
+ '9: 180']</code></pre>
+</div>
+</div>
+<p>So, a little imbalance but nothing crazy. Worth checking though…</p>
+<div class="callout-warning callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Beware Naive Optimization
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>If we train on a million images of 7’s, and only a thousand 1’s, we can be duped into thinking we’re rocking a 0.1% error rate by a naive model that guesses ‘7’ no matter what you give it!</p>
+</div>
+</div>
+<section id="picturing-inputs" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="picturing-inputs">Picturing Inputs</h3>
+<div id="fig-numbersamples" class="quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="figure page-columns page-full">
+<div class="page-columns page-full">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>):</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    show_image(mnist[<span class="st">"images"</span>][<span class="op">-</span>i] <span class="op">/</span> <span class="dv">16</span>)  <span class="co"># Visualizing example digit</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell column-page quarto-layout-panel" data-execution_count="8">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 20.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-9-output-1.png" class="img-fluid figure-img" width="93"></p>
+</div>
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 20.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-9-output-2.png" class="img-fluid figure-img" width="93"></p>
+</div>
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 20.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-9-output-3.png" class="img-fluid figure-img" width="93"></p>
+</div>
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 20.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-9-output-4.png" class="img-fluid figure-img" width="93"></p>
+</div>
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 20.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-9-output-5.png" class="img-fluid figure-img" width="93"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 20.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-9-output-6.png" class="img-fluid figure-img" width="93"></p>
+</div>
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 20.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-9-output-7.png" class="img-fluid figure-img" width="93"></p>
+</div>
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 20.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-9-output-8.png" class="img-fluid figure-img" width="93"></p>
+</div>
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 20.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-9-output-9.png" class="img-fluid figure-img" width="93"></p>
+</div>
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 20.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-9-output-10.png" class="img-fluid figure-img" width="93"></p>
+</div>
+</div>
+</div>
+</div>
+<p></p><figcaption class="figure-caption">Figure&nbsp;1: A few examples of our data. Can you read them?</figcaption><p></p>
+</figure>
+</div>
+<p>Turns out that pre-processing that comes baked in does make them pretty grainy. But nothing some training can’t solve.</p>
+</section>
+<section id="bucketing-classes" class="level3">
+<h3 class="anchored" data-anchor-id="bucketing-classes">Bucketing Classes</h3>
+<p>We need to separate out our inputs for training purposes. We’ll iterate across the ‘targets’ list, using the target numbers themselves as the index value to dump the corresponding ‘image’ data into the storage bin.</p>
+<div class="cell" data-execution_count="9">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>stacked <span class="op">=</span> []</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co"># This loop because stacked=[[]]*10 makes 1 list in list, with 10 copies of pointers... need separate objects</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>):</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    stacked.append([])</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Assign all images to the right collection in the 'stacked' list, indexed by target</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(mnist[<span class="st">"target"</span>])):</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    stacked[mnist[<span class="st">"target"</span>][i]].append(mnist[<span class="st">"images"</span>][i])</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>lens <span class="op">=</span> [<span class="bu">len</span>(stacked[i]) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>)]</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>lens, <span class="bu">min</span>(lens)  <span class="co"># Confirm counts of samples</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="61">
+<pre><code>([178, 182, 177, 183, 181, 182, 181, 179, 174, 180], 174)</code></pre>
+</div>
+</div>
+<p>So that worked, we now have a list of lists of arrays, the arrays being interpreted as images, the lists being collections of images, with all images in a given collection being an image of the same hand drawn number. And we see that we have the fewest samples of numbers 8’s, so we’ll take only that many samples (174) of every other image for our dataset.</p>
+</section>
+<section id="segmentation" class="level3">
+<h3 class="anchored" data-anchor-id="segmentation">Segmentation</h3>
+<p>The next step is to define which data will be our training, and our validation set. It was important to bucket out our data first so by randomly sampling our data we didn’t generate a validation set with a large imbalance in the number of classes to be tested in it.</p>
+<p>First we convert to a tensor, then segment training from validation data. Arbitrarily taking 20 examples from each digit, so, 11.5% of the total data set towards validation.</p>
+<p>We’ll print out the size of these collections and take a peek at a sample to make sure we indexed right.</p>
+<div id="fig-checkSamp" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<div class="cell" data-execution_count="10">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># To make dataset a tensor, make it same number of dimensions</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>stacked <span class="op">=</span> tensor([x[:<span class="dv">174</span>] <span class="cf">for</span> x <span class="kw">in</span> stacked])</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Segmentation: Pull 20 of each digit out of training set</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>test <span class="op">=</span> [dig[<span class="op">-</span><span class="dv">20</span>:] <span class="cf">for</span> dig <span class="kw">in</span> stacked]</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>train <span class="op">=</span> [dig[:<span class="op">-</span><span class="dv">20</span>] <span class="cf">for</span> dig <span class="kw">in</span> stacked]</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Confirm counts of samples</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>[<span class="bu">len</span>(test[i]) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>)], [<span class="bu">len</span>(train[i]) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>)]</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>show_image(stacked[<span class="dv">3</span>][<span class="dv">0</span>])  <span class="co"># Check sample</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="62">
+<pre><code>&lt;Axes: &gt;</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="index_files/figure-html/cell-11-output-2.png" width="93" height="93" class="figure-img"></p>
+</div>
+</div>
+<p></p><figcaption class="figure-caption">Figure&nbsp;2: Is it a 3?</figcaption><p></p>
+</figure>
+</div>
+<p>Nice.</p>
+<p>It’s important to keep track of what’s what.</p>
+<div class="cell" data-execution_count="11">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="bu">type</span>(train), <span class="bu">type</span>(train[<span class="dv">0</span>]), <span class="bu">type</span>(train[<span class="dv">0</span>][<span class="dv">0</span>]), [</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">type</span>(test), <span class="bu">type</span>(test[<span class="dv">0</span>]), <span class="bu">type</span>(test[<span class="dv">0</span>][<span class="dv">0</span>])]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="63">
+<pre><code>(list, torch.Tensor, torch.Tensor, [list, torch.Tensor, torch.Tensor])</code></pre>
+</div>
+</div>
+<p>Ok so our top level containers for training/testing data are basic python lists. Within those, we have 10 collections, one for each integer. Those are Tensors. And then, each image (a collection of pixels unto itself) within those tensors, are also Tensor type objects.</p>
+<p>Instead of a basic Python list, we will need the top level containers as tensors to leverage the pyTorch functionality built into them. luckily it’s an easy conversion</p>
+<div class="cell" data-execution_count="12">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Converts PyList of tensors to tensor of tesnors (join in new dimensions, retain target indexing)</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>train <span class="op">=</span> torch.stack(train)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>test <span class="op">=</span> torch.stack(test)</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>train.shape, test.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="64">
+<pre><code>(torch.Size([10, 154, 8, 8]), torch.Size([10, 20, 8, 8]))</code></pre>
+</div>
+</div>
+<p>Now here is a crtiical piece, working with multidimensional arrays and keeping in mind what we understand these to be. Our test and training tensors have the same dimensionality but not the same size.</p>
+</section>
+</section>
+<section id="building-benchmark-function" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="building-benchmark-function">Building Benchmark Function</h2>
+<p>Where it gets fun then is averaging and such across these dimensions. By doing so we can get the ‘average drawing of a number,’ which will be integral to creating our benchmark classification function.</p>
+<section id="the-average-digit" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="the-average-digit">The ‘Average’ Digit</h3>
+<div id="fig-ideals" class="quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="figure page-columns page-full">
+<div class="page-columns page-full">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>means <span class="op">=</span> torch.stack([x.mean(<span class="dv">0</span>) <span class="cf">for</span> x <span class="kw">in</span> train])  <span class="co"># Compute the average digit</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>):</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    show_image(means[i])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell column-page quarto-layout-panel" data-execution_count="13">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 20.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-14-output-1.png" class="img-fluid figure-img" width="93"></p>
+</div>
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 20.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-14-output-2.png" class="img-fluid figure-img" width="93"></p>
+</div>
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 20.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-14-output-3.png" class="img-fluid figure-img" width="93"></p>
+</div>
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 20.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-14-output-4.png" class="img-fluid figure-img" width="93"></p>
+</div>
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 20.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-14-output-5.png" class="img-fluid figure-img" width="93"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 20.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-14-output-6.png" class="img-fluid figure-img" width="93"></p>
+</div>
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 20.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-14-output-7.png" class="img-fluid figure-img" width="93"></p>
+</div>
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 20.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-14-output-8.png" class="img-fluid figure-img" width="93"></p>
+</div>
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 20.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-14-output-9.png" class="img-fluid figure-img" width="93"></p>
+</div>
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 20.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-14-output-10.png" class="img-fluid figure-img" width="93"></p>
+</div>
+</div>
+</div>
+</div>
+<p></p><figcaption class="figure-caption">Figure&nbsp;3: Now those are some digits!</figcaption><p></p>
+</figure>
+</div>
+<p>What just happened, how did we get this? let’s tear this one apart.</p>
+<p>First of all, we’re dealing with a 4 dimensional tensor, <code>train</code>. When we jumped into a list comprehension iterating <code>for x in train</code>, we ‘stepped into’ that 0<sup>th</sup> dimension, so to speak. Then any given element <code>x</code> is a 3 dimensional tensor.</p>
+<p>We will go through 10 of them, one for each integer, and each will contain 174 <code>8x8</code> images. When we take the mean in the 0<sup>th</sup> dimension of <code>x</code>, we are saying “Across these 172 samples of 8x8 containers, what are the average values for element?” A visual way to think of this is that you have 174 pages, each with an <code>8x8</code> grid of numbers on it. We will reduce it to a single page by taking the average through all the pages, for each number; i.e.&nbsp;the 1<sup>st</sup> number on our single summary page will be the average of the 1<sup>st</sup> number from all of the 174 pages. The 2<sup>nd</sup> number will be the average of all the 2<sup>nd</sup> numbers, etc.</p>
+<p>In practice, this means that the more samples in which a given pixel was inked, the darker that pixel will be in the average.</p>
+</section>
+<section id="least-difference-as-decision" class="level3">
+<h3 class="anchored" data-anchor-id="least-difference-as-decision">Least-Difference As Decision</h3>
+
+
+<!-- -->
+
+</section>
+</section>
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Too fun not to share though I think this is a machine vision implementation without neural nets. Probably just averaging colour across a pixel range to trigger the paddles.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>If it ain’t ‘py’, it ain’t python, right?<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb23" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "A Simple Digit Classifier"</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "David De Sa"</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> "2023-03-14"</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="an">categories:</span><span class="co"> [python, pyTorch, NeuralNetworks]</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="an">image:</span><span class="co"> "NN101_thumbnail.png"</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="co">    code-fold: true</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a><span class="co">    toc: true</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools: true</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a><span class="an">draft:</span><span class="co"> true</span></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a><span class="fu">## TL;DR</span></span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>The best way to learn is to teach, so in this post I try to teach the reader how my first neural network implementation works! I built this in following along with the awesome lessons over at <span class="co">[</span><span class="ot">fast.ai</span><span class="co">](course.fast.ai)</span>. Many thanks to that team.</span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a><span class="fu"># Overview</span></span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a><span class="fu">### What?</span></span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>We're going to make a function that, given a picture of a numeric digit, identifes the number.</span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a><span class="fu">### Why?</span></span>
+<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a>You need to crawl before you can <span class="co">[</span><span class="ot">reject unripe tomatoes</span><span class="co">](https://www.reddit.com/r/oddlysatisfying/comments/zw3iwq/machine_that_rejects_unripe_tomatoes)</span>^<span class="co">[</span><span class="ot">Too fun not to share though I think this is a machine vision implementation without neural nets. Probably just averaging colour across a pixel range to trigger the paddles.</span><span class="co">]</span>, and that before you can comfortably learn to tie a necktie while your Tesla is whipping around corners with you in the drivers seat.</span>
+<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a><span class="fu">### Who?</span></span>
+<span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Who am I</span><span class="co">](https://davidd003.github.io/Coding_Blog/about.html)</span>!? Who are you?!</span>
+<span id="cb23-27"><a href="#cb23-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-28"><a href="#cb23-28" aria-hidden="true" tabindex="-1"></a><span class="fu">### How?</span></span>
+<span id="cb23-29"><a href="#cb23-29" aria-hidden="true" tabindex="-1"></a>Using <span class="co">[</span><span class="ot">PyTorch</span><span class="co">](https://pytorch.org/)</span>^<span class="co">[</span><span class="ot">If it ain't 'py', it ain't python, right?</span><span class="co">]</span>, an opensource toolkit for building neural networks. Truly the shoulders of giants at our finger tips.</span>
+<span id="cb23-30"><a href="#cb23-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-31"><a href="#cb23-31" aria-hidden="true" tabindex="-1"></a><span class="fu"># Code Review</span></span>
+<span id="cb23-32"><a href="#cb23-32" aria-hidden="true" tabindex="-1"></a>Making a neural network to solve a problem is a bunch of mumbo jumbo if we're not actually performing better than a simpler heuristic function. To test that, we will start off by constructing a simple classification that classifies a digit based on which average digit image it is nearest to (You'll see what I mean later). Then we will build a simple neural network (not too deep, not too convolutional, just right), and try to out perform the naive function!</span>
+<span id="cb23-33"><a href="#cb23-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-34"><a href="#cb23-34" aria-hidden="true" tabindex="-1"></a>Let's get into it!</span>
+<span id="cb23-35"><a href="#cb23-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-36"><a href="#cb23-36" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true"}</span>
+<span id="cb23-37"><a href="#cb23-37" aria-hidden="true" tabindex="-1"></a>The required dependencies!:<span class="in">`scikit-learn`</span>, <span class="in">`fastbook`</span>, <span class="in">`matplotlib`</span></span>
+<span id="cb23-38"><a href="#cb23-38" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb23-39"><a href="#cb23-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-42"><a href="#cb23-42" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb23-43"><a href="#cb23-43" aria-hidden="true" tabindex="-1"></a><span class="co"># Install dependency</span></span>
+<span id="cb23-44"><a href="#cb23-44" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastbook <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb23-45"><a href="#cb23-45" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastai.vision.<span class="bu">all</span> <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb23-46"><a href="#cb23-46" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> load_digits</span>
+<span id="cb23-47"><a href="#cb23-47" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> fastbook</span>
+<span id="cb23-48"><a href="#cb23-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-49"><a href="#cb23-49" aria-hidden="true" tabindex="-1"></a>fastbook.setup_book()</span>
+<span id="cb23-50"><a href="#cb23-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-51"><a href="#cb23-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-52"><a href="#cb23-52" aria-hidden="true" tabindex="-1"></a>matplotlib.rc(<span class="st">"image"</span>, cmap<span class="op">=</span><span class="st">"Greys"</span>)</span>
+<span id="cb23-53"><a href="#cb23-53" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-54"><a href="#cb23-54" aria-hidden="true" tabindex="-1"></a><span class="fu">## Data Acquisition</span></span>
+<span id="cb23-55"><a href="#cb23-55" aria-hidden="true" tabindex="-1"></a>In any real world ML application, data acquisition can be one of the more costly  parts of the process, luckily not so for this simple learning example. </span>
+<span id="cb23-56"><a href="#cb23-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-57"><a href="#cb23-57" aria-hidden="true" tabindex="-1"></a>We're using a variant of the classic NIST database, a collection of images of hand drawn numbers that provided the means for benchmarking in earlier days of ML. </span>
+<span id="cb23-58"><a href="#cb23-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-59"><a href="#cb23-59" aria-hidden="true" tabindex="-1"></a>I had trouble wrangling with the various sources for this database online, the simplest workable solution I could find for us to get a grip on these images was to just import the datasets library that comes with installing the scikit-learn package.</span>
+<span id="cb23-60"><a href="#cb23-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-61"><a href="#cb23-61" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip collapse="true"}</span>
+<span id="cb23-62"><a href="#cb23-62" aria-hidden="true" tabindex="-1"></a><span class="fu">## Understand Your Input!</span></span>
+<span id="cb23-63"><a href="#cb23-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-64"><a href="#cb23-64" aria-hidden="true" tabindex="-1"></a>Pre-processing data before even touching any neural net methods can improve your final performance. Note the data set information offered at the <span class="co">[</span><span class="ot">source page</span><span class="co">](https://archive.ics.uci.edu/ml/datasets/Optical+Recognition+of+Handwritten+Digits)</span>: </span>
+<span id="cb23-65"><a href="#cb23-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-66"><a href="#cb23-66" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; We used preprocessing programs made available by NIST to extract normalized bitmaps of handwritten digits from a preprinted form. From a total of 43 people, 30 contributed to the training set and different 13 to the test set. 32x32 bitmaps are divided into nonoverlapping blocks of 4x4 and the number of on pixels are counted in each block. This generates an input matrix of 8x8 where each element is an integer in the range 0..16. This reduces dimensionality and gives invariance to small distortions.</span></span>
+<span id="cb23-67"><a href="#cb23-67" aria-hidden="true" tabindex="-1"></a><span class="at">:::</span></span>
+<span id="cb23-68"><a href="#cb23-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-71"><a href="#cb23-71" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb23-72"><a href="#cb23-72" aria-hidden="true" tabindex="-1"></a>mnist <span class="op">=</span> load_digits()</span>
+<span id="cb23-73"><a href="#cb23-73" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-74"><a href="#cb23-74" aria-hidden="true" tabindex="-1"></a>Always good to get to know your data..</span>
+<span id="cb23-77"><a href="#cb23-77" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb23-78"><a href="#cb23-78" aria-hidden="true" tabindex="-1"></a>mnist.keys()</span>
+<span id="cb23-79"><a href="#cb23-79" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-80"><a href="#cb23-80" aria-hidden="true" tabindex="-1"></a>What's in here?</span>
+<span id="cb23-83"><a href="#cb23-83" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb23-84"><a href="#cb23-84" aria-hidden="true" tabindex="-1"></a><span class="co"># Observing y value for data sequence</span></span>
+<span id="cb23-85"><a href="#cb23-85" aria-hidden="true" tabindex="-1"></a>mnist[<span class="st">"target"</span>], <span class="st">"# targets: "</span> <span class="op">+</span> <span class="bu">str</span>(<span class="bu">len</span>(mnist[<span class="st">"target"</span>]))</span>
+<span id="cb23-86"><a href="#cb23-86" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-87"><a href="#cb23-87" aria-hidden="true" tabindex="-1"></a>So we have 1797 numbers in this data set.</span>
+<span id="cb23-90"><a href="#cb23-90" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb23-91"><a href="#cb23-91" aria-hidden="true" tabindex="-1"></a>n0 <span class="op">=</span> [[n <span class="cf">for</span> n <span class="kw">in</span> mnist[<span class="st">"data"</span>][<span class="dv">0</span>][i <span class="op">*</span> <span class="dv">8</span>: i <span class="op">*</span> <span class="dv">8</span> <span class="op">+</span> <span class="dv">7</span>]] <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, <span class="dv">8</span>)]</span>
+<span id="cb23-92"><a href="#cb23-92" aria-hidden="true" tabindex="-1"></a>n0, mnist[<span class="st">"images"</span>][<span class="dv">0</span>]</span>
+<span id="cb23-93"><a href="#cb23-93" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-94"><a href="#cb23-94" aria-hidden="true" tabindex="-1"></a>And it looks like the 'data' entity is a list of one dimensional vectors, listing out the 64 pixels of each image, whereas the 'images' entity is the same info already organized into the 8x8 array of pixels.</span>
+<span id="cb23-95"><a href="#cb23-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-96"><a href="#cb23-96" aria-hidden="true" tabindex="-1"></a>The values in the arrays are from 0-16, as described in the source documentation. Important to keep in mind that we might want to normalize them all to a range from 0 to 1 for our purposes. We'll do that later.</span>
+<span id="cb23-97"><a href="#cb23-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-98"><a href="#cb23-98" aria-hidden="true" tabindex="-1"></a>I had to do some funny indexing to tease that out. Something I learned along the way was the fantastic .view() function of the Tensor object in pyTorch. Tensors are like a numpy array, have a lot of features that will be critical for quickly creating neural nets. This object type was imported with fastbook.</span>
+<span id="cb23-101"><a href="#cb23-101" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb23-102"><a href="#cb23-102" aria-hidden="true" tabindex="-1"></a>Tensor(mnist[<span class="st">"data"</span>][<span class="dv">0</span>]).view(<span class="op">-</span><span class="dv">1</span>, <span class="dv">8</span>)</span>
+<span id="cb23-103"><a href="#cb23-103" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-104"><a href="#cb23-104" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-105"><a href="#cb23-105" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip}</span>
+<span id="cb23-106"><a href="#cb23-106" aria-hidden="true" tabindex="-1"></a><span class="fu">## Tensor Views</span></span>
+<span id="cb23-107"><a href="#cb23-107" aria-hidden="true" tabindex="-1"></a>Using -1 in the argument for the view function will auto-size the tensor based on the number of elements in the array, and the other dimensions specified. This should come in handy!</span>
+<span id="cb23-108"><a href="#cb23-108" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb23-109"><a href="#cb23-109" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-110"><a href="#cb23-110" aria-hidden="true" tabindex="-1"></a>For a <span class="co">[</span><span class="ot">classification task</span><span class="co">](https://docs.aws.amazon.com/machine-learning/latest/dg/types-of-ml-models.html)</span> such as this, it's important to keep in mind that our data should be balanced in quantity per class. Let's take a look at how many we've got. </span>
+<span id="cb23-111"><a href="#cb23-111" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-114"><a href="#cb23-114" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb23-115"><a href="#cb23-115" aria-hidden="true" tabindex="-1"></a>[<span class="bu">str</span>(i) <span class="op">+</span> <span class="st">": "</span> <span class="op">+</span> <span class="bu">str</span>(<span class="bu">list</span>(mnist[<span class="st">"target"</span>]).count(i))</span>
+<span id="cb23-116"><a href="#cb23-116" aria-hidden="true" tabindex="-1"></a> <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>)]  <span class="co"># Count of each digit in dataset</span></span>
+<span id="cb23-117"><a href="#cb23-117" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-118"><a href="#cb23-118" aria-hidden="true" tabindex="-1"></a>So, a little imbalance but nothing crazy. Worth checking though...</span>
+<span id="cb23-119"><a href="#cb23-119" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-120"><a href="#cb23-120" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning}</span>
+<span id="cb23-121"><a href="#cb23-121" aria-hidden="true" tabindex="-1"></a><span class="fu">## Beware Naive Optimization</span></span>
+<span id="cb23-122"><a href="#cb23-122" aria-hidden="true" tabindex="-1"></a>If we train on a million images of 7's, and only a thousand 1's, we can be duped into thinking we're rocking a 0.1% error rate by a naive model that guesses '7' no matter what you give it!</span>
+<span id="cb23-123"><a href="#cb23-123" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb23-124"><a href="#cb23-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-125"><a href="#cb23-125" aria-hidden="true" tabindex="-1"></a><span class="fu">### Picturing Inputs</span></span>
+<span id="cb23-126"><a href="#cb23-126" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-127"><a href="#cb23-127" aria-hidden="true" tabindex="-1"></a>:::{#fig-numbersamples}</span>
+<span id="cb23-130"><a href="#cb23-130" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb23-131"><a href="#cb23-131" aria-hidden="true" tabindex="-1"></a><span class="co"># | column: page</span></span>
+<span id="cb23-132"><a href="#cb23-132" aria-hidden="true" tabindex="-1"></a><span class="co"># | layout-ncol: 5</span></span>
+<span id="cb23-133"><a href="#cb23-133" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>):</span>
+<span id="cb23-134"><a href="#cb23-134" aria-hidden="true" tabindex="-1"></a>    show_image(mnist[<span class="st">"images"</span>][<span class="op">-</span>i] <span class="op">/</span> <span class="dv">16</span>)  <span class="co"># Visualizing example digit</span></span>
+<span id="cb23-135"><a href="#cb23-135" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-136"><a href="#cb23-136" aria-hidden="true" tabindex="-1"></a>A few examples of our data. Can you read them?</span>
+<span id="cb23-137"><a href="#cb23-137" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb23-138"><a href="#cb23-138" aria-hidden="true" tabindex="-1"></a>Turns out that pre-processing that comes baked in does make them pretty grainy. But nothing some training can't solve.</span>
+<span id="cb23-139"><a href="#cb23-139" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-140"><a href="#cb23-140" aria-hidden="true" tabindex="-1"></a><span class="fu">### Bucketing Classes</span></span>
+<span id="cb23-141"><a href="#cb23-141" aria-hidden="true" tabindex="-1"></a>We need to separate out our inputs for training purposes. We'll iterate across the 'targets' list, using the target numbers themselves as the index value to dump the corresponding 'image' data into the storage bin.</span>
+<span id="cb23-144"><a href="#cb23-144" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb23-145"><a href="#cb23-145" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-fold: show</span></span>
+<span id="cb23-146"><a href="#cb23-146" aria-hidden="true" tabindex="-1"></a>stacked <span class="op">=</span> []</span>
+<span id="cb23-147"><a href="#cb23-147" aria-hidden="true" tabindex="-1"></a><span class="co"># This loop because stacked=[[]]*10 makes 1 list in list, with 10 copies of pointers... need separate objects</span></span>
+<span id="cb23-148"><a href="#cb23-148" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>):</span>
+<span id="cb23-149"><a href="#cb23-149" aria-hidden="true" tabindex="-1"></a>    stacked.append([])</span>
+<span id="cb23-150"><a href="#cb23-150" aria-hidden="true" tabindex="-1"></a><span class="co"># Assign all images to the right collection in the 'stacked' list, indexed by target</span></span>
+<span id="cb23-151"><a href="#cb23-151" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(mnist[<span class="st">"target"</span>])):</span>
+<span id="cb23-152"><a href="#cb23-152" aria-hidden="true" tabindex="-1"></a>    stacked[mnist[<span class="st">"target"</span>][i]].append(mnist[<span class="st">"images"</span>][i])</span>
+<span id="cb23-153"><a href="#cb23-153" aria-hidden="true" tabindex="-1"></a>lens <span class="op">=</span> [<span class="bu">len</span>(stacked[i]) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>)]</span>
+<span id="cb23-154"><a href="#cb23-154" aria-hidden="true" tabindex="-1"></a>lens, <span class="bu">min</span>(lens)  <span class="co"># Confirm counts of samples</span></span>
+<span id="cb23-155"><a href="#cb23-155" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-156"><a href="#cb23-156" aria-hidden="true" tabindex="-1"></a>So that worked, we now have a list of lists of arrays, the arrays being interpreted as images, the lists being collections of images, with all images in a given collection being an image of the same hand drawn number. And we see that we have the fewest samples of numbers 8's, so we'll take only that many samples (174) of every other image for our dataset. </span>
+<span id="cb23-157"><a href="#cb23-157" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-158"><a href="#cb23-158" aria-hidden="true" tabindex="-1"></a><span class="fu">### Segmentation</span></span>
+<span id="cb23-159"><a href="#cb23-159" aria-hidden="true" tabindex="-1"></a>The next step is to define which data will be our training, and our validation set. It was important to bucket out our data first so by randomly sampling our data we didn't generate a validation set with a large imbalance in the number of classes to be tested in it. </span>
+<span id="cb23-160"><a href="#cb23-160" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-161"><a href="#cb23-161" aria-hidden="true" tabindex="-1"></a>First we convert to a tensor, then segment training from validation data. Arbitrarily taking 20 examples from each digit, so, 11.5% of the total data set towards validation.</span>
+<span id="cb23-162"><a href="#cb23-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-163"><a href="#cb23-163" aria-hidden="true" tabindex="-1"></a>We'll print out the size of these collections and take a peek at a sample to make sure we indexed right.</span>
+<span id="cb23-164"><a href="#cb23-164" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-165"><a href="#cb23-165" aria-hidden="true" tabindex="-1"></a>:::{#fig-checkSamp}</span>
+<span id="cb23-168"><a href="#cb23-168" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb23-169"><a href="#cb23-169" aria-hidden="true" tabindex="-1"></a><span class="co"># | warning: False</span></span>
+<span id="cb23-170"><a href="#cb23-170" aria-hidden="true" tabindex="-1"></a><span class="co"># To make dataset a tensor, make it same number of dimensions</span></span>
+<span id="cb23-171"><a href="#cb23-171" aria-hidden="true" tabindex="-1"></a>stacked <span class="op">=</span> tensor([x[:<span class="dv">174</span>] <span class="cf">for</span> x <span class="kw">in</span> stacked])</span>
+<span id="cb23-172"><a href="#cb23-172" aria-hidden="true" tabindex="-1"></a><span class="co"># Segmentation: Pull 20 of each digit out of training set</span></span>
+<span id="cb23-173"><a href="#cb23-173" aria-hidden="true" tabindex="-1"></a>test <span class="op">=</span> [dig[<span class="op">-</span><span class="dv">20</span>:] <span class="cf">for</span> dig <span class="kw">in</span> stacked]</span>
+<span id="cb23-174"><a href="#cb23-174" aria-hidden="true" tabindex="-1"></a>train <span class="op">=</span> [dig[:<span class="op">-</span><span class="dv">20</span>] <span class="cf">for</span> dig <span class="kw">in</span> stacked]</span>
+<span id="cb23-175"><a href="#cb23-175" aria-hidden="true" tabindex="-1"></a><span class="co"># Confirm counts of samples</span></span>
+<span id="cb23-176"><a href="#cb23-176" aria-hidden="true" tabindex="-1"></a>[<span class="bu">len</span>(test[i]) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>)], [<span class="bu">len</span>(train[i]) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>)]</span>
+<span id="cb23-177"><a href="#cb23-177" aria-hidden="true" tabindex="-1"></a>show_image(stacked[<span class="dv">3</span>][<span class="dv">0</span>])  <span class="co"># Check sample</span></span>
+<span id="cb23-178"><a href="#cb23-178" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-179"><a href="#cb23-179" aria-hidden="true" tabindex="-1"></a>Is it a 3?</span>
+<span id="cb23-180"><a href="#cb23-180" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb23-181"><a href="#cb23-181" aria-hidden="true" tabindex="-1"></a>Nice.</span>
+<span id="cb23-182"><a href="#cb23-182" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-183"><a href="#cb23-183" aria-hidden="true" tabindex="-1"></a>It's important to keep track of what's what.</span>
+<span id="cb23-186"><a href="#cb23-186" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb23-187"><a href="#cb23-187" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-fold: show</span></span>
+<span id="cb23-188"><a href="#cb23-188" aria-hidden="true" tabindex="-1"></a><span class="bu">type</span>(train), <span class="bu">type</span>(train[<span class="dv">0</span>]), <span class="bu">type</span>(train[<span class="dv">0</span>][<span class="dv">0</span>]), [</span>
+<span id="cb23-189"><a href="#cb23-189" aria-hidden="true" tabindex="-1"></a>    <span class="bu">type</span>(test), <span class="bu">type</span>(test[<span class="dv">0</span>]), <span class="bu">type</span>(test[<span class="dv">0</span>][<span class="dv">0</span>])]</span>
+<span id="cb23-190"><a href="#cb23-190" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-191"><a href="#cb23-191" aria-hidden="true" tabindex="-1"></a>Ok so our top level containers for training/testing data are basic python lists. Within those, we have 10 collections, one for each integer. Those are Tensors. And then, each image (a collection of pixels unto itself) within those tensors, are also Tensor type objects.</span>
+<span id="cb23-192"><a href="#cb23-192" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-193"><a href="#cb23-193" aria-hidden="true" tabindex="-1"></a>Instead of a basic Python list, we will need the top level containers as tensors to leverage the pyTorch functionality built into them. luckily it's an easy conversion</span>
+<span id="cb23-196"><a href="#cb23-196" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb23-197"><a href="#cb23-197" aria-hidden="true" tabindex="-1"></a><span class="co"># Converts PyList of tensors to tensor of tesnors (join in new dimensions, retain target indexing)</span></span>
+<span id="cb23-198"><a href="#cb23-198" aria-hidden="true" tabindex="-1"></a>train <span class="op">=</span> torch.stack(train)</span>
+<span id="cb23-199"><a href="#cb23-199" aria-hidden="true" tabindex="-1"></a>test <span class="op">=</span> torch.stack(test)</span>
+<span id="cb23-200"><a href="#cb23-200" aria-hidden="true" tabindex="-1"></a>train.shape, test.shape</span>
+<span id="cb23-201"><a href="#cb23-201" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-202"><a href="#cb23-202" aria-hidden="true" tabindex="-1"></a>Now here is a crtiical piece, working with multidimensional arrays and keeping in mind what we understand these to be. Our test and training tensors have the same dimensionality but not the same size. </span>
+<span id="cb23-203"><a href="#cb23-203" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-204"><a href="#cb23-204" aria-hidden="true" tabindex="-1"></a><span class="fu">## Building Benchmark Function</span></span>
+<span id="cb23-205"><a href="#cb23-205" aria-hidden="true" tabindex="-1"></a>Where it gets fun then is averaging and such across these dimensions. By doing so we can get the 'average drawing of a number,' which will be integral to creating our benchmark classification function.</span>
+<span id="cb23-206"><a href="#cb23-206" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-207"><a href="#cb23-207" aria-hidden="true" tabindex="-1"></a><span class="fu">### The 'Average' Digit</span></span>
+<span id="cb23-208"><a href="#cb23-208" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-209"><a href="#cb23-209" aria-hidden="true" tabindex="-1"></a>:::{#fig-ideals}</span>
+<span id="cb23-212"><a href="#cb23-212" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb23-213"><a href="#cb23-213" aria-hidden="true" tabindex="-1"></a><span class="co"># | column: page</span></span>
+<span id="cb23-214"><a href="#cb23-214" aria-hidden="true" tabindex="-1"></a><span class="co"># | layout-ncol: 5</span></span>
+<span id="cb23-215"><a href="#cb23-215" aria-hidden="true" tabindex="-1"></a>means <span class="op">=</span> torch.stack([x.mean(<span class="dv">0</span>) <span class="cf">for</span> x <span class="kw">in</span> train])  <span class="co"># Compute the average digit</span></span>
+<span id="cb23-216"><a href="#cb23-216" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>):</span>
+<span id="cb23-217"><a href="#cb23-217" aria-hidden="true" tabindex="-1"></a>    show_image(means[i])</span>
+<span id="cb23-218"><a href="#cb23-218" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-219"><a href="#cb23-219" aria-hidden="true" tabindex="-1"></a>Now those are some digits!</span>
+<span id="cb23-220"><a href="#cb23-220" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb23-221"><a href="#cb23-221" aria-hidden="true" tabindex="-1"></a>What just happened, how did we get this? let's tear this one apart.</span>
+<span id="cb23-222"><a href="#cb23-222" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-223"><a href="#cb23-223" aria-hidden="true" tabindex="-1"></a>First of all, we're dealing with a 4 dimensional tensor, <span class="in">`train`</span>. When we jumped into a list comprehension iterating <span class="in">`for x in train`</span>, we 'stepped into' that 0^th^ dimension, so to speak. Then any given element <span class="in">`x`</span> is a 3 dimensional tensor. </span>
+<span id="cb23-224"><a href="#cb23-224" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-225"><a href="#cb23-225" aria-hidden="true" tabindex="-1"></a>We will go through 10 of them, one for each integer, and each will contain 174 <span class="in">`8x8`</span> images. When we take the mean in the 0^th^ dimension of <span class="in">`x`</span>, we are saying "Across these 172 samples of 8x8 containers, what are the average values for element?" A visual way to think of this is that you have 174 pages, each with an <span class="in">`8x8`</span> grid of numbers on it. We will reduce it to a single page by taking the average through all the pages, for each number; i.e. the 1^st^ number on our single summary page will be the average of the 1^st^ number from all of the 174 pages. The 2^nd^ number will be the average of all the 2^nd^ numbers, etc. </span>
+<span id="cb23-226"><a href="#cb23-226" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-227"><a href="#cb23-227" aria-hidden="true" tabindex="-1"></a>In practice, this means that the more samples in which a given pixel was inked, the darker that pixel will be in the average.</span>
+<span id="cb23-228"><a href="#cb23-228" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-229"><a href="#cb23-229" aria-hidden="true" tabindex="-1"></a><span class="fu">### Least-Difference As Decision</span></span>
+<span id="cb23-230"><a href="#cb23-230" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-231"><a href="#cb23-231" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-234"><a href="#cb23-234" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb23-235"><a href="#cb23-235" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-238"><a href="#cb23-238" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb23-239"><a href="#cb23-239" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-242"><a href="#cb23-242" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb23-243"><a href="#cb23-243" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-246"><a href="#cb23-246" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb23-247"><a href="#cb23-247" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+</body></html>

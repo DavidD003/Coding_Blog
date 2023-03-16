@@ -1,0 +1,217 @@
+---
+title: "A Simple Digit Classifier"
+author: "David De Sa"
+date: "2023-03-14"
+categories: [python, pyTorch, NeuralNetworks]
+image: "NN101_thumbnail.png"
+format:
+  html:
+    code-fold: true
+    toc: true
+    code-tools: true
+draft: true
+---
+
+## TL;DR
+The best way to learn is to teach, so in this post I try to teach the reader how my first neural network implementation works! I built this in following along with the awesome lessons over at [fast.ai](course.fast.ai). Many thanks to that team.
+
+# Overview
+### What?
+We're going to make a function that, given a picture of a numeric digit, identifes the number.
+
+### Why?
+You need to crawl before you can [reject unripe tomatoes](https://www.reddit.com/r/oddlysatisfying/comments/zw3iwq/machine_that_rejects_unripe_tomatoes)^[Too fun not to share though I think this is a machine vision implementation without neural nets. Probably just averaging colour across a pixel range to trigger the paddles.], and that before you can comfortably learn to tie a necktie while your Tesla is whipping around corners with you in the drivers seat.
+
+### Who?
+[Who am I](https://davidd003.github.io/Coding_Blog/about.html)!? Who are you?!
+
+### How?
+Using [PyTorch](https://pytorch.org/)^[If it ain't 'py', it ain't python, right?], an opensource toolkit for building neural networks. Truly the shoulders of giants at our finger tips.
+
+# Code Review
+Making a neural network to solve a problem is a bunch of mumbo jumbo if we're not actually performing better than a simpler heuristic function. To test that, we will start off by constructing a simple classification that classifies a digit based on which average digit image it is nearest to (You'll see what I mean later). Then we will build a simple neural network (not too deep, not too convolutional, just right), and try to out perform the naive function!
+
+Let's get into it!
+
+::: {.callout-note collapse="true"}
+The required dependencies!:`scikit-learn`, `fastbook`, `matplotlib`
+:::
+
+```{python}
+# Install dependency
+from fastbook import *
+from fastai.vision.all import *
+from sklearn.datasets import load_digits
+import fastbook
+
+fastbook.setup_book()
+
+
+matplotlib.rc("image", cmap="Greys")
+```
+## Data Acquisition
+In any real world ML application, data acquisition can be one of the more costly  parts of the process, luckily not so for this simple learning example. 
+
+We're using a variant of the classic NIST database, a collection of images of hand drawn numbers that provided the means for benchmarking in earlier days of ML. 
+
+I had trouble wrangling with the various sources for this database online, the simplest workable solution I could find for us to get a grip on these images was to just import the datasets library that comes with installing the scikit-learn package.
+
+::: {.callout-tip collapse="true"}
+## Understand Your Input!
+
+Pre-processing data before even touching any neural net methods can improve your final performance. Note the data set information offered at the [source page](https://archive.ics.uci.edu/ml/datasets/Optical+Recognition+of+Handwritten+Digits): 
+
+> We used preprocessing programs made available by NIST to extract normalized bitmaps of handwritten digits from a preprinted form. From a total of 43 people, 30 contributed to the training set and different 13 to the test set. 32x32 bitmaps are divided into nonoverlapping blocks of 4x4 and the number of on pixels are counted in each block. This generates an input matrix of 8x8 where each element is an integer in the range 0..16. This reduces dimensionality and gives invariance to small distortions.
+:::
+
+```{python}
+mnist = load_digits()
+```
+Always good to get to know your data..
+```{python}
+mnist.keys()
+```
+What's in here?
+```{python}
+# Observing y value for data sequence
+mnist["target"], "# targets: " + str(len(mnist["target"]))
+```
+So we have 1797 numbers in this data set.
+```{python}
+n0 = [[n for n in mnist["data"][0][i * 8: i * 8 + 7]] for i in range(0, 8)]
+n0, mnist["images"][0]
+```
+And it looks like the 'data' entity is a list of one dimensional vectors, listing out the 64 pixels of each image, whereas the 'images' entity is the same info already organized into the 8x8 array of pixels.
+
+The values in the arrays are from 0-16, as described in the source documentation. Important to keep in mind that we might want to normalize them all to a range from 0 to 1 for our purposes. We'll do that later.
+
+I had to do some funny indexing to tease that out. Something I learned along the way was the fantastic .view() function of the Tensor object in pyTorch. Tensors are like a numpy array, have a lot of features that will be critical for quickly creating neural nets. This object type was imported with fastbook.
+```{python}
+Tensor(mnist["data"][0]).view(-1, 8)
+```
+
+::: {.callout-tip}
+## Tensor Views
+Using -1 in the argument for the view function will auto-size the tensor based on the number of elements in the array, and the other dimensions specified. This should come in handy!
+:::
+
+For a [classification task](https://docs.aws.amazon.com/machine-learning/latest/dg/types-of-ml-models.html) such as this, it's important to keep in mind that our data should be balanced in quantity per class. Let's take a look at how many we've got. 
+
+```{python}
+[str(i) + ": " + str(list(mnist["target"]).count(i))
+ for i in range(10)]  # Count of each digit in dataset
+```
+So, a little imbalance but nothing crazy. Worth checking though...
+
+::: {.callout-warning}
+## Beware Naive Optimization
+If we train on a million images of 7's, and only a thousand 1's, we can be duped into thinking we're rocking a 0.1% error rate by a naive model that guesses '7' no matter what you give it!
+:::
+
+### Picturing Inputs
+
+:::{#fig-numbersamples}
+```{python}
+# | column: page
+# | layout-ncol: 5
+for i in range(10):
+    show_image(mnist["images"][-i] / 16)  # Visualizing example digit
+```
+A few examples of our data. Can you read them?
+:::
+Turns out that pre-processing that comes baked in does make them pretty grainy. But nothing some training can't solve.
+
+### Bucketing Classes
+We need to separate out our inputs for training purposes. We'll iterate across the 'targets' list, using the target numbers themselves as the index value to dump the corresponding 'image' data into the storage bin.
+```{python}
+# | code-fold: show
+stacked = []
+# This loop because stacked=[[]]*10 makes 1 list in list, with 10 copies of pointers... need separate objects
+for i in range(10):
+    stacked.append([])
+# Assign all images to the right collection in the 'stacked' list, indexed by target
+for i in range(len(mnist["target"])):
+    stacked[mnist["target"][i]].append(mnist["images"][i])
+lens = [len(stacked[i]) for i in range(10)]
+lens, min(lens)  # Confirm counts of samples
+```
+So that worked, we now have a list of lists of arrays, the arrays being interpreted as images, the lists being collections of images, with all images in a given collection being an image of the same hand drawn number. And we see that we have the fewest samples of numbers 8's, so we'll take only that many samples (174) of every other image for our dataset. 
+
+### Segmentation
+The next step is to define which data will be our training, and our validation set. It was important to bucket out our data first so by randomly sampling our data we didn't generate a validation set with a large imbalance in the number of classes to be tested in it. 
+
+First we convert to a tensor, then segment training from validation data. Arbitrarily taking 20 examples from each digit, so, 11.5% of the total data set towards validation.
+
+We'll print out the size of these collections and take a peek at a sample to make sure we indexed right.
+
+:::{#fig-checkSamp}
+```{python}
+# | warning: False
+# To make dataset a tensor, make it same number of dimensions
+stacked = tensor([x[:174] for x in stacked])
+# Segmentation: Pull 20 of each digit out of training set
+test = [dig[-20:] for dig in stacked]
+train = [dig[:-20] for dig in stacked]
+# Confirm counts of samples
+[len(test[i]) for i in range(10)], [len(train[i]) for i in range(10)]
+show_image(stacked[3][0])  # Check sample
+```
+Is it a 3?
+:::
+Nice.
+
+It's important to keep track of what's what.
+```{python}
+# | code-fold: show
+type(train), type(train[0]), type(train[0][0]), [
+    type(test), type(test[0]), type(test[0][0])]
+```
+Ok so our top level containers for training/testing data are basic python lists. Within those, we have 10 collections, one for each integer. Those are Tensors. And then, each image (a collection of pixels unto itself) within those tensors, are also Tensor type objects.
+
+Instead of a basic Python list, we will need the top level containers as tensors to leverage the pyTorch functionality built into them. luckily it's an easy conversion
+```{python}
+# Converts PyList of tensors to tensor of tesnors (join in new dimensions, retain target indexing)
+train = torch.stack(train)
+test = torch.stack(test)
+train.shape, test.shape
+```
+Now here is a crtiical piece, working with multidimensional arrays and keeping in mind what we understand these to be. Our test and training tensors have the same dimensionality but not the same size. 
+
+## Building Benchmark Function
+Where it gets fun then is averaging and such across these dimensions. By doing so we can get the 'average drawing of a number,' which will be integral to creating our benchmark classification function.
+
+### The 'Average' Digit
+
+:::{#fig-ideals}
+```{python}
+# | column: page
+# | layout-ncol: 5
+means = torch.stack([x.mean(0) for x in train])  # Compute the average digit
+for i in range(10):
+    show_image(means[i])
+```
+Now those are some digits!
+:::
+What just happened, how did we get this? let's tear this one apart.
+
+First of all, we're dealing with a 4 dimensional tensor, `train`. When we jumped into a list comprehension iterating `for x in train`, we 'stepped into' that 0^th^ dimension, so to speak. Then any given element `x` is a 3 dimensional tensor. 
+
+We will go through 10 of them, one for each integer, and each will contain 174 `8x8` images. When we take the mean in the 0^th^ dimension of `x`, we are saying "Across these 172 samples of 8x8 containers, what are the average values for element?" A visual way to think of this is that you have 174 pages, each with an `8x8` grid of numbers on it. We will reduce it to a single page by taking the average through all the pages, for each number; i.e. the 1^st^ number on our single summary page will be the average of the 1^st^ number from all of the 174 pages. The 2^nd^ number will be the average of all the 2^nd^ numbers, etc. 
+
+In practice, this means that the more samples in which a given pixel was inked, the darker that pixel will be in the average.
+
+### Least-Difference As Decision
+
+
+```{python}
+
+```
+```{python}
+
+```
+```{python}
+
+```
+```{python}
+
+```
