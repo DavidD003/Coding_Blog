@@ -1,23 +1,25 @@
 ---
-title: "A Simple Digit Classifier"
+title: "Broadcasting and Heuristic Digit Classification"
 author: "David De Sa"
-date: "2023-03-14"
-categories: [python, pyTorch, NeuralNetworks]
-image: "NN101_thumbnail.png"
+date: "2023-03-18"
+categories: [python, pyTorch, Neuralnetworks]
+image: "Cube_thumb.png"
 format:
   html:
     code-fold: true
     toc: true
     code-tools: true
-draft: true
+draft: false
 ---
 
 ## TL;DR
-The best way to learn is to teach, so in this post I try to teach the reader how my first neural network implementation works! I built this in following along with the awesome lessons over at [fast.ai](course.fast.ai). Many thanks to that team.
+The best way to learn is to teach, so in this post I walk through an example of putting broadcasting to use in a heuristic number reading app. Part 1 of two in making my first neural network.
 
 # Overview
+The code in this post is largely from the awesome lessons over at [fast.ai](course.fast.ai), with the explanation all in my own words. Many thanks to that team for their amazing work. This is part one of two from the same lesson learning to make a digit classifier, the next will go into making the neural network that performs better at the same task.
+
 ### What?
-We're going to make a function that, given a picture of a numeric digit, identifes the number.
+We're going to make a function to act as a benchmark for a neural network. The task it will perform is to correctly identify a number, given a hand drawn picture of it. 
 
 ### Why?
 You need to crawl before you can [reject unripe tomatoes](https://www.reddit.com/r/oddlysatisfying/comments/zw3iwq/machine_that_rejects_unripe_tomatoes)^[Too fun not to share though I think this is a machine vision implementation without neural nets. Probably just averaging colour across a pixel range to trigger the paddles.], and that before you can comfortably learn to tie a necktie while your Tesla is whipping around corners with you in the drivers seat.
@@ -29,7 +31,7 @@ You need to crawl before you can [reject unripe tomatoes](https://www.reddit.com
 Using [PyTorch](https://pytorch.org/)^[If it ain't 'py', it ain't python, right?], an opensource toolkit for building neural networks. Truly the shoulders of giants at our finger tips.
 
 # Code Review
-Making a neural network to solve a problem is a bunch of mumbo jumbo if we're not actually performing better than a simpler heuristic function. To test that, we will start off by constructing a simple classification that classifies a digit based on which average digit image it is nearest to (You'll see what I mean later). Then we will build a simple neural network (not too deep, not too convolutional, just right), and try to out perform the naive function!
+Making a neural network to solve a problem is a bunch of mumbo jumbo if we're not actually performing better than a simpler heuristic function. To test that, we will start off by constructing a simple classification that classifies a digit based on which average digit image it is nearest to (You'll see what I mean later). This will determine the score-to-beat with the neural network we make in the next post.
 
 Let's get into it!
 
@@ -190,7 +192,7 @@ train.shape, test.shape
 Now here is a crtiical piece, working with multidimensional arrays and keeping in mind what we understand these to be. Our test and training tensors have the same dimensionality but not the same size. 
 
 ## Building Benchmark Function
-Where it gets fun then is averaging and such across these dimensions. By doing so we can get the 'average drawing of a number,' which will be integral to creating our benchmark classification function.
+Where it gets fun now is in averaging and such across these dimensions. By doing so we can get the 'average drawing of a number,' which will be integral to creating our benchmark classification function.
 
 ### The 'Average' Digit
 
@@ -315,22 +317,139 @@ Instead of using Python to make many copies of our average digits, we can just a
 train.shape, means.unsqueeze(1).shape
 ```
 
-The way I look at this is nested boxes! In this diagram, the `unsqueeze` function added  an extra layer to the nested boxes making up `means`.
+The way I look at this is like folders in a file system! In this diagram, the `unsqueeze` function added an extra layer to the nested boxes making up `means`.
 
 ![Visualizing Broadcasting](Broadcasting_Basics.drawio.png){#fig-broadcast}  
 
 
 From the bottom up (i.e. right to left of tensor indices) we have:
 
- - A box with 8 numbers -  the pixel brightness values for the 8 pixels in a single row.
- - A box with 8 of the preceding boxes - one for each row of pixels making an image
- - A box with 154 of the preceding boxes - In `train`, the 154 different samples of hand written digits, for a given integer. In `means`, a single box, redundant on its own, but serving as the thing to broadcast
- - A box (our tensor) with 10 of the preceding boxes, one for each integer `0` through `9`
+ - A folder with 8 numbers^("files" in this analogy- the foundational stuff we are actually storing!) -  the pixel brightness values for the 8 pixels in a single row.
+ - A folder with 8 of the preceding folders - one for each row of pixels making an image
+ - A folder with 154 of the preceding folders - In `train`, the 154 different samples of hand written digits, for a given integer. In `means`, a single box, redundant on its own, but serving as the thing to broadcast
+ - A directory (our tensor) with 10 of the preceding folders, one for each integer `0` through `9`
 
+Lets test that this modified structure works:
+```{python}
+# | code-line-numbers: true
+res = mnist_distance(train, means.unsqueeze(1))
+print(res.shape)
+```
+Great, no error! We see the result is a tensor structured as an array of 10 vectors, each with 154 elements. In other words,a directory of 10 folders, each with 154 files. 
 
+We understand the numbers stored to be the L1 norm loss measures for each of the 154 samples of each digit, against the 'average' version of that digit. So by looking for the min and max values within these 10 vectors, we can identify the best and worst samples, as compared against their target digit:
 
-But we just asked "Which of these two is more likely to be a zero?" We haven't really done digit classification just yet, to do that we need to compare any given test digit against the averages samples of 0 through 9 and see which yields the smallest loss measure.
+:::{#fig-BestAndWorst}
+```{python}
+# | layout-ncol: 2
+# | code-line-numbers: true
+bestWorstIndex = [(list(x).index(min(x)), list(x).index(max(x))) for x in res]
+i = 0
+for b, w in bestWorstIndex:
+    show_image(train[i][b])
+    show_image(train[i][w])
+    i = i+1
+```
+The Best and Worst!
+:::
+So we can get a sense for where this benchmark digit classification function might go wrong, such as by taking that worst 1 for a 7, or the worst 9 for a 4.
+
+We're close now. The goal here is a single performance measure, classification accuracy, for the benchmark function against all input data. That will be the score to beat with the neural entwork implementation. 
+
+What we need to do is extend the logic of that last code segment, comparing each digit to not only the 'average' version of it's target number, but also against the average version of every other number. To do this, we'll have to broadcast some more. this is the structure we'll use:
 
 ```{python}
 # | code-line-numbers: true
+print('Further unsqueezed shape of means: ' +
+      str(means.unsqueeze(1).unsqueeze(1).shape))
+print('Unsqueezed shape of train data   : ' + str(train.unsqueeze(0).shape))
 ```
+Why? Let's go back to our norm function:
+`def mnist_distance(a, b): return (a-b).abs().mean((-1, -2))`
+The last two dimensions will be averaged to get a score number, and we want a score number for every combination of sample image, and 'average' digits 0-9. Thinking of nested boxes again, we should expect the structure of our result tensor to have a path through it to each one of these combinations.^[There is some ambiguity as to how we could've gone about this, as to wehther or not we thought about the digit from which samples are drawn as the first layer, or the average digit being tested against as the first layer. I chose the latter.] To build this path, we first imagine it:
+
+ - The tensor as our outermost box should have 10 boxes in it, one for each 'average' digit; in this box that digit will be the comparison item against every sample.
+ - Within each of those boxes will be 10 more boxes, one for each of the sample pools (all samples of 0's, all samples of 1's, 2's, etc.)
+ - Within each of those boxes will be 154 boxes, each containing the data for one sample image. The data is stored in array structure, i.e. 2 boxes, but we can leave it at that since at that level, all those 64 numbers per digit will be averaged out.
+
+First of all, we unsqueeze the `means` tensor we had at the first index *again* so that the dimension where the differentiation between average digit occurs stays at the highest dimension. The result is that 10,1,1,8,8 tensor. We unsqueezed multiple times because we want *copies of copies* of each of the mean digits. One level of copying at the layer of sample pool, and copying againt to each sample image within the sample pool. 
+
+Next, we need to make the `train` tensor compatible with this. The thought is that this entire training set will be compared against each average, so there will need to be 10 copies of it. To achieve that we unsqueezed at the 0^th^ index to allow for broadcasting to more copies.
+
+The result is that the 10,1,1,8,8 tensor and 1,10,154,8,8 tensors are broadcast to be equal in shape to perform computation. First in dimension 1, the train data is broadcast (10 copies created), in dimension 2 the mean data is broadcast creating 10 copies of everything below. Then in the 3rd dimension, the means is again broadcast up to 154, creating 154 more copies of what is in the dimensions below. In this way, the 1st dimension corresponds to the different 'ideal' or mean  digits 0-9, the 2nd dimension corresponds to all the data corresponding to the training data for digits 0-9. The 3rd dimension differentiates between individual samples of a given training digit. And the 4th and 5th dimension get us to individual pixels of those images.
+
+![And they say broadcast is dead!](Broadcasting_Full.drawio.png){#fig-bigbroadcast}  
+
+Let's see if it worked!
+
+```{python}
+# | code-line-numbers: true
+all_comparison = mnist_distance(
+    means.unsqueeze(1).unsqueeze(1), train.unsqueeze(0))
+print('shape of all comparison:     '+str(all_comparison.shape))
+```
+Great, no error!
+
+The result is 3 dimensions instead of 5 because the mnist_distance function took the average across the last two dimensions, reducing the data in them to a scalar stored in the 3rd dimension. So for the 0^th^ dimension, we have 10 collections of data (horizontal slices), which is the ideal digit is compared against the 154 samples for each digit as indexed in the 1^st^ dimension (vertical slices), and the 2^nd^ dimension (depth) indexing the 154 samples.
+
+Picturing the 3D result as a cube, each element in the cube contains the numeric result from mnist_dist for the comparison of an ideal and a test image. Any given sample image is compared against all 9 ideal digits, and where the miniumum mnist_distance corresponds to the integer that the training digit actually is, the benchmark function was correct.
+
+![Behold, the data cube! *a.k.a Visualizing a Tensor*](Data_cube.png){#fig-datacube}  
+
+Alright, so we have a big tensor with every image compared against every 'average' digit. Now we need to do some smart indexing to identify the lowest loss function score for each sample image, indicating what number the benchmark function *thinks* that that image is, and to summarize all that output as a performance metric for us to beat.
+
+Here are the lines in the following block where the maagic is baked into the cake:
+ 3. Generalizing the function so it can handle inputs of varibable size
+ 11. Using iterator to index an entire vertical slice of the data cube, yielding a 2D tensor. 
+  i) The `.min(dim=0)` looks across the 0^th^ dimension of the input tensor, in this case the 2D array. It yields a tensor containing the minimum values in each slice. the `.indices` yields the indices at which those values were identified.
+  ii) In the bigger picture, `.min(dim=0)` is looking at single columns of 10 numbers and returning the minimum value.
+ 12. Tallying up how many classifications were attributed to each number 0 through 9.
+ 13. Because our target values are number 0 to 9, they lend themselves to being used as indices. This same code for another kind of task might look very different. Here, our iterating/slicing strategy is such that we know the true digit for all the data points in iteration 0 are 0, iteration 1 are 1, etc, so we can simply take the number of classifications made to the current iteration number as the same thing as classifications to correct category, and add that to our running total.
+
+
+:::{#fig-bmkConfMat}
+```{python}
+# | code-line-numbers: true
+
+
+def acc_rslt(comp):
+    c = comp.clone()
+    x, y, z = [i for i in c.shape]
+    totSamp = y*z
+    totCorrect = 0  # Tallier
+    confM = []  # confusion matrix will be result of stacking the bincount results
+    for i in range(10):
+        # Taking slice yields 2D object, shape (10,154), take min in each column (axis 1) to get digit prediction
+        # Retrieve indices i.e. predictions for all comparisons
+        # Yields a 1D tensor with count of integers indexed by integer
+        id = c[:, i, :].min(dim=0).indices
+        predCnt = torch.bincount(id, minlength=10)
+        totCorrect = totCorrect+predCnt[i]
+        confM.append(predCnt)
+    confM = torch.stack(confM)
+    return (totCorrect/totSamp*100), confM
+
+
+acc, conf = acc_rslt(all_comparison)
+print('accuracy: '+str(round(acc.item(), 2))+'%')
+
+df = pd.DataFrame(conf)
+df.style.set_properties(**{'font-size': '6pt'}).background_gradient('Greys')
+df.style.set_table_styles([dict(selector='th', props=[(
+    'text-align', 'center')])]).set_properties(**{'text-align': 'center'})
+```
+Confusion Matrix. Tally of Actual (row) Vs. Predicted (col)"
+:::
+
+Exciting! Just shy of 90% accuracy is the score to beat. And we can see which deigits performed better or worse. Row 8 shows that numbe r8 had the worst performance, with only 119/154 images classified correctly, with most 8's being incorrectly classified as 1's, or 9's. Following that, 5's had 131/154 correct, with 17 instances incorrectly classified as a 9. Now, we are *ready* to make a neural network.
+
+::: {.callout-important }
+
+If you want to understand each line of everything that follows, a strong grasp of broadcasting will be critical.
+:::
+
+# Outro
+
+A couple of key take aways from this portion of the fastAI lesson. A notable one not to skip si the fact that there is no sense deploying neural networks if other methods can do the job better, so we should always be verifying that we perform better than the alternatives. I really had a few a-ha moments in learning about the broadcasting techniques and so I felt it would be great to share. It was a lot easier to scribble the drawings on paper than to put them on the screen but I hope you find them illuminating!
+
+I *was* able to create that neural net to classify digits more accurately, in the end. I'll walk through that in the next post.

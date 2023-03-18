@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="David De Sa">
-<meta name="dcterms.date" content="2023-03-14">
+<meta name="dcterms.date" content="2023-03-18">
 
-<title>Davids Coding - A Simple Digit Classifier</title>
+<title>Davids Coding - Broadcasting and Heuristic Digit Classification</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -124,6 +124,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     "search-submit-button-title": "Submit"
   }
 }</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
 
 <link rel="stylesheet" href="../../styles.css">
@@ -174,11 +177,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <div class="quarto-title-block"><div><h1 class="title">A Simple Digit Classifier</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+      <div class="quarto-title-block"><div><h1 class="title">Broadcasting and Heuristic Digit Classification</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
                                 <div class="quarto-categories">
                 <div class="quarto-category">python</div>
                 <div class="quarto-category">pyTorch</div>
-                <div class="quarto-category">NeuralNetworks</div>
+                <div class="quarto-category">Neuralnetworks</div>
               </div>
                   </div>
   </div>
@@ -196,7 +199,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">March 14, 2023</p>
+        <p class="date">March 18, 2023</p>
       </div>
     </div>
     
@@ -235,6 +238,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   </ul></li>
   <li><a href="#computing-the-benchmark" id="toc-computing-the-benchmark" class="nav-link" data-scroll-target="#computing-the-benchmark">Computing The Benchmark</a></li>
   </ul></li>
+  <li><a href="#outro" id="toc-outro" class="nav-link" data-scroll-target="#outro">Outro</a></li>
   </ul>
 </nav>
     </div>
@@ -246,13 +250,14 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <section id="tldr" class="level2">
 <h2 class="anchored" data-anchor-id="tldr">TL;DR</h2>
-<p>The best way to learn is to teach, so in this post I try to teach the reader how my first neural network implementation works! I built this in following along with the awesome lessons over at <a href="course.fast.ai">fast.ai</a>. Many thanks to that team.</p>
+<p>The best way to learn is to teach, so in this post I walk through an example of putting broadcasting to use in a heuristic number reading app. Part 1 of two in making my first neural network.</p>
 </section>
 <section id="overview" class="level1">
 <h1>Overview</h1>
+<p>The code in this post is largely from the awesome lessons over at <a href="course.fast.ai">fast.ai</a>, with the explanation all in my own words. Many thanks to that team for their amazing work. This is part one of two from the same lesson learning to make a digit classifier, the next will go into making the neural network that performs better at the same task.</p>
 <section id="what" class="level3">
 <h3 class="anchored" data-anchor-id="what">What?</h3>
-<p>We’re going to make a function that, given a picture of a numeric digit, identifes the number.</p>
+<p>We’re going to make a function to act as a benchmark for a neural network. The task it will perform is to correctly identify a number, given a hand drawn picture of it.</p>
 </section>
 <section id="why" class="level3">
 <h3 class="anchored" data-anchor-id="why">Why?</h3>
@@ -269,7 +274,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </section>
 <section id="code-review" class="level1 page-columns page-full">
 <h1>Code Review</h1>
-<p>Making a neural network to solve a problem is a bunch of mumbo jumbo if we’re not actually performing better than a simpler heuristic function. To test that, we will start off by constructing a simple classification that classifies a digit based on which average digit image it is nearest to (You’ll see what I mean later). Then we will build a simple neural network (not too deep, not too convolutional, just right), and try to out perform the naive function!</p>
+<p>Making a neural network to solve a problem is a bunch of mumbo jumbo if we’re not actually performing better than a simpler heuristic function. To test that, we will start off by constructing a simple classification that classifies a digit based on which average digit image it is nearest to (You’ll see what I mean later). This will determine the score-to-beat with the neural network we make in the next post.</p>
 <p>Let’s get into it!</p>
 <div class="callout-note callout callout-style-default callout-captioned">
 <div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
@@ -338,7 +343,7 @@ Understand Your Input!
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1"></a>mnist.keys()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="24">
+<div class="cell-output cell-output-display" data-execution_count="81">
 <pre><code>dict_keys(['data', 'target', 'frame', 'feature_names', 'target_names', 'images', 'DESCR'])</code></pre>
 </div>
 </div>
@@ -349,7 +354,7 @@ Understand Your Input!
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1"></a><span class="co"># Observing y value for data sequence</span></span>
 <span id="cb5-2"><a href="#cb5-2"></a>mnist[<span class="st">"target"</span>], <span class="st">"# targets: "</span> <span class="op">+</span> <span class="bu">str</span>(<span class="bu">len</span>(mnist[<span class="st">"target"</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="25">
+<div class="cell-output cell-output-display" data-execution_count="82">
 <pre><code>(array([0, 1, 2, ..., 8, 9, 8]), '# targets: 1797')</code></pre>
 </div>
 </div>
@@ -360,7 +365,7 @@ Understand Your Input!
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1"></a>n0 <span class="op">=</span> [[n <span class="cf">for</span> n <span class="kw">in</span> mnist[<span class="st">"data"</span>][<span class="dv">0</span>][i <span class="op">*</span> <span class="dv">8</span>: i <span class="op">*</span> <span class="dv">8</span> <span class="op">+</span> <span class="dv">7</span>]] <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, <span class="dv">8</span>)]</span>
 <span id="cb7-2"><a href="#cb7-2"></a>n0, mnist[<span class="st">"images"</span>][<span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="26">
+<div class="cell-output cell-output-display" data-execution_count="83">
 <pre><code>([[0.0, 0.0, 5.0, 13.0, 9.0, 1.0, 0.0],
   [0.0, 0.0, 13.0, 15.0, 10.0, 15.0, 5.0],
   [0.0, 3.0, 15.0, 2.0, 0.0, 11.0, 8.0],
@@ -387,7 +392,7 @@ Understand Your Input!
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1"></a>Tensor(mnist[<span class="st">"data"</span>][<span class="dv">0</span>]).view(<span class="op">-</span><span class="dv">1</span>, <span class="dv">8</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="27">
+<div class="cell-output cell-output-display" data-execution_count="84">
 <pre><code>tensor([[ 0.,  0.,  5., 13.,  9.,  1.,  0.,  0.],
         [ 0.,  0., 13., 15., 10., 15.,  5.,  0.],
         [ 0.,  3., 15.,  2.,  0., 11.,  8.,  0.],
@@ -418,7 +423,7 @@ Tensor Views
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1"></a>[<span class="bu">str</span>(i) <span class="op">+</span> <span class="st">": "</span> <span class="op">+</span> <span class="bu">str</span>(<span class="bu">list</span>(mnist[<span class="st">"target"</span>]).count(i))</span>
 <span id="cb11-2"><a href="#cb11-2"></a> <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>)]  <span class="co"># Count of each digit in dataset</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="28">
+<div class="cell-output cell-output-display" data-execution_count="85">
 <pre><code>['0: 178',
  '1: 182',
  '2: 177',
@@ -513,7 +518,7 @@ Beware Naive Optimization
 <span id="cb14-8"><a href="#cb14-8"></a>lens <span class="op">=</span> [<span class="bu">len</span>(stacked[i]) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>)]</span>
 <span id="cb14-9"><a href="#cb14-9"></a>lens, <span class="bu">min</span>(lens)  <span class="co"># Confirm counts of samples</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="30">
+<div class="cell-output cell-output-display" data-execution_count="87">
 <pre><code>([178, 182, 177, 183, 181, 182, 181, 179, 174, 180], 174)</code></pre>
 </div>
 </div>
@@ -538,7 +543,7 @@ Beware Naive Optimization
 <span id="cb16-7"><a href="#cb16-7"></a>[<span class="bu">len</span>(test[i]) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>)], [<span class="bu">len</span>(train[i]) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>)]</span>
 <span id="cb16-8"><a href="#cb16-8"></a>show_image(stacked[<span class="dv">3</span>][<span class="dv">0</span>])  <span class="co"># Check sample</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="31">
+<div class="cell-output cell-output-display" data-execution_count="88">
 <pre><code>&lt;Axes: &gt;</code></pre>
 </div>
 <div class="cell-output cell-output-display">
@@ -556,7 +561,7 @@ Beware Naive Optimization
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1"></a><span class="bu">type</span>(train), <span class="bu">type</span>(train[<span class="dv">0</span>]), <span class="bu">type</span>(train[<span class="dv">0</span>][<span class="dv">0</span>]), [</span>
 <span id="cb18-2"><a href="#cb18-2"></a>    <span class="bu">type</span>(test), <span class="bu">type</span>(test[<span class="dv">0</span>]), <span class="bu">type</span>(test[<span class="dv">0</span>][<span class="dv">0</span>])]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="32">
+<div class="cell-output cell-output-display" data-execution_count="89">
 <pre><code>(list, torch.Tensor, torch.Tensor, [list, torch.Tensor, torch.Tensor])</code></pre>
 </div>
 </div>
@@ -570,7 +575,7 @@ Beware Naive Optimization
 <span id="cb20-3"><a href="#cb20-3"></a>test <span class="op">=</span> torch.stack(test)</span>
 <span id="cb20-4"><a href="#cb20-4"></a>train.shape, test.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="33">
+<div class="cell-output cell-output-display" data-execution_count="90">
 <pre><code>(torch.Size([10, 154, 8, 8]), torch.Size([10, 20, 8, 8]))</code></pre>
 </div>
 </div>
@@ -579,7 +584,7 @@ Beware Naive Optimization
 </section>
 <section id="building-benchmark-function" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="building-benchmark-function">Building Benchmark Function</h2>
-<p>Where it gets fun then is averaging and such across these dimensions. By doing so we can get the ‘average drawing of a number,’ which will be integral to creating our benchmark classification function.</p>
+<p>Where it gets fun now is in averaging and such across these dimensions. By doing so we can get the ‘average drawing of a number,’ which will be integral to creating our benchmark classification function.</p>
 <section id="the-average-digit" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="the-average-digit">The ‘Average’ Digit</h3>
 <div id="fig-ideals" class="quarto-figure quarto-figure-center anchored page-columns page-full">
@@ -681,7 +686,7 @@ Comparing Differences Between Pictures?
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1"></a><span class="co">"L1 loss: "</span><span class="op">+</span><span class="bu">str</span>(F.l1_loss(test[<span class="dv">0</span>][<span class="dv">18</span>], means[<span class="dv">0</span>]).item()), <span class="st">"MSE Loss: "</span> <span class="op">+</span> <span class="op">\</span></span>
 <span id="cb24-2"><a href="#cb24-2"></a>    <span class="bu">str</span>(F.mse_loss(test[<span class="dv">0</span>][<span class="dv">18</span>], means[<span class="dv">0</span>]).sqrt().item())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="36">
+<div class="cell-output cell-output-display" data-execution_count="93">
 <pre><code>('L1 loss: 1.9119317531585693', 'MSE Loss: 3.072631359100342')</code></pre>
 </div>
 </div>
@@ -711,7 +716,7 @@ Comparing Differences Between Pictures?
 <div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1"></a><span class="co">"L1 loss: "</span><span class="op">+</span><span class="bu">str</span>(F.l1_loss(test[<span class="dv">7</span>][<span class="dv">0</span>], means[<span class="dv">0</span>]).item()), <span class="st">"MSE Loss: "</span> <span class="op">+</span> <span class="op">\</span></span>
 <span id="cb27-2"><a href="#cb27-2"></a>    <span class="bu">str</span>(F.mse_loss(test[<span class="dv">7</span>][<span class="dv">0</span>], means[<span class="dv">0</span>]).sqrt().item())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="38">
+<div class="cell-output cell-output-display" data-execution_count="95">
 <pre><code>('L1 loss: 4.754464149475098', 'MSE Loss: 6.698919296264648')</code></pre>
 </div>
 </div>
@@ -755,7 +760,7 @@ Coding The L1 Norm
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1"></a>means.shape, train.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="41">
+<div class="cell-output cell-output-display" data-execution_count="98">
 <pre><code>(torch.Size([10, 8, 8]), torch.Size([10, 154, 8, 8]))</code></pre>
 </div>
 </div>
@@ -784,11 +789,11 @@ Broadcasting
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1"></a>train.shape, means.unsqueeze(<span class="dv">1</span>).shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="42">
+<div class="cell-output cell-output-display" data-execution_count="99">
 <pre><code>(torch.Size([10, 154, 8, 8]), torch.Size([10, 1, 8, 8]))</code></pre>
 </div>
 </div>
-<p>The way I look at this is nested boxes! In this diagram, the <code>unsqueeze</code> function added an extra layer to the nested boxes making up <code>means</code>.</p>
+<p>The way I look at this is like folders in a file system! In this diagram, the <code>unsqueeze</code> function added an extra layer to the nested boxes making up <code>means</code>.</p>
 <div id="fig-broadcast" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="Broadcasting_Basics.drawio.png" class="img-fluid figure-img"></p>
@@ -797,17 +802,397 @@ Broadcasting
 </div>
 <p>From the bottom up (i.e.&nbsp;right to left of tensor indices) we have:</p>
 <ul>
-<li>A box with 8 numbers - the pixel brightness values for the 8 pixels in a single row.</li>
-<li>A box with 8 of the preceding boxes - one for each row of pixels making an image</li>
-<li>A box with 154 of the preceding boxes - In <code>train</code>, the 154 different samples of hand written digits, for a given integer. In <code>means</code>, a single box, redundant on its own, but serving as the thing to broadcast</li>
-<li>A box (our tensor) with 10 of the preceding boxes, one for each integer <code>0</code> through <code>9</code></li>
+<li>A folder with 8 numbers^(“files” in this analogy- the foundational stuff we are actually storing!) - the pixel brightness values for the 8 pixels in a single row.</li>
+<li>A folder with 8 of the preceding folders - one for each row of pixels making an image</li>
+<li>A folder with 154 of the preceding folders - In <code>train</code>, the 154 different samples of hand written digits, for a given integer. In <code>means</code>, a single box, redundant on its own, but serving as the thing to broadcast</li>
+<li>A directory (our tensor) with 10 of the preceding folders, one for each integer <code>0</code> through <code>9</code></li>
 </ul>
-<p>But we just asked “Which of these two is more likely to be a zero?” We haven’t really done digit classification just yet, to do that we need to compare any given test digit against the averages samples of 0 through 9 and see which yields the smallest loss measure.</p>
+<p>Lets test that this modified structure works:</p>
+<div class="cell" data-execution_count="22">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1"></a>res <span class="op">=</span> mnist_distance(train, means.unsqueeze(<span class="dv">1</span>))</span>
+<span id="cb36-2"><a href="#cb36-2"></a><span class="bu">print</span>(res.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>torch.Size([10, 154])</code></pre>
+</div>
+</div>
+<p>Great, no error! We see the result is a tensor structured as an array of 10 vectors, each with 154 elements. In other words,a directory of 10 folders, each with 154 files.</p>
+<p>We understand the numbers stored to be the L1 norm loss measures for each of the 154 samples of each digit, against the ‘average’ version of that digit. So by looking for the min and max values within these 10 vectors, we can identify the best and worst samples, as compared against their target digit:</p>
+<div id="fig-BestAndWorst" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1"></a>bestWorstIndex <span class="op">=</span> [(<span class="bu">list</span>(x).index(<span class="bu">min</span>(x)), <span class="bu">list</span>(x).index(<span class="bu">max</span>(x))) <span class="cf">for</span> x <span class="kw">in</span> res]</span>
+<span id="cb38-2"><a href="#cb38-2"></a>i <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb38-3"><a href="#cb38-3"></a><span class="cf">for</span> b, w <span class="kw">in</span> bestWorstIndex:</span>
+<span id="cb38-4"><a href="#cb38-4"></a>    show_image(train[i][b])</span>
+<span id="cb38-5"><a href="#cb38-5"></a>    show_image(train[i][w])</span>
+<span id="cb38-6"><a href="#cb38-6"></a>    i <span class="op">=</span> i<span class="op">+</span><span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell quarto-layout-panel" data-execution_count="23">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-24-output-1.png" class="img-fluid figure-img" width="93"></p>
+</div>
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-24-output-2.png" class="img-fluid figure-img" width="93"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-24-output-3.png" class="img-fluid figure-img" width="93"></p>
+</div>
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-24-output-4.png" class="img-fluid figure-img" width="93"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-24-output-5.png" class="img-fluid figure-img" width="93"></p>
+</div>
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-24-output-6.png" class="img-fluid figure-img" width="93"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-24-output-7.png" class="img-fluid figure-img" width="93"></p>
+</div>
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-24-output-8.png" class="img-fluid figure-img" width="93"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-24-output-9.png" class="img-fluid figure-img" width="93"></p>
+</div>
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-24-output-10.png" class="img-fluid figure-img" width="93"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-24-output-11.png" class="img-fluid figure-img" width="93"></p>
+</div>
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-24-output-12.png" class="img-fluid figure-img" width="93"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-24-output-13.png" class="img-fluid figure-img" width="93"></p>
+</div>
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-24-output-14.png" class="img-fluid figure-img" width="93"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-24-output-15.png" class="img-fluid figure-img" width="93"></p>
+</div>
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-24-output-16.png" class="img-fluid figure-img" width="93"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-24-output-17.png" class="img-fluid figure-img" width="93"></p>
+</div>
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-24-output-18.png" class="img-fluid figure-img" width="93"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-24-output-19.png" class="img-fluid figure-img" width="93"></p>
+</div>
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="index_files/figure-html/cell-24-output-20.png" class="img-fluid figure-img" width="93"></p>
+</div>
+</div>
+</div>
+</div>
+<p></p><figcaption class="figure-caption">Figure&nbsp;7: The Best and Worst!</figcaption><p></p>
+</figure>
+</div>
+<p>So we can get a sense for where this benchmark digit classification function might go wrong, such as by taking that worst 1 for a 7, or the worst 9 for a 4.</p>
+<p>We’re close now. The goal here is a single performance measure, classification accuracy, for the benchmark function against all input data. That will be the score to beat with the neural entwork implementation.</p>
+<p>What we need to do is extend the logic of that last code segment, comparing each digit to not only the ‘average’ version of it’s target number, but also against the average version of every other number. To do this, we’ll have to broadcast some more. this is the structure we’ll use:</p>
+<div class="cell" data-execution_count="24">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1"></a><span class="bu">print</span>(<span class="st">'Further unsqueezed shape of means: '</span> <span class="op">+</span></span>
+<span id="cb39-2"><a href="#cb39-2"></a>      <span class="bu">str</span>(means.unsqueeze(<span class="dv">1</span>).unsqueeze(<span class="dv">1</span>).shape))</span>
+<span id="cb39-3"><a href="#cb39-3"></a><span class="bu">print</span>(<span class="st">'Unsqueezed shape of train data   : '</span> <span class="op">+</span> <span class="bu">str</span>(train.unsqueeze(<span class="dv">0</span>).shape))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Further unsqueezed shape of means: torch.Size([10, 1, 1, 8, 8])
+Unsqueezed shape of train data   : torch.Size([1, 10, 154, 8, 8])</code></pre>
+</div>
+</div>
+<p>Why? Let’s go back to our norm function: <code>def mnist_distance(a, b): return (a-b).abs().mean((-1, -2))</code> The last two dimensions will be averaged to get a score number, and we want a score number for every combination of sample image, and ‘average’ digits 0-9. Thinking of nested boxes again, we should expect the structure of our result tensor to have a path through it to each one of these combinations.<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> To build this path, we first imagine it:</p>
+<ul>
+<li>The tensor as our outermost box should have 10 boxes in it, one for each ‘average’ digit; in this box that digit will be the comparison item against every sample.</li>
+<li>Within each of those boxes will be 10 more boxes, one for each of the sample pools (all samples of 0’s, all samples of 1’s, 2’s, etc.)</li>
+<li>Within each of those boxes will be 154 boxes, each containing the data for one sample image. The data is stored in array structure, i.e.&nbsp;2 boxes, but we can leave it at that since at that level, all those 64 numbers per digit will be averaged out.</li>
+</ul>
+<p>First of all, we unsqueeze the <code>means</code> tensor we had at the first index <em>again</em> so that the dimension where the differentiation between average digit occurs stays at the highest dimension. The result is that 10,1,1,8,8 tensor. We unsqueezed multiple times because we want <em>copies of copies</em> of each of the mean digits. One level of copying at the layer of sample pool, and copying againt to each sample image within the sample pool.</p>
+<p>Next, we need to make the <code>train</code> tensor compatible with this. The thought is that this entire training set will be compared against each average, so there will need to be 10 copies of it. To achieve that we unsqueezed at the 0<sup>th</sup> index to allow for broadcasting to more copies.</p>
+<p>The result is that the 10,1,1,8,8 tensor and 1,10,154,8,8 tensors are broadcast to be equal in shape to perform computation. First in dimension 1, the train data is broadcast (10 copies created), in dimension 2 the mean data is broadcast creating 10 copies of everything below. Then in the 3rd dimension, the means is again broadcast up to 154, creating 154 more copies of what is in the dimensions below. In this way, the 1st dimension corresponds to the different ‘ideal’ or mean digits 0-9, the 2nd dimension corresponds to all the data corresponding to the training data for digits 0-9. The 3rd dimension differentiates between individual samples of a given training digit. And the 4th and 5th dimension get us to individual pixels of those images.</p>
+<div id="fig-bigbroadcast" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="Broadcasting_Full.drawio.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;8: And they say broadcast is dead!</figcaption><p></p>
+</figure>
+</div>
+<p>Let’s see if it worked!</p>
+<div class="cell" data-execution_count="25">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1"></a>all_comparison <span class="op">=</span> mnist_distance(</span>
+<span id="cb41-2"><a href="#cb41-2"></a>    means.unsqueeze(<span class="dv">1</span>).unsqueeze(<span class="dv">1</span>), train.unsqueeze(<span class="dv">0</span>))</span>
+<span id="cb41-3"><a href="#cb41-3"></a><span class="bu">print</span>(<span class="st">'shape of all comparison:     '</span><span class="op">+</span><span class="bu">str</span>(all_comparison.shape))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>shape of all comparison:     torch.Size([10, 10, 154])</code></pre>
+</div>
+</div>
+<p>Great, no error!</p>
+<p>The result is 3 dimensions instead of 5 because the mnist_distance function took the average across the last two dimensions, reducing the data in them to a scalar stored in the 3rd dimension. So for the 0<sup>th</sup> dimension, we have 10 collections of data (horizontal slices), which is the ideal digit is compared against the 154 samples for each digit as indexed in the 1<sup>st</sup> dimension (vertical slices), and the 2<sup>nd</sup> dimension (depth) indexing the 154 samples.</p>
+<p>Picturing the 3D result as a cube, each element in the cube contains the numeric result from mnist_dist for the comparison of an ideal and a test image. Any given sample image is compared against all 9 ideal digits, and where the miniumum mnist_distance corresponds to the integer that the training digit actually is, the benchmark function was correct.</p>
+<div id="fig-datacube" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="Data_cube.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;9: Behold, the data cube! <em>a.k.a Visualizing a Tensor</em></figcaption><p></p>
+</figure>
+</div>
+<p>Alright, so we have a big tensor with every image compared against every ‘average’ digit. Now we need to do some smart indexing to identify the lowest loss function score for each sample image, indicating what number the benchmark function <em>thinks</em> that that image is, and to summarize all that output as a performance metric for us to beat.</p>
+<p>Here are the lines in the following block where the maagic is baked into the cake: 3. Generalizing the function so it can handle inputs of varibable size 11. Using iterator to index an entire vertical slice of the data cube, yielding a 2D tensor. i) The <code>.min(dim=0)</code> looks across the 0<sup>th</sup> dimension of the input tensor, in this case the 2D array. It yields a tensor containing the minimum values in each slice. the <code>.indices</code> yields the indices at which those values were identified. ii) In the bigger picture, <code>.min(dim=0)</code> is looking at single columns of 10 numbers and returning the minimum value. 12. Tallying up how many classifications were attributed to each number 0 through 9. 13. Because our target values are number 0 to 9, they lend themselves to being used as indices. This same code for another kind of task might look very different. Here, our iterating/slicing strategy is such that we know the true digit for all the data points in iteration 0 are 0, iteration 1 are 1, etc, so we can simply take the number of classifications made to the current iteration number as the same thing as classifications to correct category, and add that to our running total.</p>
+<div id="fig-bmkConfMat" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<div class="cell" data-execution_count="26">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1"></a><span class="kw">def</span> acc_rslt(comp):</span>
+<span id="cb43-2"><a href="#cb43-2"></a>    c <span class="op">=</span> comp.clone()</span>
+<span id="cb43-3"><a href="#cb43-3"></a>    x, y, z <span class="op">=</span> [i <span class="cf">for</span> i <span class="kw">in</span> c.shape]</span>
+<span id="cb43-4"><a href="#cb43-4"></a>    totSamp <span class="op">=</span> y<span class="op">*</span>z</span>
+<span id="cb43-5"><a href="#cb43-5"></a>    totCorrect <span class="op">=</span> <span class="dv">0</span>  <span class="co"># Tallier</span></span>
+<span id="cb43-6"><a href="#cb43-6"></a>    confM <span class="op">=</span> []  <span class="co"># confusion matrix will be result of stacking the bincount results</span></span>
+<span id="cb43-7"><a href="#cb43-7"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>):</span>
+<span id="cb43-8"><a href="#cb43-8"></a>        <span class="co"># Taking slice yields 2D object, shape (10,154), take min in each column (axis 1) to get digit prediction</span></span>
+<span id="cb43-9"><a href="#cb43-9"></a>        <span class="co"># Retrieve indices i.e. predictions for all comparisons</span></span>
+<span id="cb43-10"><a href="#cb43-10"></a>        <span class="co"># Yields a 1D tensor with count of integers indexed by integer</span></span>
+<span id="cb43-11"><a href="#cb43-11"></a>        <span class="bu">id</span> <span class="op">=</span> c[:, i, :].<span class="bu">min</span>(dim<span class="op">=</span><span class="dv">0</span>).indices</span>
+<span id="cb43-12"><a href="#cb43-12"></a>        predCnt <span class="op">=</span> torch.bincount(<span class="bu">id</span>, minlength<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb43-13"><a href="#cb43-13"></a>        totCorrect <span class="op">=</span> totCorrect<span class="op">+</span>predCnt[i]</span>
+<span id="cb43-14"><a href="#cb43-14"></a>        confM.append(predCnt)</span>
+<span id="cb43-15"><a href="#cb43-15"></a>    confM <span class="op">=</span> torch.stack(confM)</span>
+<span id="cb43-16"><a href="#cb43-16"></a>    <span class="cf">return</span> (totCorrect<span class="op">/</span>totSamp<span class="op">*</span><span class="dv">100</span>), confM</span>
+<span id="cb43-17"><a href="#cb43-17"></a></span>
+<span id="cb43-18"><a href="#cb43-18"></a></span>
+<span id="cb43-19"><a href="#cb43-19"></a>acc, conf <span class="op">=</span> acc_rslt(all_comparison)</span>
+<span id="cb43-20"><a href="#cb43-20"></a><span class="bu">print</span>(<span class="st">'accuracy: '</span><span class="op">+</span><span class="bu">str</span>(<span class="bu">round</span>(acc.item(), <span class="dv">2</span>))<span class="op">+</span><span class="st">'%'</span>)</span>
+<span id="cb43-21"><a href="#cb43-21"></a></span>
+<span id="cb43-22"><a href="#cb43-22"></a>df <span class="op">=</span> pd.DataFrame(conf)</span>
+<span id="cb43-23"><a href="#cb43-23"></a>df.style.set_properties(<span class="op">**</span>{<span class="st">'font-size'</span>: <span class="st">'6pt'</span>}).background_gradient(<span class="st">'Greys'</span>)</span>
+<span id="cb43-24"><a href="#cb43-24"></a>df.style.set_table_styles([<span class="bu">dict</span>(selector<span class="op">=</span><span class="st">'th'</span>, props<span class="op">=</span>[(</span>
+<span id="cb43-25"><a href="#cb43-25"></a>    <span class="st">'text-align'</span>, <span class="st">'center'</span>)])]).set_properties(<span class="op">**</span>{<span class="st">'text-align'</span>: <span class="st">'center'</span>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>accuracy: 89.94%</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="104">
+
+<style type="text/css">
+#T_e5ea1 th {
+  text-align: center;
+}
+#T_e5ea1_row0_col0, #T_e5ea1_row0_col1, #T_e5ea1_row0_col2, #T_e5ea1_row0_col3, #T_e5ea1_row0_col4, #T_e5ea1_row0_col5, #T_e5ea1_row0_col6, #T_e5ea1_row0_col7, #T_e5ea1_row0_col8, #T_e5ea1_row0_col9, #T_e5ea1_row1_col0, #T_e5ea1_row1_col1, #T_e5ea1_row1_col2, #T_e5ea1_row1_col3, #T_e5ea1_row1_col4, #T_e5ea1_row1_col5, #T_e5ea1_row1_col6, #T_e5ea1_row1_col7, #T_e5ea1_row1_col8, #T_e5ea1_row1_col9, #T_e5ea1_row2_col0, #T_e5ea1_row2_col1, #T_e5ea1_row2_col2, #T_e5ea1_row2_col3, #T_e5ea1_row2_col4, #T_e5ea1_row2_col5, #T_e5ea1_row2_col6, #T_e5ea1_row2_col7, #T_e5ea1_row2_col8, #T_e5ea1_row2_col9, #T_e5ea1_row3_col0, #T_e5ea1_row3_col1, #T_e5ea1_row3_col2, #T_e5ea1_row3_col3, #T_e5ea1_row3_col4, #T_e5ea1_row3_col5, #T_e5ea1_row3_col6, #T_e5ea1_row3_col7, #T_e5ea1_row3_col8, #T_e5ea1_row3_col9, #T_e5ea1_row4_col0, #T_e5ea1_row4_col1, #T_e5ea1_row4_col2, #T_e5ea1_row4_col3, #T_e5ea1_row4_col4, #T_e5ea1_row4_col5, #T_e5ea1_row4_col6, #T_e5ea1_row4_col7, #T_e5ea1_row4_col8, #T_e5ea1_row4_col9, #T_e5ea1_row5_col0, #T_e5ea1_row5_col1, #T_e5ea1_row5_col2, #T_e5ea1_row5_col3, #T_e5ea1_row5_col4, #T_e5ea1_row5_col5, #T_e5ea1_row5_col6, #T_e5ea1_row5_col7, #T_e5ea1_row5_col8, #T_e5ea1_row5_col9, #T_e5ea1_row6_col0, #T_e5ea1_row6_col1, #T_e5ea1_row6_col2, #T_e5ea1_row6_col3, #T_e5ea1_row6_col4, #T_e5ea1_row6_col5, #T_e5ea1_row6_col6, #T_e5ea1_row6_col7, #T_e5ea1_row6_col8, #T_e5ea1_row6_col9, #T_e5ea1_row7_col0, #T_e5ea1_row7_col1, #T_e5ea1_row7_col2, #T_e5ea1_row7_col3, #T_e5ea1_row7_col4, #T_e5ea1_row7_col5, #T_e5ea1_row7_col6, #T_e5ea1_row7_col7, #T_e5ea1_row7_col8, #T_e5ea1_row7_col9, #T_e5ea1_row8_col0, #T_e5ea1_row8_col1, #T_e5ea1_row8_col2, #T_e5ea1_row8_col3, #T_e5ea1_row8_col4, #T_e5ea1_row8_col5, #T_e5ea1_row8_col6, #T_e5ea1_row8_col7, #T_e5ea1_row8_col8, #T_e5ea1_row8_col9, #T_e5ea1_row9_col0, #T_e5ea1_row9_col1, #T_e5ea1_row9_col2, #T_e5ea1_row9_col3, #T_e5ea1_row9_col4, #T_e5ea1_row9_col5, #T_e5ea1_row9_col6, #T_e5ea1_row9_col7, #T_e5ea1_row9_col8, #T_e5ea1_row9_col9 {
+  text-align: center;
+}
+</style>
+<table id="T_e5ea1">
+  <thead>
+    <tr>
+      <th class="blank level0">&nbsp;</th>
+      <th id="T_e5ea1_level0_col0" class="col_heading level0 col0">0</th>
+      <th id="T_e5ea1_level0_col1" class="col_heading level0 col1">1</th>
+      <th id="T_e5ea1_level0_col2" class="col_heading level0 col2">2</th>
+      <th id="T_e5ea1_level0_col3" class="col_heading level0 col3">3</th>
+      <th id="T_e5ea1_level0_col4" class="col_heading level0 col4">4</th>
+      <th id="T_e5ea1_level0_col5" class="col_heading level0 col5">5</th>
+      <th id="T_e5ea1_level0_col6" class="col_heading level0 col6">6</th>
+      <th id="T_e5ea1_level0_col7" class="col_heading level0 col7">7</th>
+      <th id="T_e5ea1_level0_col8" class="col_heading level0 col8">8</th>
+      <th id="T_e5ea1_level0_col9" class="col_heading level0 col9">9</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th id="T_e5ea1_level0_row0" class="row_heading level0 row0">0</th>
+      <td id="T_e5ea1_row0_col0" class="data row0 col0">153</td>
+      <td id="T_e5ea1_row0_col1" class="data row0 col1">0</td>
+      <td id="T_e5ea1_row0_col2" class="data row0 col2">0</td>
+      <td id="T_e5ea1_row0_col3" class="data row0 col3">0</td>
+      <td id="T_e5ea1_row0_col4" class="data row0 col4">1</td>
+      <td id="T_e5ea1_row0_col5" class="data row0 col5">0</td>
+      <td id="T_e5ea1_row0_col6" class="data row0 col6">0</td>
+      <td id="T_e5ea1_row0_col7" class="data row0 col7">0</td>
+      <td id="T_e5ea1_row0_col8" class="data row0 col8">0</td>
+      <td id="T_e5ea1_row0_col9" class="data row0 col9">0</td>
+    </tr>
+    <tr>
+      <th id="T_e5ea1_level0_row1" class="row_heading level0 row1">1</th>
+      <td id="T_e5ea1_row1_col0" class="data row1 col0">0</td>
+      <td id="T_e5ea1_row1_col1" class="data row1 col1">124</td>
+      <td id="T_e5ea1_row1_col2" class="data row1 col2">8</td>
+      <td id="T_e5ea1_row1_col3" class="data row1 col3">1</td>
+      <td id="T_e5ea1_row1_col4" class="data row1 col4">0</td>
+      <td id="T_e5ea1_row1_col5" class="data row1 col5">2</td>
+      <td id="T_e5ea1_row1_col6" class="data row1 col6">4</td>
+      <td id="T_e5ea1_row1_col7" class="data row1 col7">0</td>
+      <td id="T_e5ea1_row1_col8" class="data row1 col8">4</td>
+      <td id="T_e5ea1_row1_col9" class="data row1 col9">11</td>
+    </tr>
+    <tr>
+      <th id="T_e5ea1_level0_row2" class="row_heading level0 row2">2</th>
+      <td id="T_e5ea1_row2_col0" class="data row2 col0">0</td>
+      <td id="T_e5ea1_row2_col1" class="data row2 col1">6</td>
+      <td id="T_e5ea1_row2_col2" class="data row2 col2">136</td>
+      <td id="T_e5ea1_row2_col3" class="data row2 col3">4</td>
+      <td id="T_e5ea1_row2_col4" class="data row2 col4">0</td>
+      <td id="T_e5ea1_row2_col5" class="data row2 col5">0</td>
+      <td id="T_e5ea1_row2_col6" class="data row2 col6">0</td>
+      <td id="T_e5ea1_row2_col7" class="data row2 col7">2</td>
+      <td id="T_e5ea1_row2_col8" class="data row2 col8">5</td>
+      <td id="T_e5ea1_row2_col9" class="data row2 col9">1</td>
+    </tr>
+    <tr>
+      <th id="T_e5ea1_level0_row3" class="row_heading level0 row3">3</th>
+      <td id="T_e5ea1_row3_col0" class="data row3 col0">1</td>
+      <td id="T_e5ea1_row3_col1" class="data row3 col1">0</td>
+      <td id="T_e5ea1_row3_col2" class="data row3 col2">1</td>
+      <td id="T_e5ea1_row3_col3" class="data row3 col3">143</td>
+      <td id="T_e5ea1_row3_col4" class="data row3 col4">0</td>
+      <td id="T_e5ea1_row3_col5" class="data row3 col5">0</td>
+      <td id="T_e5ea1_row3_col6" class="data row3 col6">0</td>
+      <td id="T_e5ea1_row3_col7" class="data row3 col7">4</td>
+      <td id="T_e5ea1_row3_col8" class="data row3 col8">2</td>
+      <td id="T_e5ea1_row3_col9" class="data row3 col9">3</td>
+    </tr>
+    <tr>
+      <th id="T_e5ea1_level0_row4" class="row_heading level0 row4">4</th>
+      <td id="T_e5ea1_row4_col0" class="data row4 col0">1</td>
+      <td id="T_e5ea1_row4_col1" class="data row4 col1">3</td>
+      <td id="T_e5ea1_row4_col2" class="data row4 col2">0</td>
+      <td id="T_e5ea1_row4_col3" class="data row4 col3">0</td>
+      <td id="T_e5ea1_row4_col4" class="data row4 col4">143</td>
+      <td id="T_e5ea1_row4_col5" class="data row4 col5">0</td>
+      <td id="T_e5ea1_row4_col6" class="data row4 col6">0</td>
+      <td id="T_e5ea1_row4_col7" class="data row4 col7">7</td>
+      <td id="T_e5ea1_row4_col8" class="data row4 col8">0</td>
+      <td id="T_e5ea1_row4_col9" class="data row4 col9">0</td>
+    </tr>
+    <tr>
+      <th id="T_e5ea1_level0_row5" class="row_heading level0 row5">5</th>
+      <td id="T_e5ea1_row5_col0" class="data row5 col0">1</td>
+      <td id="T_e5ea1_row5_col1" class="data row5 col1">0</td>
+      <td id="T_e5ea1_row5_col2" class="data row5 col2">0</td>
+      <td id="T_e5ea1_row5_col3" class="data row5 col3">1</td>
+      <td id="T_e5ea1_row5_col4" class="data row5 col4">1</td>
+      <td id="T_e5ea1_row5_col5" class="data row5 col5">131</td>
+      <td id="T_e5ea1_row5_col6" class="data row5 col6">3</td>
+      <td id="T_e5ea1_row5_col7" class="data row5 col7">0</td>
+      <td id="T_e5ea1_row5_col8" class="data row5 col8">0</td>
+      <td id="T_e5ea1_row5_col9" class="data row5 col9">17</td>
+    </tr>
+    <tr>
+      <th id="T_e5ea1_level0_row6" class="row_heading level0 row6">6</th>
+      <td id="T_e5ea1_row6_col0" class="data row6 col0">1</td>
+      <td id="T_e5ea1_row6_col1" class="data row6 col1">1</td>
+      <td id="T_e5ea1_row6_col2" class="data row6 col2">0</td>
+      <td id="T_e5ea1_row6_col3" class="data row6 col3">0</td>
+      <td id="T_e5ea1_row6_col4" class="data row6 col4">1</td>
+      <td id="T_e5ea1_row6_col5" class="data row6 col5">0</td>
+      <td id="T_e5ea1_row6_col6" class="data row6 col6">151</td>
+      <td id="T_e5ea1_row6_col7" class="data row6 col7">0</td>
+      <td id="T_e5ea1_row6_col8" class="data row6 col8">0</td>
+      <td id="T_e5ea1_row6_col9" class="data row6 col9">0</td>
+    </tr>
+    <tr>
+      <th id="T_e5ea1_level0_row7" class="row_heading level0 row7">7</th>
+      <td id="T_e5ea1_row7_col0" class="data row7 col0">0</td>
+      <td id="T_e5ea1_row7_col1" class="data row7 col1">0</td>
+      <td id="T_e5ea1_row7_col2" class="data row7 col2">0</td>
+      <td id="T_e5ea1_row7_col3" class="data row7 col3">0</td>
+      <td id="T_e5ea1_row7_col4" class="data row7 col4">1</td>
+      <td id="T_e5ea1_row7_col5" class="data row7 col5">1</td>
+      <td id="T_e5ea1_row7_col6" class="data row7 col6">0</td>
+      <td id="T_e5ea1_row7_col7" class="data row7 col7">152</td>
+      <td id="T_e5ea1_row7_col8" class="data row7 col8">0</td>
+      <td id="T_e5ea1_row7_col9" class="data row7 col9">0</td>
+    </tr>
+    <tr>
+      <th id="T_e5ea1_level0_row8" class="row_heading level0 row8">8</th>
+      <td id="T_e5ea1_row8_col0" class="data row8 col0">0</td>
+      <td id="T_e5ea1_row8_col1" class="data row8 col1">15</td>
+      <td id="T_e5ea1_row8_col2" class="data row8 col2">2</td>
+      <td id="T_e5ea1_row8_col3" class="data row8 col3">2</td>
+      <td id="T_e5ea1_row8_col4" class="data row8 col4">0</td>
+      <td id="T_e5ea1_row8_col5" class="data row8 col5">4</td>
+      <td id="T_e5ea1_row8_col6" class="data row8 col6">2</td>
+      <td id="T_e5ea1_row8_col7" class="data row8 col7">2</td>
+      <td id="T_e5ea1_row8_col8" class="data row8 col8">119</td>
+      <td id="T_e5ea1_row8_col9" class="data row8 col9">8</td>
+    </tr>
+    <tr>
+      <th id="T_e5ea1_level0_row9" class="row_heading level0 row9">9</th>
+      <td id="T_e5ea1_row9_col0" class="data row9 col0">0</td>
+      <td id="T_e5ea1_row9_col1" class="data row9 col1">3</td>
+      <td id="T_e5ea1_row9_col2" class="data row9 col2">0</td>
+      <td id="T_e5ea1_row9_col3" class="data row9 col3">5</td>
+      <td id="T_e5ea1_row9_col4" class="data row9 col4">4</td>
+      <td id="T_e5ea1_row9_col5" class="data row9 col5">1</td>
+      <td id="T_e5ea1_row9_col6" class="data row9 col6">0</td>
+      <td id="T_e5ea1_row9_col7" class="data row9 col7">6</td>
+      <td id="T_e5ea1_row9_col8" class="data row9 col8">2</td>
+      <td id="T_e5ea1_row9_col9" class="data row9 col9">133</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+<p></p><figcaption class="figure-caption">Figure&nbsp;10: Confusion Matrix. Tally of Actual (row) Vs. Predicted (col)”</figcaption><p></p>
+</figure>
+</div>
+<p>Exciting! Just shy of 90% accuracy is the score to beat. And we can see which deigits performed better or worse. Row 8 shows that numbe r8 had the worst performance, with only 119/154 images classified correctly, with most 8’s being incorrectly classified as 1’s, or 9’s. Following that, 5’s had 131/154 correct, with 17 instances incorrectly classified as a 9. Now, we are <em>ready</em> to make a neural network.</p>
+<div class="callout-important callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>If you want to understand each line of everything that follows, a strong grasp of broadcasting will be critical.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="outro" class="level1">
+<h1>Outro</h1>
+<p>A couple of key take aways from this portion of the fastAI lesson. A notable one not to skip si the fact that there is no sense deploying neural networks if other methods can do the job better, so we should always be verifying that we perform better than the alternatives. I really had a few a-ha moments in learning about the broadcasting techniques and so I felt it would be great to share. It was a lot easier to scribble the drawings on paper than to put them on the screen but I hope you find them illuminating!</p>
+<p>I <em>was</em> able to create that neural net to classify digits more accurately, in the end. I’ll walk through that in the next post.</p>
 
 
 <!-- -->
 
-</section>
 </section>
 
 
@@ -817,6 +1202,7 @@ Broadcasting
 <li id="fn1"><p>Too fun not to share though I think this is a machine vision implementation without neural nets. Probably just averaging colour across a pixel range to trigger the paddles.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn2"><p>If it ain’t ‘py’, it ain’t python, right?<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn3"><p>Check out <a href="https://mathworld.wolfram.com/L2-Norm.html">this link</a> for more on these norms. Be aware that MSE is just a colloquial name for the L2 norm, and also that a norm alone isn’t a ‘loss function’ <em>per se</em>. Any function at all is a loss function if you use it to calculate loss. That cetainly doesn’t mean it’ll be a good one. Books could be written on the topic though, so we’ll leave it there.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>There is some ambiguity as to how we could’ve gone about this, as to wehther or not we thought about the digit from which samples are drawn as the first layer, or the average digit being tested against as the first layer. I chose the latter.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -1003,342 +1389,461 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="sourceCode" id="cb36" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "A Simple Digit Classifier"</span></span>
-<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "David De Sa"</span></span>
-<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> "2023-03-14"</span></span>
-<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a><span class="an">categories:</span><span class="co"> [python, pyTorch, NeuralNetworks]</span></span>
-<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a><span class="an">image:</span><span class="co"> "NN101_thumbnail.png"</span></span>
-<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
-<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
-<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a><span class="co">    code-fold: true</span></span>
-<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a><span class="co">    toc: true</span></span>
-<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools: true</span></span>
-<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a><span class="an">draft:</span><span class="co"> true</span></span>
-<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a><span class="fu">## TL;DR</span></span>
-<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a>The best way to learn is to teach, so in this post I try to teach the reader how my first neural network implementation works! I built this in following along with the awesome lessons over at <span class="co">[</span><span class="ot">fast.ai</span><span class="co">](course.fast.ai)</span>. Many thanks to that team.</span>
-<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a><span class="fu"># Overview</span></span>
-<span id="cb36-19"><a href="#cb36-19" aria-hidden="true" tabindex="-1"></a><span class="fu">### What?</span></span>
-<span id="cb36-20"><a href="#cb36-20" aria-hidden="true" tabindex="-1"></a>We're going to make a function that, given a picture of a numeric digit, identifes the number.</span>
-<span id="cb36-21"><a href="#cb36-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-22"><a href="#cb36-22" aria-hidden="true" tabindex="-1"></a><span class="fu">### Why?</span></span>
-<span id="cb36-23"><a href="#cb36-23" aria-hidden="true" tabindex="-1"></a>You need to crawl before you can <span class="co">[</span><span class="ot">reject unripe tomatoes</span><span class="co">](https://www.reddit.com/r/oddlysatisfying/comments/zw3iwq/machine_that_rejects_unripe_tomatoes)</span>^<span class="co">[</span><span class="ot">Too fun not to share though I think this is a machine vision implementation without neural nets. Probably just averaging colour across a pixel range to trigger the paddles.</span><span class="co">]</span>, and that before you can comfortably learn to tie a necktie while your Tesla is whipping around corners with you in the drivers seat.</span>
-<span id="cb36-24"><a href="#cb36-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-25"><a href="#cb36-25" aria-hidden="true" tabindex="-1"></a><span class="fu">### Who?</span></span>
-<span id="cb36-26"><a href="#cb36-26" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Who am I</span><span class="co">](https://davidd003.github.io/Coding_Blog/about.html)</span>!? Who are you?!</span>
-<span id="cb36-27"><a href="#cb36-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-28"><a href="#cb36-28" aria-hidden="true" tabindex="-1"></a><span class="fu">### How?</span></span>
-<span id="cb36-29"><a href="#cb36-29" aria-hidden="true" tabindex="-1"></a>Using <span class="co">[</span><span class="ot">PyTorch</span><span class="co">](https://pytorch.org/)</span>^<span class="co">[</span><span class="ot">If it ain't 'py', it ain't python, right?</span><span class="co">]</span>, an opensource toolkit for building neural networks. Truly the shoulders of giants at our finger tips.</span>
-<span id="cb36-30"><a href="#cb36-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-31"><a href="#cb36-31" aria-hidden="true" tabindex="-1"></a><span class="fu"># Code Review</span></span>
-<span id="cb36-32"><a href="#cb36-32" aria-hidden="true" tabindex="-1"></a>Making a neural network to solve a problem is a bunch of mumbo jumbo if we're not actually performing better than a simpler heuristic function. To test that, we will start off by constructing a simple classification that classifies a digit based on which average digit image it is nearest to (You'll see what I mean later). Then we will build a simple neural network (not too deep, not too convolutional, just right), and try to out perform the naive function!</span>
-<span id="cb36-33"><a href="#cb36-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-34"><a href="#cb36-34" aria-hidden="true" tabindex="-1"></a>Let's get into it!</span>
-<span id="cb36-35"><a href="#cb36-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-36"><a href="#cb36-36" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true"}</span>
-<span id="cb36-37"><a href="#cb36-37" aria-hidden="true" tabindex="-1"></a>The required dependencies!:<span class="in">`scikit-learn`</span>, <span class="in">`fastbook`</span>, <span class="in">`matplotlib`</span></span>
-<span id="cb36-38"><a href="#cb36-38" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb36-39"><a href="#cb36-39" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-42"><a href="#cb36-42" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb36-43"><a href="#cb36-43" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
-<span id="cb36-44"><a href="#cb36-44" aria-hidden="true" tabindex="-1"></a><span class="co"># Install dependency</span></span>
-<span id="cb36-45"><a href="#cb36-45" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastbook <span class="im">import</span> <span class="op">*</span></span>
-<span id="cb36-46"><a href="#cb36-46" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastai.vision.<span class="bu">all</span> <span class="im">import</span> <span class="op">*</span></span>
-<span id="cb36-47"><a href="#cb36-47" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> load_digits</span>
-<span id="cb36-48"><a href="#cb36-48" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> fastbook</span>
-<span id="cb36-49"><a href="#cb36-49" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-50"><a href="#cb36-50" aria-hidden="true" tabindex="-1"></a>fastbook.setup_book()</span>
-<span id="cb36-51"><a href="#cb36-51" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-52"><a href="#cb36-52" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-53"><a href="#cb36-53" aria-hidden="true" tabindex="-1"></a>matplotlib.rc(<span class="st">"image"</span>, cmap<span class="op">=</span><span class="st">"Greys"</span>)</span>
-<span id="cb36-54"><a href="#cb36-54" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb36-55"><a href="#cb36-55" aria-hidden="true" tabindex="-1"></a><span class="fu">## Data Acquisition</span></span>
-<span id="cb36-56"><a href="#cb36-56" aria-hidden="true" tabindex="-1"></a>In any real world ML application, data acquisition can be one of the more costly  parts of the process, luckily not so for this simple learning example. </span>
-<span id="cb36-57"><a href="#cb36-57" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-58"><a href="#cb36-58" aria-hidden="true" tabindex="-1"></a>We're using a variant of the classic NIST database, a collection of images of hand drawn numbers that provided the means for benchmarking in earlier days of ML. </span>
-<span id="cb36-59"><a href="#cb36-59" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-60"><a href="#cb36-60" aria-hidden="true" tabindex="-1"></a>I had trouble wrangling with the various sources for this database online, the simplest workable solution I could find for us to get a grip on these images was to just import the datasets library that comes with installing the scikit-learn package.</span>
-<span id="cb36-61"><a href="#cb36-61" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-62"><a href="#cb36-62" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip collapse="true"}</span>
-<span id="cb36-63"><a href="#cb36-63" aria-hidden="true" tabindex="-1"></a><span class="fu">## Understand Your Input!</span></span>
-<span id="cb36-64"><a href="#cb36-64" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-65"><a href="#cb36-65" aria-hidden="true" tabindex="-1"></a>Pre-processing data before even touching any neural net methods can improve your final performance. Note the data set information offered at the <span class="co">[</span><span class="ot">source page</span><span class="co">](https://archive.ics.uci.edu/ml/datasets/Optical+Recognition+of+Handwritten+Digits)</span>: </span>
-<span id="cb36-66"><a href="#cb36-66" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-67"><a href="#cb36-67" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; We used preprocessing programs made available by NIST to extract normalized bitmaps of handwritten digits from a preprinted form. From a total of 43 people, 30 contributed to the training set and different 13 to the test set. 32x32 bitmaps are divided into nonoverlapping blocks of 4x4 and the number of on pixels are counted in each block. This generates an input matrix of 8x8 where each element is an integer in the range 0..16. This reduces dimensionality and gives invariance to small distortions.</span></span>
-<span id="cb36-68"><a href="#cb36-68" aria-hidden="true" tabindex="-1"></a><span class="at">:::</span></span>
-<span id="cb36-69"><a href="#cb36-69" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-72"><a href="#cb36-72" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb36-73"><a href="#cb36-73" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
-<span id="cb36-74"><a href="#cb36-74" aria-hidden="true" tabindex="-1"></a>mnist <span class="op">=</span> load_digits()</span>
-<span id="cb36-75"><a href="#cb36-75" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb36-76"><a href="#cb36-76" aria-hidden="true" tabindex="-1"></a>Always good to get to know your data..</span>
-<span id="cb36-79"><a href="#cb36-79" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb36-80"><a href="#cb36-80" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
-<span id="cb36-81"><a href="#cb36-81" aria-hidden="true" tabindex="-1"></a>mnist.keys()</span>
-<span id="cb36-82"><a href="#cb36-82" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb36-83"><a href="#cb36-83" aria-hidden="true" tabindex="-1"></a>What's in here?</span>
-<span id="cb36-86"><a href="#cb36-86" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb36-87"><a href="#cb36-87" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
-<span id="cb36-88"><a href="#cb36-88" aria-hidden="true" tabindex="-1"></a><span class="co"># Observing y value for data sequence</span></span>
-<span id="cb36-89"><a href="#cb36-89" aria-hidden="true" tabindex="-1"></a>mnist[<span class="st">"target"</span>], <span class="st">"# targets: "</span> <span class="op">+</span> <span class="bu">str</span>(<span class="bu">len</span>(mnist[<span class="st">"target"</span>]))</span>
-<span id="cb36-90"><a href="#cb36-90" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb36-91"><a href="#cb36-91" aria-hidden="true" tabindex="-1"></a>So we have 1797 numbers in this data set.</span>
-<span id="cb36-94"><a href="#cb36-94" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb36-95"><a href="#cb36-95" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
-<span id="cb36-96"><a href="#cb36-96" aria-hidden="true" tabindex="-1"></a>n0 <span class="op">=</span> [[n <span class="cf">for</span> n <span class="kw">in</span> mnist[<span class="st">"data"</span>][<span class="dv">0</span>][i <span class="op">*</span> <span class="dv">8</span>: i <span class="op">*</span> <span class="dv">8</span> <span class="op">+</span> <span class="dv">7</span>]] <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, <span class="dv">8</span>)]</span>
-<span id="cb36-97"><a href="#cb36-97" aria-hidden="true" tabindex="-1"></a>n0, mnist[<span class="st">"images"</span>][<span class="dv">0</span>]</span>
-<span id="cb36-98"><a href="#cb36-98" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb36-99"><a href="#cb36-99" aria-hidden="true" tabindex="-1"></a>And it looks like the 'data' entity is a list of one dimensional vectors, listing out the 64 pixels of each image, whereas the 'images' entity is the same info already organized into the 8x8 array of pixels.</span>
-<span id="cb36-100"><a href="#cb36-100" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-101"><a href="#cb36-101" aria-hidden="true" tabindex="-1"></a>The values in the arrays are from 0-16, as described in the source documentation. Important to keep in mind that we might want to normalize them all to a range from 0 to 1 for our purposes. We'll do that later.</span>
-<span id="cb36-102"><a href="#cb36-102" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-103"><a href="#cb36-103" aria-hidden="true" tabindex="-1"></a>I had to do some funny indexing to tease that out. Something I learned along the way was the fantastic .view() function of the Tensor object in pyTorch. Tensors are like a numpy array, have a lot of features that will be critical for quickly creating neural nets. This object type was imported with fastbook.</span>
-<span id="cb36-106"><a href="#cb36-106" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb36-107"><a href="#cb36-107" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
-<span id="cb36-108"><a href="#cb36-108" aria-hidden="true" tabindex="-1"></a>Tensor(mnist[<span class="st">"data"</span>][<span class="dv">0</span>]).view(<span class="op">-</span><span class="dv">1</span>, <span class="dv">8</span>)</span>
-<span id="cb36-109"><a href="#cb36-109" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb36-110"><a href="#cb36-110" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-111"><a href="#cb36-111" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip}</span>
-<span id="cb36-112"><a href="#cb36-112" aria-hidden="true" tabindex="-1"></a><span class="fu">## Tensor Views</span></span>
-<span id="cb36-113"><a href="#cb36-113" aria-hidden="true" tabindex="-1"></a>Using -1 in the argument for the view function will auto-size the tensor based on the number of elements in the array, and the other dimensions specified. This should come in handy!</span>
-<span id="cb36-114"><a href="#cb36-114" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb36-115"><a href="#cb36-115" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-116"><a href="#cb36-116" aria-hidden="true" tabindex="-1"></a>For a <span class="co">[</span><span class="ot">classification task</span><span class="co">](https://docs.aws.amazon.com/machine-learning/latest/dg/types-of-ml-models.html)</span> such as this, it's important to keep in mind that our data should be balanced in quantity per class. Let's take a look at how many we've got. </span>
-<span id="cb36-117"><a href="#cb36-117" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-120"><a href="#cb36-120" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb36-121"><a href="#cb36-121" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
-<span id="cb36-122"><a href="#cb36-122" aria-hidden="true" tabindex="-1"></a>[<span class="bu">str</span>(i) <span class="op">+</span> <span class="st">": "</span> <span class="op">+</span> <span class="bu">str</span>(<span class="bu">list</span>(mnist[<span class="st">"target"</span>]).count(i))</span>
-<span id="cb36-123"><a href="#cb36-123" aria-hidden="true" tabindex="-1"></a> <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>)]  <span class="co"># Count of each digit in dataset</span></span>
-<span id="cb36-124"><a href="#cb36-124" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb36-125"><a href="#cb36-125" aria-hidden="true" tabindex="-1"></a>So, a little imbalance but nothing crazy. Worth checking though...</span>
-<span id="cb36-126"><a href="#cb36-126" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-127"><a href="#cb36-127" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning}</span>
-<span id="cb36-128"><a href="#cb36-128" aria-hidden="true" tabindex="-1"></a><span class="fu">## Beware Naive Optimization</span></span>
-<span id="cb36-129"><a href="#cb36-129" aria-hidden="true" tabindex="-1"></a>If we train on a million images of 7's, and only a thousand 1's, we can be duped into thinking we're rocking a 0.1% error rate by a naive model that guesses '7' no matter what you give it!</span>
-<span id="cb36-130"><a href="#cb36-130" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb36-131"><a href="#cb36-131" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-132"><a href="#cb36-132" aria-hidden="true" tabindex="-1"></a><span class="fu">### Picturing Inputs</span></span>
-<span id="cb36-133"><a href="#cb36-133" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-134"><a href="#cb36-134" aria-hidden="true" tabindex="-1"></a>:::{#fig-numbersamples}</span>
-<span id="cb36-137"><a href="#cb36-137" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb36-138"><a href="#cb36-138" aria-hidden="true" tabindex="-1"></a><span class="co"># | column: page</span></span>
-<span id="cb36-139"><a href="#cb36-139" aria-hidden="true" tabindex="-1"></a><span class="co"># | layout-ncol: 5</span></span>
-<span id="cb36-140"><a href="#cb36-140" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
-<span id="cb36-141"><a href="#cb36-141" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>):</span>
-<span id="cb36-142"><a href="#cb36-142" aria-hidden="true" tabindex="-1"></a>    show_image(mnist[<span class="st">"images"</span>][<span class="op">-</span>i] <span class="op">/</span> <span class="dv">16</span>)  <span class="co"># Visualizing example digit</span></span>
-<span id="cb36-143"><a href="#cb36-143" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb36-144"><a href="#cb36-144" aria-hidden="true" tabindex="-1"></a>A few examples of our data. Can you read them?</span>
-<span id="cb36-145"><a href="#cb36-145" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb36-146"><a href="#cb36-146" aria-hidden="true" tabindex="-1"></a>Turns out that pre-processing that comes baked in does make them pretty grainy. But nothing some training can't solve.</span>
-<span id="cb36-147"><a href="#cb36-147" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-148"><a href="#cb36-148" aria-hidden="true" tabindex="-1"></a><span class="fu">### Bucketing Classes</span></span>
-<span id="cb36-149"><a href="#cb36-149" aria-hidden="true" tabindex="-1"></a>We need to separate out our inputs for training purposes. We'll iterate across the 'targets' list, using the target numbers themselves as the index value to dump the corresponding 'image' data into the storage bin.</span>
-<span id="cb36-152"><a href="#cb36-152" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb36-153"><a href="#cb36-153" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-fold: show</span></span>
-<span id="cb36-154"><a href="#cb36-154" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
-<span id="cb36-155"><a href="#cb36-155" aria-hidden="true" tabindex="-1"></a>stacked <span class="op">=</span> []</span>
-<span id="cb36-156"><a href="#cb36-156" aria-hidden="true" tabindex="-1"></a><span class="co"># This loop because stacked=[[]]*10 makes 1 list in list, with 10 copies of pointers... need separate objects</span></span>
-<span id="cb36-157"><a href="#cb36-157" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>):</span>
-<span id="cb36-158"><a href="#cb36-158" aria-hidden="true" tabindex="-1"></a>    stacked.append([])</span>
-<span id="cb36-159"><a href="#cb36-159" aria-hidden="true" tabindex="-1"></a><span class="co"># Assign all images to the right collection in the 'stacked' list, indexed by target</span></span>
-<span id="cb36-160"><a href="#cb36-160" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(mnist[<span class="st">"target"</span>])):</span>
-<span id="cb36-161"><a href="#cb36-161" aria-hidden="true" tabindex="-1"></a>    stacked[mnist[<span class="st">"target"</span>][i]].append(mnist[<span class="st">"images"</span>][i])</span>
-<span id="cb36-162"><a href="#cb36-162" aria-hidden="true" tabindex="-1"></a>lens <span class="op">=</span> [<span class="bu">len</span>(stacked[i]) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>)]</span>
-<span id="cb36-163"><a href="#cb36-163" aria-hidden="true" tabindex="-1"></a>lens, <span class="bu">min</span>(lens)  <span class="co"># Confirm counts of samples</span></span>
-<span id="cb36-164"><a href="#cb36-164" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb36-165"><a href="#cb36-165" aria-hidden="true" tabindex="-1"></a>So that worked, we now have a list of lists of arrays, the arrays being interpreted as images, the lists being collections of images, with all images in a given collection being an image of the same hand drawn number. And we see that we have the fewest samples of numbers 8's, so we'll take only that many samples (174) of every other image for our dataset. </span>
-<span id="cb36-166"><a href="#cb36-166" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-167"><a href="#cb36-167" aria-hidden="true" tabindex="-1"></a><span class="fu">### Segmentation</span></span>
-<span id="cb36-168"><a href="#cb36-168" aria-hidden="true" tabindex="-1"></a>The next step is to define which data will be our training, and our validation set. It was important to bucket out our data first so by randomly sampling our data we didn't generate a validation set with a large imbalance in the number of classes to be tested in it. </span>
-<span id="cb36-169"><a href="#cb36-169" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-170"><a href="#cb36-170" aria-hidden="true" tabindex="-1"></a>First we convert to a tensor, then segment training from validation data. Arbitrarily taking 20 examples from each digit, so, 11.5% of the total data set towards validation.</span>
-<span id="cb36-171"><a href="#cb36-171" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-172"><a href="#cb36-172" aria-hidden="true" tabindex="-1"></a>We'll print out the size of these collections and take a peek at a sample to make sure we indexed right.</span>
-<span id="cb36-173"><a href="#cb36-173" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-174"><a href="#cb36-174" aria-hidden="true" tabindex="-1"></a>:::{#fig-checkSamp}</span>
-<span id="cb36-177"><a href="#cb36-177" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb36-178"><a href="#cb36-178" aria-hidden="true" tabindex="-1"></a><span class="co"># | warning: False</span></span>
-<span id="cb36-179"><a href="#cb36-179" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
-<span id="cb36-180"><a href="#cb36-180" aria-hidden="true" tabindex="-1"></a><span class="co"># To make dataset a tensor, make it same number of dimensions</span></span>
-<span id="cb36-181"><a href="#cb36-181" aria-hidden="true" tabindex="-1"></a>stacked <span class="op">=</span> tensor([x[:<span class="dv">174</span>] <span class="cf">for</span> x <span class="kw">in</span> stacked])</span>
-<span id="cb36-182"><a href="#cb36-182" aria-hidden="true" tabindex="-1"></a><span class="co"># Segmentation: Pull 20 of each digit out of training set</span></span>
-<span id="cb36-183"><a href="#cb36-183" aria-hidden="true" tabindex="-1"></a>test <span class="op">=</span> [dig[<span class="op">-</span><span class="dv">20</span>:] <span class="cf">for</span> dig <span class="kw">in</span> stacked]</span>
-<span id="cb36-184"><a href="#cb36-184" aria-hidden="true" tabindex="-1"></a>train <span class="op">=</span> [dig[:<span class="op">-</span><span class="dv">20</span>] <span class="cf">for</span> dig <span class="kw">in</span> stacked]</span>
-<span id="cb36-185"><a href="#cb36-185" aria-hidden="true" tabindex="-1"></a><span class="co"># Confirm counts of samples</span></span>
-<span id="cb36-186"><a href="#cb36-186" aria-hidden="true" tabindex="-1"></a>[<span class="bu">len</span>(test[i]) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>)], [<span class="bu">len</span>(train[i]) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>)]</span>
-<span id="cb36-187"><a href="#cb36-187" aria-hidden="true" tabindex="-1"></a>show_image(stacked[<span class="dv">3</span>][<span class="dv">0</span>])  <span class="co"># Check sample</span></span>
-<span id="cb36-188"><a href="#cb36-188" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb36-189"><a href="#cb36-189" aria-hidden="true" tabindex="-1"></a>Is it a 3?</span>
-<span id="cb36-190"><a href="#cb36-190" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb36-191"><a href="#cb36-191" aria-hidden="true" tabindex="-1"></a>Nice.</span>
-<span id="cb36-192"><a href="#cb36-192" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-193"><a href="#cb36-193" aria-hidden="true" tabindex="-1"></a>It's important to keep track of what's what.</span>
-<span id="cb36-196"><a href="#cb36-196" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb36-197"><a href="#cb36-197" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
-<span id="cb36-198"><a href="#cb36-198" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-fold: show</span></span>
-<span id="cb36-199"><a href="#cb36-199" aria-hidden="true" tabindex="-1"></a><span class="bu">type</span>(train), <span class="bu">type</span>(train[<span class="dv">0</span>]), <span class="bu">type</span>(train[<span class="dv">0</span>][<span class="dv">0</span>]), [</span>
-<span id="cb36-200"><a href="#cb36-200" aria-hidden="true" tabindex="-1"></a>    <span class="bu">type</span>(test), <span class="bu">type</span>(test[<span class="dv">0</span>]), <span class="bu">type</span>(test[<span class="dv">0</span>][<span class="dv">0</span>])]</span>
-<span id="cb36-201"><a href="#cb36-201" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb36-202"><a href="#cb36-202" aria-hidden="true" tabindex="-1"></a>Ok so our top level containers for training/testing data are basic python lists. Within those, we have 10 collections, one for each integer. Those are Tensors. And then, each image (a collection of pixels unto itself) within those tensors, are also Tensor type objects.</span>
-<span id="cb36-203"><a href="#cb36-203" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-204"><a href="#cb36-204" aria-hidden="true" tabindex="-1"></a>Instead of a basic Python list, we will need the top level containers as tensors to leverage the pyTorch functionality built into them. luckily it's an easy conversion</span>
-<span id="cb36-207"><a href="#cb36-207" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb36-208"><a href="#cb36-208" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
-<span id="cb36-209"><a href="#cb36-209" aria-hidden="true" tabindex="-1"></a><span class="co"># Converts PyList of tensors to tensor of tesnors (join in new dimensions, retain target indexing)</span></span>
-<span id="cb36-210"><a href="#cb36-210" aria-hidden="true" tabindex="-1"></a>train <span class="op">=</span> torch.stack(train)</span>
-<span id="cb36-211"><a href="#cb36-211" aria-hidden="true" tabindex="-1"></a>test <span class="op">=</span> torch.stack(test)</span>
-<span id="cb36-212"><a href="#cb36-212" aria-hidden="true" tabindex="-1"></a>train.shape, test.shape</span>
-<span id="cb36-213"><a href="#cb36-213" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb36-214"><a href="#cb36-214" aria-hidden="true" tabindex="-1"></a>Now here is a crtiical piece, working with multidimensional arrays and keeping in mind what we understand these to be. Our test and training tensors have the same dimensionality but not the same size. </span>
-<span id="cb36-215"><a href="#cb36-215" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-216"><a href="#cb36-216" aria-hidden="true" tabindex="-1"></a><span class="fu">## Building Benchmark Function</span></span>
-<span id="cb36-217"><a href="#cb36-217" aria-hidden="true" tabindex="-1"></a>Where it gets fun then is averaging and such across these dimensions. By doing so we can get the 'average drawing of a number,' which will be integral to creating our benchmark classification function.</span>
-<span id="cb36-218"><a href="#cb36-218" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-219"><a href="#cb36-219" aria-hidden="true" tabindex="-1"></a><span class="fu">### The 'Average' Digit</span></span>
-<span id="cb36-220"><a href="#cb36-220" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-221"><a href="#cb36-221" aria-hidden="true" tabindex="-1"></a>:::{#fig-ideals}</span>
-<span id="cb36-224"><a href="#cb36-224" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb36-225"><a href="#cb36-225" aria-hidden="true" tabindex="-1"></a><span class="co"># | column: page</span></span>
-<span id="cb36-226"><a href="#cb36-226" aria-hidden="true" tabindex="-1"></a><span class="co"># | layout-ncol: 5</span></span>
-<span id="cb36-227"><a href="#cb36-227" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
-<span id="cb36-228"><a href="#cb36-228" aria-hidden="true" tabindex="-1"></a>means <span class="op">=</span> torch.stack([x.mean(<span class="dv">0</span>) <span class="cf">for</span> x <span class="kw">in</span> train])  <span class="co"># Compute the average digit</span></span>
-<span id="cb36-229"><a href="#cb36-229" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>):</span>
-<span id="cb36-230"><a href="#cb36-230" aria-hidden="true" tabindex="-1"></a>    show_image(means[i])</span>
-<span id="cb36-231"><a href="#cb36-231" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb36-232"><a href="#cb36-232" aria-hidden="true" tabindex="-1"></a>Now those are some digits!</span>
-<span id="cb36-233"><a href="#cb36-233" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb36-234"><a href="#cb36-234" aria-hidden="true" tabindex="-1"></a>I hope you think this is as cool as I do! It calls to mind the idea of seeing a video of someone doing something routine every day like brushing their teeth, but at a million times speed, all the variations of movement wash out and create this somewhat blurry view of the general pattern. Like a mashing of all possible worlds. What did that code do, how did we get this? Let's tear this one apart.</span>
-<span id="cb36-235"><a href="#cb36-235" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-236"><a href="#cb36-236" aria-hidden="true" tabindex="-1"></a>First of all, we're dealing with a 4 dimensional tensor, <span class="in">`train`</span>. When we jumped into a list comprehension iterating <span class="in">`for x in train`</span>, we 'stepped into' that 0^th^ dimension, so to speak. Then any given element <span class="in">`x`</span> is a 3 dimensional tensor. </span>
-<span id="cb36-237"><a href="#cb36-237" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-238"><a href="#cb36-238" aria-hidden="true" tabindex="-1"></a>We will go through 10 of them, one for each integer, and each will contain 174 <span class="in">`8x8`</span> images. When we take the mean in the 0^th^ dimension of <span class="in">`x`</span>, we are saying "Across these 172 samples of 8x8 containers, what are the average values for element?" A visual way to think of this is that you have 174 pages, each with an <span class="in">`8x8`</span> grid of numbers on it. We will reduce it to a single page by taking the average through all the pages, for each number; i.e. the 1^st^ number on our single summary page will be the average of the 1^st^ number from all of the 174 pages. The 2^nd^ number will be the average of all the 2^nd^ numbers, etc. </span>
-<span id="cb36-239"><a href="#cb36-239" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-240"><a href="#cb36-240" aria-hidden="true" tabindex="-1"></a>In practice, this means that the more samples in which a given pixel was inked, the darker that pixel will be in the average.</span>
-<span id="cb36-241"><a href="#cb36-241" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-242"><a href="#cb36-242" aria-hidden="true" tabindex="-1"></a><span class="fu">### Least-Difference As Decision</span></span>
-<span id="cb36-243"><a href="#cb36-243" aria-hidden="true" tabindex="-1"></a>Recall, our goal is first create a benchmark classification function that doesn't use neural network methodologies. Now that we have the aberage, or 'archetypal' form of each digit, we can define a function to compare an input digit against the ideal digits to identify which it has the least difference with.</span>
-<span id="cb36-244"><a href="#cb36-244" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-245"><a href="#cb36-245" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip collapse="true"}</span>
-<span id="cb36-246"><a href="#cb36-246" aria-hidden="true" tabindex="-1"></a><span class="fu">## Comparing Differences Between Pictures?</span></span>
-<span id="cb36-247"><a href="#cb36-247" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-248"><a href="#cb36-248" aria-hidden="true" tabindex="-1"></a>Since all of the 'images' we're talking about are represented as a collection of 64 numbers, each number indicating a pixels brightness, taking the difference between two images as a whole just entails taking the difference between each pair of corresponding pixels from each, and then taking the average or using some other function to convert those 64 differences into one number. </span>
-<span id="cb36-249"><a href="#cb36-249" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb36-250"><a href="#cb36-250" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-251"><a href="#cb36-251" aria-hidden="true" tabindex="-1"></a>Fortunately, the fastbook library again serves up a toolkit: the module F, containing functions we'll need in our travels on any ML journey.</span>
-<span id="cb36-252"><a href="#cb36-252" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-253"><a href="#cb36-253" aria-hidden="true" tabindex="-1"></a>Let's use the L1 loss and MSE as loss functions^<span class="co">[</span><span class="ot">Check out [this link](https://mathworld.wolfram.com/L2-Norm.html) for more on these norms. Be aware that MSE is just a colloquial name for the L2 norm, and also that a norm alone isn't a 'loss function' *per se*. Any function at all is a loss function if you use it to calculate loss. That cetainly doesn't mean it'll be a good one. Books could be written on the topic though, so we'll leave it there.</span><span class="co">]</span>. We'll pass in the first example of a zero we have against the 'average' zero:</span>
-<span id="cb36-254"><a href="#cb36-254" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-255"><a href="#cb36-255" aria-hidden="true" tabindex="-1"></a>:::{#fig-zeroTozero}</span>
-<span id="cb36-258"><a href="#cb36-258" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb36-259"><a href="#cb36-259" aria-hidden="true" tabindex="-1"></a><span class="co"># | column: page</span></span>
-<span id="cb36-260"><a href="#cb36-260" aria-hidden="true" tabindex="-1"></a><span class="co"># | layout-ncol: 2</span></span>
-<span id="cb36-261"><a href="#cb36-261" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
-<span id="cb36-262"><a href="#cb36-262" aria-hidden="true" tabindex="-1"></a>show_images([test[<span class="dv">0</span>][<span class="dv">19</span>], means[<span class="dv">0</span>]])</span>
-<span id="cb36-263"><a href="#cb36-263" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb36-264"><a href="#cb36-264" aria-hidden="true" tabindex="-1"></a>Zero to hero?</span>
-<span id="cb36-265"><a href="#cb36-265" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb36-268"><a href="#cb36-268" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb36-269"><a href="#cb36-269" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
-<span id="cb36-270"><a href="#cb36-270" aria-hidden="true" tabindex="-1"></a><span class="co">"L1 loss: "</span><span class="op">+</span><span class="bu">str</span>(F.l1_loss(test[<span class="dv">0</span>][<span class="dv">18</span>], means[<span class="dv">0</span>]).item()), <span class="st">"MSE Loss: "</span> <span class="op">+</span> <span class="op">\</span></span>
-<span id="cb36-271"><a href="#cb36-271" aria-hidden="true" tabindex="-1"></a>    <span class="bu">str</span>(F.mse_loss(test[<span class="dv">0</span>][<span class="dv">18</span>], means[<span class="dv">0</span>]).sqrt().item())</span>
-<span id="cb36-272"><a href="#cb36-272" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb36-273"><a href="#cb36-273" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-274"><a href="#cb36-274" aria-hidden="true" tabindex="-1"></a>Other than validating the fact that we aren't getting any errors due to bad inputs, this doesn't tell us much. Generally, the MSE loss will always be greater than the L1 loss. Because loss increases exponentially with deviation from target, in principle, it is a better loss function as it will give a stronger learning signal in training; i.e. a step in the right direction will have greater effect on minimizing the loss function, at greater distance from target. But I'm getting ahead of myself here.</span>
-<span id="cb36-275"><a href="#cb36-275" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-276"><a href="#cb36-276" aria-hidden="true" tabindex="-1"></a>A more meaningful test that this is making sense would be to compare the error of a different sample digit against our ideal zero. Lets go with a seven.</span>
-<span id="cb36-277"><a href="#cb36-277" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-278"><a href="#cb36-278" aria-hidden="true" tabindex="-1"></a>:::{#fig-sevenTozero}</span>
-<span id="cb36-281"><a href="#cb36-281" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb36-282"><a href="#cb36-282" aria-hidden="true" tabindex="-1"></a><span class="co"># | column: page</span></span>
-<span id="cb36-283"><a href="#cb36-283" aria-hidden="true" tabindex="-1"></a><span class="co"># | layout-ncol: 2</span></span>
-<span id="cb36-284"><a href="#cb36-284" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
-<span id="cb36-285"><a href="#cb36-285" aria-hidden="true" tabindex="-1"></a>show_images([test[<span class="dv">7</span>][<span class="dv">0</span>], means[<span class="dv">0</span>]])</span>
-<span id="cb36-286"><a href="#cb36-286" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb36-287"><a href="#cb36-287" aria-hidden="true" tabindex="-1"></a>Lucky Number Seven?</span>
-<span id="cb36-288"><a href="#cb36-288" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb36-291"><a href="#cb36-291" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb36-292"><a href="#cb36-292" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
-<span id="cb36-293"><a href="#cb36-293" aria-hidden="true" tabindex="-1"></a><span class="co">"L1 loss: "</span><span class="op">+</span><span class="bu">str</span>(F.l1_loss(test[<span class="dv">7</span>][<span class="dv">0</span>], means[<span class="dv">0</span>]).item()), <span class="st">"MSE Loss: "</span> <span class="op">+</span> <span class="op">\</span></span>
-<span id="cb36-294"><a href="#cb36-294" aria-hidden="true" tabindex="-1"></a>    <span class="bu">str</span>(F.mse_loss(test[<span class="dv">7</span>][<span class="dv">0</span>], means[<span class="dv">0</span>]).sqrt().item())</span>
-<span id="cb36-295"><a href="#cb36-295" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb36-296"><a href="#cb36-296" aria-hidden="true" tabindex="-1"></a>Seems about right- a random zero sample from the database has a lower measure of loss when tested against the average zero than a random seven does. Now that we know the measure is behaving, we'll pack into a function so we can call on it and simplify our upcoming code. We'll use the L1 norm:</span>
-<span id="cb36-297"><a href="#cb36-297" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-300"><a href="#cb36-300" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb36-301"><a href="#cb36-301" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-fold: show</span></span>
-<span id="cb36-302"><a href="#cb36-302" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
-<span id="cb36-303"><a href="#cb36-303" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mnist_distance(a, b): <span class="cf">return</span> (a<span class="op">-</span>b).<span class="bu">abs</span>().mean((<span class="op">-</span><span class="dv">1</span>, <span class="op">-</span><span class="dv">2</span>))</span>
-<span id="cb36-304"><a href="#cb36-304" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-305"><a href="#cb36-305" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-306"><a href="#cb36-306" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb36-307"><a href="#cb36-307" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-308"><a href="#cb36-308" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip}</span>
-<span id="cb36-309"><a href="#cb36-309" aria-hidden="true" tabindex="-1"></a><span class="fu">## Coding The L1 Norm</span></span>
-<span id="cb36-310"><a href="#cb36-310" aria-hidden="true" tabindex="-1"></a>I would really encourage you to simmer with the function defined in this code block and make sure you understand how it works:</span>
-<span id="cb36-311"><a href="#cb36-311" aria-hidden="true" tabindex="-1"></a><span class="ss"> - </span>We're taking the difference of each element in each input by subtracting</span>
-<span id="cb36-312"><a href="#cb36-312" aria-hidden="true" tabindex="-1"></a><span class="ss"> - </span>We're taking the absolute value of all those differences</span>
-<span id="cb36-313"><a href="#cb36-313" aria-hidden="true" tabindex="-1"></a><span class="ss"> - </span>We're averaging across the last two dimensions of the tensor. Think about it... what happens if there is more than just two dimensions</span>
-<span id="cb36-314"><a href="#cb36-314" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb36-315"><a href="#cb36-315" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-316"><a href="#cb36-316" aria-hidden="true" tabindex="-1"></a><span class="fu">## Computing The Benchmark</span></span>
-<span id="cb36-317"><a href="#cb36-317" aria-hidden="true" tabindex="-1"></a>Having the benchmark function, lets take it for a whirl. We will pass in the average digits as one tensor, and the training digits as the other. This is a critical point! A foundational strategy for the approach to neural nets is that we work with tensor-wise operations. Instead of taking the difference of one image against another, one at a time, we pass entire tensors into functions that compute across them. This becomes an absolute necessity for the sake of algorithmic and code execution efficiency. </span>
-<span id="cb36-318"><a href="#cb36-318" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-321"><a href="#cb36-321" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb36-322"><a href="#cb36-322" aria-hidden="true" tabindex="-1"></a><span class="co"># | error: true</span></span>
-<span id="cb36-323"><a href="#cb36-323" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
-<span id="cb36-324"><a href="#cb36-324" aria-hidden="true" tabindex="-1"></a>mnist_distance(train, means)  <span class="co"># Intentional error to demonstrate</span></span>
-<span id="cb36-325"><a href="#cb36-325" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb36-326"><a href="#cb36-326" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-327"><a href="#cb36-327" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-328"><a href="#cb36-328" aria-hidden="true" tabindex="-1"></a>An error! The error message points to a mismatch in the sizes of our tensors. Let's take at these:</span>
-<span id="cb36-329"><a href="#cb36-329" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-332"><a href="#cb36-332" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb36-333"><a href="#cb36-333" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
-<span id="cb36-334"><a href="#cb36-334" aria-hidden="true" tabindex="-1"></a>means.shape, train.shape</span>
-<span id="cb36-335"><a href="#cb36-335" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb36-336"><a href="#cb36-336" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-337"><a href="#cb36-337" aria-hidden="true" tabindex="-1"></a>Right, our <span class="in">`means`</span> contains 10 images, each 8 by 8 pixels, one image for each 'average' digit. Meanwhile <span class="in">`train`</span> is storing our training data, so it has a *collection* of images for each digit. So the tensor has greate dimensionality because for each digit there are 154 images of 8x8 pixels.</span>
-<span id="cb36-338"><a href="#cb36-338" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-339"><a href="#cb36-339" aria-hidden="true" tabindex="-1"></a>The mnist_distance function we made subtracts every element in the input tensors, so it makes sense that there needs to be an equal number of individual elements for the computer to make sense of the instruction. When I say element in this context I mean the numeric value assigned to each pixel in each image indicating its brightness. So at first blush, we'd think we need to expand the <span class="in">`means`</span> tensor so as to contain many copies of the each average digit.</span>
-<span id="cb36-340"><a href="#cb36-340" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-341"><a href="#cb36-341" aria-hidden="true" tabindex="-1"></a>How can we fix this? This reveals a critical lesson in the technique called broadcasting.</span>
-<span id="cb36-342"><a href="#cb36-342" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-343"><a href="#cb36-343" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
-<span id="cb36-344"><a href="#cb36-344" aria-hidden="true" tabindex="-1"></a><span class="fu">## Broadcasting</span></span>
-<span id="cb36-345"><a href="#cb36-345" aria-hidden="true" tabindex="-1"></a>Broadcasting is a functionality <span class="co">[</span><span class="ot">pyTorch</span><span class="co">](https://pytorch.org/docs/stable/notes/broadcasting.html)</span> brings over from <span class="co">[</span><span class="ot">Numpy</span><span class="co">](https://numpy.org/doc/stable/user/basics.broadcasting.html)</span>. From the docs: </span>
-<span id="cb36-346"><a href="#cb36-346" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-347"><a href="#cb36-347" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; The term broadcasting describes how NumPy treats arrays with different shapes during arithmetic operations. Subject to certain constraints, the smaller array is “broadcast” across the larger array so that they have compatible shapes. Broadcasting provides a means of vectorizing array operations so that looping occurs in C instead of Python. It does this without making needless copies of data and usually leads to efficient algorithm implementations.</span></span>
-<span id="cb36-348"><a href="#cb36-348" aria-hidden="true" tabindex="-1"></a><span class="at">:::</span></span>
-<span id="cb36-349"><a href="#cb36-349" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-350"><a href="#cb36-350" aria-hidden="true" tabindex="-1"></a>Instead of using Python to make many copies of our average digits, we can just alter the structure of the tensor <span class="in">`means`</span> in memory so as to make it compatible for computation with <span class="in">`train`</span>. To do this, we use the <span class="in">`unsqueeze`</span> function to add an extra dimension along which we will broadcast. </span>
-<span id="cb36-351"><a href="#cb36-351" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-354"><a href="#cb36-354" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb36-355"><a href="#cb36-355" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-fold: show</span></span>
-<span id="cb36-356"><a href="#cb36-356" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
-<span id="cb36-357"><a href="#cb36-357" aria-hidden="true" tabindex="-1"></a>train.shape, means.unsqueeze(<span class="dv">1</span>).shape</span>
-<span id="cb36-358"><a href="#cb36-358" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb36-359"><a href="#cb36-359" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-360"><a href="#cb36-360" aria-hidden="true" tabindex="-1"></a>The way I look at this is nested boxes! In this diagram, the <span class="in">`unsqueeze`</span> function added  an extra layer to the nested boxes making up <span class="in">`means`</span>.</span>
-<span id="cb36-361"><a href="#cb36-361" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-362"><a href="#cb36-362" aria-hidden="true" tabindex="-1"></a><span class="al">![Visualizing Broadcasting](Broadcasting_Basics.drawio.png)</span>{#fig-broadcast}  </span>
-<span id="cb36-363"><a href="#cb36-363" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-364"><a href="#cb36-364" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-365"><a href="#cb36-365" aria-hidden="true" tabindex="-1"></a>From the bottom up (i.e. right to left of tensor indices) we have:</span>
-<span id="cb36-366"><a href="#cb36-366" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-367"><a href="#cb36-367" aria-hidden="true" tabindex="-1"></a><span class="ss"> - </span>A box with 8 numbers -  the pixel brightness values for the 8 pixels in a single row.</span>
-<span id="cb36-368"><a href="#cb36-368" aria-hidden="true" tabindex="-1"></a><span class="ss"> - </span>A box with 8 of the preceding boxes - one for each row of pixels making an image</span>
-<span id="cb36-369"><a href="#cb36-369" aria-hidden="true" tabindex="-1"></a><span class="ss"> - </span>A box with 154 of the preceding boxes - In <span class="in">`train`</span>, the 154 different samples of hand written digits, for a given integer. In <span class="in">`means`</span>, a single box, redundant on its own, but serving as the thing to broadcast</span>
-<span id="cb36-370"><a href="#cb36-370" aria-hidden="true" tabindex="-1"></a><span class="ss"> - </span>A box (our tensor) with 10 of the preceding boxes, one for each integer <span class="in">`0`</span> through <span class="in">`9`</span></span>
-<span id="cb36-371"><a href="#cb36-371" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-372"><a href="#cb36-372" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-373"><a href="#cb36-373" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-374"><a href="#cb36-374" aria-hidden="true" tabindex="-1"></a>But we just asked "Which of these two is more likely to be a zero?" We haven't really done digit classification just yet, to do that we need to compare any given test digit against the averages samples of 0 through 9 and see which yields the smallest loss measure.</span>
-<span id="cb36-375"><a href="#cb36-375" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-378"><a href="#cb36-378" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb36-379"><a href="#cb36-379" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
-<span id="cb36-380"><a href="#cb36-380" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<div class="sourceCode" id="cb45" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Broadcasting and Heuristic Digit Classification"</span></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "David De Sa"</span></span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> "2023-03-18"</span></span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a><span class="an">categories:</span><span class="co"> [python, pyTorch, Neuralnetworks]</span></span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a><span class="an">image:</span><span class="co"> "Cube_thumb.png"</span></span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a><span class="co">    code-fold: true</span></span>
+<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a><span class="co">    toc: true</span></span>
+<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools: true</span></span>
+<span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a><span class="an">draft:</span><span class="co"> false</span></span>
+<span id="cb45-13"><a href="#cb45-13" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb45-14"><a href="#cb45-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-15"><a href="#cb45-15" aria-hidden="true" tabindex="-1"></a><span class="fu">## TL;DR</span></span>
+<span id="cb45-16"><a href="#cb45-16" aria-hidden="true" tabindex="-1"></a>The best way to learn is to teach, so in this post I walk through an example of putting broadcasting to use in a heuristic number reading app. Part 1 of two in making my first neural network.</span>
+<span id="cb45-17"><a href="#cb45-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-18"><a href="#cb45-18" aria-hidden="true" tabindex="-1"></a><span class="fu"># Overview</span></span>
+<span id="cb45-19"><a href="#cb45-19" aria-hidden="true" tabindex="-1"></a>The code in this post is largely from the awesome lessons over at <span class="co">[</span><span class="ot">fast.ai</span><span class="co">](course.fast.ai)</span>, with the explanation all in my own words. Many thanks to that team for their amazing work. This is part one of two from the same lesson learning to make a digit classifier, the next will go into making the neural network that performs better at the same task.</span>
+<span id="cb45-20"><a href="#cb45-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-21"><a href="#cb45-21" aria-hidden="true" tabindex="-1"></a><span class="fu">### What?</span></span>
+<span id="cb45-22"><a href="#cb45-22" aria-hidden="true" tabindex="-1"></a>We're going to make a function to act as a benchmark for a neural network. The task it will perform is to correctly identify a number, given a hand drawn picture of it. </span>
+<span id="cb45-23"><a href="#cb45-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-24"><a href="#cb45-24" aria-hidden="true" tabindex="-1"></a><span class="fu">### Why?</span></span>
+<span id="cb45-25"><a href="#cb45-25" aria-hidden="true" tabindex="-1"></a>You need to crawl before you can <span class="co">[</span><span class="ot">reject unripe tomatoes</span><span class="co">](https://www.reddit.com/r/oddlysatisfying/comments/zw3iwq/machine_that_rejects_unripe_tomatoes)</span>^<span class="co">[</span><span class="ot">Too fun not to share though I think this is a machine vision implementation without neural nets. Probably just averaging colour across a pixel range to trigger the paddles.</span><span class="co">]</span>, and that before you can comfortably learn to tie a necktie while your Tesla is whipping around corners with you in the drivers seat.</span>
+<span id="cb45-26"><a href="#cb45-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-27"><a href="#cb45-27" aria-hidden="true" tabindex="-1"></a><span class="fu">### Who?</span></span>
+<span id="cb45-28"><a href="#cb45-28" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Who am I</span><span class="co">](https://davidd003.github.io/Coding_Blog/about.html)</span>!? Who are you?!</span>
+<span id="cb45-29"><a href="#cb45-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-30"><a href="#cb45-30" aria-hidden="true" tabindex="-1"></a><span class="fu">### How?</span></span>
+<span id="cb45-31"><a href="#cb45-31" aria-hidden="true" tabindex="-1"></a>Using <span class="co">[</span><span class="ot">PyTorch</span><span class="co">](https://pytorch.org/)</span>^<span class="co">[</span><span class="ot">If it ain't 'py', it ain't python, right?</span><span class="co">]</span>, an opensource toolkit for building neural networks. Truly the shoulders of giants at our finger tips.</span>
+<span id="cb45-32"><a href="#cb45-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-33"><a href="#cb45-33" aria-hidden="true" tabindex="-1"></a><span class="fu"># Code Review</span></span>
+<span id="cb45-34"><a href="#cb45-34" aria-hidden="true" tabindex="-1"></a>Making a neural network to solve a problem is a bunch of mumbo jumbo if we're not actually performing better than a simpler heuristic function. To test that, we will start off by constructing a simple classification that classifies a digit based on which average digit image it is nearest to (You'll see what I mean later). This will determine the score-to-beat with the neural network we make in the next post.</span>
+<span id="cb45-35"><a href="#cb45-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-36"><a href="#cb45-36" aria-hidden="true" tabindex="-1"></a>Let's get into it!</span>
+<span id="cb45-37"><a href="#cb45-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-38"><a href="#cb45-38" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true"}</span>
+<span id="cb45-39"><a href="#cb45-39" aria-hidden="true" tabindex="-1"></a>The required dependencies!:<span class="in">`scikit-learn`</span>, <span class="in">`fastbook`</span>, <span class="in">`matplotlib`</span></span>
+<span id="cb45-40"><a href="#cb45-40" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb45-41"><a href="#cb45-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-44"><a href="#cb45-44" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb45-45"><a href="#cb45-45" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb45-46"><a href="#cb45-46" aria-hidden="true" tabindex="-1"></a><span class="co"># Install dependency</span></span>
+<span id="cb45-47"><a href="#cb45-47" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastbook <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb45-48"><a href="#cb45-48" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastai.vision.<span class="bu">all</span> <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb45-49"><a href="#cb45-49" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> load_digits</span>
+<span id="cb45-50"><a href="#cb45-50" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> fastbook</span>
+<span id="cb45-51"><a href="#cb45-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-52"><a href="#cb45-52" aria-hidden="true" tabindex="-1"></a>fastbook.setup_book()</span>
+<span id="cb45-53"><a href="#cb45-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-54"><a href="#cb45-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-55"><a href="#cb45-55" aria-hidden="true" tabindex="-1"></a>matplotlib.rc(<span class="st">"image"</span>, cmap<span class="op">=</span><span class="st">"Greys"</span>)</span>
+<span id="cb45-56"><a href="#cb45-56" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb45-57"><a href="#cb45-57" aria-hidden="true" tabindex="-1"></a><span class="fu">## Data Acquisition</span></span>
+<span id="cb45-58"><a href="#cb45-58" aria-hidden="true" tabindex="-1"></a>In any real world ML application, data acquisition can be one of the more costly  parts of the process, luckily not so for this simple learning example. </span>
+<span id="cb45-59"><a href="#cb45-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-60"><a href="#cb45-60" aria-hidden="true" tabindex="-1"></a>We're using a variant of the classic NIST database, a collection of images of hand drawn numbers that provided the means for benchmarking in earlier days of ML. </span>
+<span id="cb45-61"><a href="#cb45-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-62"><a href="#cb45-62" aria-hidden="true" tabindex="-1"></a>I had trouble wrangling with the various sources for this database online, the simplest workable solution I could find for us to get a grip on these images was to just import the datasets library that comes with installing the scikit-learn package.</span>
+<span id="cb45-63"><a href="#cb45-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-64"><a href="#cb45-64" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip collapse="true"}</span>
+<span id="cb45-65"><a href="#cb45-65" aria-hidden="true" tabindex="-1"></a><span class="fu">## Understand Your Input!</span></span>
+<span id="cb45-66"><a href="#cb45-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-67"><a href="#cb45-67" aria-hidden="true" tabindex="-1"></a>Pre-processing data before even touching any neural net methods can improve your final performance. Note the data set information offered at the <span class="co">[</span><span class="ot">source page</span><span class="co">](https://archive.ics.uci.edu/ml/datasets/Optical+Recognition+of+Handwritten+Digits)</span>: </span>
+<span id="cb45-68"><a href="#cb45-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-69"><a href="#cb45-69" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; We used preprocessing programs made available by NIST to extract normalized bitmaps of handwritten digits from a preprinted form. From a total of 43 people, 30 contributed to the training set and different 13 to the test set. 32x32 bitmaps are divided into nonoverlapping blocks of 4x4 and the number of on pixels are counted in each block. This generates an input matrix of 8x8 where each element is an integer in the range 0..16. This reduces dimensionality and gives invariance to small distortions.</span></span>
+<span id="cb45-70"><a href="#cb45-70" aria-hidden="true" tabindex="-1"></a><span class="at">:::</span></span>
+<span id="cb45-71"><a href="#cb45-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-74"><a href="#cb45-74" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb45-75"><a href="#cb45-75" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb45-76"><a href="#cb45-76" aria-hidden="true" tabindex="-1"></a>mnist <span class="op">=</span> load_digits()</span>
+<span id="cb45-77"><a href="#cb45-77" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb45-78"><a href="#cb45-78" aria-hidden="true" tabindex="-1"></a>Always good to get to know your data..</span>
+<span id="cb45-81"><a href="#cb45-81" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb45-82"><a href="#cb45-82" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb45-83"><a href="#cb45-83" aria-hidden="true" tabindex="-1"></a>mnist.keys()</span>
+<span id="cb45-84"><a href="#cb45-84" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb45-85"><a href="#cb45-85" aria-hidden="true" tabindex="-1"></a>What's in here?</span>
+<span id="cb45-88"><a href="#cb45-88" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb45-89"><a href="#cb45-89" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb45-90"><a href="#cb45-90" aria-hidden="true" tabindex="-1"></a><span class="co"># Observing y value for data sequence</span></span>
+<span id="cb45-91"><a href="#cb45-91" aria-hidden="true" tabindex="-1"></a>mnist[<span class="st">"target"</span>], <span class="st">"# targets: "</span> <span class="op">+</span> <span class="bu">str</span>(<span class="bu">len</span>(mnist[<span class="st">"target"</span>]))</span>
+<span id="cb45-92"><a href="#cb45-92" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb45-93"><a href="#cb45-93" aria-hidden="true" tabindex="-1"></a>So we have 1797 numbers in this data set.</span>
+<span id="cb45-96"><a href="#cb45-96" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb45-97"><a href="#cb45-97" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb45-98"><a href="#cb45-98" aria-hidden="true" tabindex="-1"></a>n0 <span class="op">=</span> [[n <span class="cf">for</span> n <span class="kw">in</span> mnist[<span class="st">"data"</span>][<span class="dv">0</span>][i <span class="op">*</span> <span class="dv">8</span>: i <span class="op">*</span> <span class="dv">8</span> <span class="op">+</span> <span class="dv">7</span>]] <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, <span class="dv">8</span>)]</span>
+<span id="cb45-99"><a href="#cb45-99" aria-hidden="true" tabindex="-1"></a>n0, mnist[<span class="st">"images"</span>][<span class="dv">0</span>]</span>
+<span id="cb45-100"><a href="#cb45-100" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb45-101"><a href="#cb45-101" aria-hidden="true" tabindex="-1"></a>And it looks like the 'data' entity is a list of one dimensional vectors, listing out the 64 pixels of each image, whereas the 'images' entity is the same info already organized into the 8x8 array of pixels.</span>
+<span id="cb45-102"><a href="#cb45-102" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-103"><a href="#cb45-103" aria-hidden="true" tabindex="-1"></a>The values in the arrays are from 0-16, as described in the source documentation. Important to keep in mind that we might want to normalize them all to a range from 0 to 1 for our purposes. We'll do that later.</span>
+<span id="cb45-104"><a href="#cb45-104" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-105"><a href="#cb45-105" aria-hidden="true" tabindex="-1"></a>I had to do some funny indexing to tease that out. Something I learned along the way was the fantastic .view() function of the Tensor object in pyTorch. Tensors are like a numpy array, have a lot of features that will be critical for quickly creating neural nets. This object type was imported with fastbook.</span>
+<span id="cb45-108"><a href="#cb45-108" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb45-109"><a href="#cb45-109" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb45-110"><a href="#cb45-110" aria-hidden="true" tabindex="-1"></a>Tensor(mnist[<span class="st">"data"</span>][<span class="dv">0</span>]).view(<span class="op">-</span><span class="dv">1</span>, <span class="dv">8</span>)</span>
+<span id="cb45-111"><a href="#cb45-111" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb45-112"><a href="#cb45-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-113"><a href="#cb45-113" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip}</span>
+<span id="cb45-114"><a href="#cb45-114" aria-hidden="true" tabindex="-1"></a><span class="fu">## Tensor Views</span></span>
+<span id="cb45-115"><a href="#cb45-115" aria-hidden="true" tabindex="-1"></a>Using -1 in the argument for the view function will auto-size the tensor based on the number of elements in the array, and the other dimensions specified. This should come in handy!</span>
+<span id="cb45-116"><a href="#cb45-116" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb45-117"><a href="#cb45-117" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-118"><a href="#cb45-118" aria-hidden="true" tabindex="-1"></a>For a <span class="co">[</span><span class="ot">classification task</span><span class="co">](https://docs.aws.amazon.com/machine-learning/latest/dg/types-of-ml-models.html)</span> such as this, it's important to keep in mind that our data should be balanced in quantity per class. Let's take a look at how many we've got. </span>
+<span id="cb45-119"><a href="#cb45-119" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-122"><a href="#cb45-122" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb45-123"><a href="#cb45-123" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb45-124"><a href="#cb45-124" aria-hidden="true" tabindex="-1"></a>[<span class="bu">str</span>(i) <span class="op">+</span> <span class="st">": "</span> <span class="op">+</span> <span class="bu">str</span>(<span class="bu">list</span>(mnist[<span class="st">"target"</span>]).count(i))</span>
+<span id="cb45-125"><a href="#cb45-125" aria-hidden="true" tabindex="-1"></a> <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>)]  <span class="co"># Count of each digit in dataset</span></span>
+<span id="cb45-126"><a href="#cb45-126" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb45-127"><a href="#cb45-127" aria-hidden="true" tabindex="-1"></a>So, a little imbalance but nothing crazy. Worth checking though...</span>
+<span id="cb45-128"><a href="#cb45-128" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-129"><a href="#cb45-129" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning}</span>
+<span id="cb45-130"><a href="#cb45-130" aria-hidden="true" tabindex="-1"></a><span class="fu">## Beware Naive Optimization</span></span>
+<span id="cb45-131"><a href="#cb45-131" aria-hidden="true" tabindex="-1"></a>If we train on a million images of 7's, and only a thousand 1's, we can be duped into thinking we're rocking a 0.1% error rate by a naive model that guesses '7' no matter what you give it!</span>
+<span id="cb45-132"><a href="#cb45-132" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb45-133"><a href="#cb45-133" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-134"><a href="#cb45-134" aria-hidden="true" tabindex="-1"></a><span class="fu">### Picturing Inputs</span></span>
+<span id="cb45-135"><a href="#cb45-135" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-136"><a href="#cb45-136" aria-hidden="true" tabindex="-1"></a>:::{#fig-numbersamples}</span>
+<span id="cb45-139"><a href="#cb45-139" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb45-140"><a href="#cb45-140" aria-hidden="true" tabindex="-1"></a><span class="co"># | column: page</span></span>
+<span id="cb45-141"><a href="#cb45-141" aria-hidden="true" tabindex="-1"></a><span class="co"># | layout-ncol: 5</span></span>
+<span id="cb45-142"><a href="#cb45-142" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb45-143"><a href="#cb45-143" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>):</span>
+<span id="cb45-144"><a href="#cb45-144" aria-hidden="true" tabindex="-1"></a>    show_image(mnist[<span class="st">"images"</span>][<span class="op">-</span>i] <span class="op">/</span> <span class="dv">16</span>)  <span class="co"># Visualizing example digit</span></span>
+<span id="cb45-145"><a href="#cb45-145" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb45-146"><a href="#cb45-146" aria-hidden="true" tabindex="-1"></a>A few examples of our data. Can you read them?</span>
+<span id="cb45-147"><a href="#cb45-147" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb45-148"><a href="#cb45-148" aria-hidden="true" tabindex="-1"></a>Turns out that pre-processing that comes baked in does make them pretty grainy. But nothing some training can't solve.</span>
+<span id="cb45-149"><a href="#cb45-149" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-150"><a href="#cb45-150" aria-hidden="true" tabindex="-1"></a><span class="fu">### Bucketing Classes</span></span>
+<span id="cb45-151"><a href="#cb45-151" aria-hidden="true" tabindex="-1"></a>We need to separate out our inputs for training purposes. We'll iterate across the 'targets' list, using the target numbers themselves as the index value to dump the corresponding 'image' data into the storage bin.</span>
+<span id="cb45-154"><a href="#cb45-154" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb45-155"><a href="#cb45-155" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-fold: show</span></span>
+<span id="cb45-156"><a href="#cb45-156" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb45-157"><a href="#cb45-157" aria-hidden="true" tabindex="-1"></a>stacked <span class="op">=</span> []</span>
+<span id="cb45-158"><a href="#cb45-158" aria-hidden="true" tabindex="-1"></a><span class="co"># This loop because stacked=[[]]*10 makes 1 list in list, with 10 copies of pointers... need separate objects</span></span>
+<span id="cb45-159"><a href="#cb45-159" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>):</span>
+<span id="cb45-160"><a href="#cb45-160" aria-hidden="true" tabindex="-1"></a>    stacked.append([])</span>
+<span id="cb45-161"><a href="#cb45-161" aria-hidden="true" tabindex="-1"></a><span class="co"># Assign all images to the right collection in the 'stacked' list, indexed by target</span></span>
+<span id="cb45-162"><a href="#cb45-162" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(mnist[<span class="st">"target"</span>])):</span>
+<span id="cb45-163"><a href="#cb45-163" aria-hidden="true" tabindex="-1"></a>    stacked[mnist[<span class="st">"target"</span>][i]].append(mnist[<span class="st">"images"</span>][i])</span>
+<span id="cb45-164"><a href="#cb45-164" aria-hidden="true" tabindex="-1"></a>lens <span class="op">=</span> [<span class="bu">len</span>(stacked[i]) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>)]</span>
+<span id="cb45-165"><a href="#cb45-165" aria-hidden="true" tabindex="-1"></a>lens, <span class="bu">min</span>(lens)  <span class="co"># Confirm counts of samples</span></span>
+<span id="cb45-166"><a href="#cb45-166" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb45-167"><a href="#cb45-167" aria-hidden="true" tabindex="-1"></a>So that worked, we now have a list of lists of arrays, the arrays being interpreted as images, the lists being collections of images, with all images in a given collection being an image of the same hand drawn number. And we see that we have the fewest samples of numbers 8's, so we'll take only that many samples (174) of every other image for our dataset. </span>
+<span id="cb45-168"><a href="#cb45-168" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-169"><a href="#cb45-169" aria-hidden="true" tabindex="-1"></a><span class="fu">### Segmentation</span></span>
+<span id="cb45-170"><a href="#cb45-170" aria-hidden="true" tabindex="-1"></a>The next step is to define which data will be our training, and our validation set. It was important to bucket out our data first so by randomly sampling our data we didn't generate a validation set with a large imbalance in the number of classes to be tested in it. </span>
+<span id="cb45-171"><a href="#cb45-171" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-172"><a href="#cb45-172" aria-hidden="true" tabindex="-1"></a>First we convert to a tensor, then segment training from validation data. Arbitrarily taking 20 examples from each digit, so, 11.5% of the total data set towards validation.</span>
+<span id="cb45-173"><a href="#cb45-173" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-174"><a href="#cb45-174" aria-hidden="true" tabindex="-1"></a>We'll print out the size of these collections and take a peek at a sample to make sure we indexed right.</span>
+<span id="cb45-175"><a href="#cb45-175" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-176"><a href="#cb45-176" aria-hidden="true" tabindex="-1"></a>:::{#fig-checkSamp}</span>
+<span id="cb45-179"><a href="#cb45-179" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb45-180"><a href="#cb45-180" aria-hidden="true" tabindex="-1"></a><span class="co"># | warning: False</span></span>
+<span id="cb45-181"><a href="#cb45-181" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb45-182"><a href="#cb45-182" aria-hidden="true" tabindex="-1"></a><span class="co"># To make dataset a tensor, make it same number of dimensions</span></span>
+<span id="cb45-183"><a href="#cb45-183" aria-hidden="true" tabindex="-1"></a>stacked <span class="op">=</span> tensor([x[:<span class="dv">174</span>] <span class="cf">for</span> x <span class="kw">in</span> stacked])</span>
+<span id="cb45-184"><a href="#cb45-184" aria-hidden="true" tabindex="-1"></a><span class="co"># Segmentation: Pull 20 of each digit out of training set</span></span>
+<span id="cb45-185"><a href="#cb45-185" aria-hidden="true" tabindex="-1"></a>test <span class="op">=</span> [dig[<span class="op">-</span><span class="dv">20</span>:] <span class="cf">for</span> dig <span class="kw">in</span> stacked]</span>
+<span id="cb45-186"><a href="#cb45-186" aria-hidden="true" tabindex="-1"></a>train <span class="op">=</span> [dig[:<span class="op">-</span><span class="dv">20</span>] <span class="cf">for</span> dig <span class="kw">in</span> stacked]</span>
+<span id="cb45-187"><a href="#cb45-187" aria-hidden="true" tabindex="-1"></a><span class="co"># Confirm counts of samples</span></span>
+<span id="cb45-188"><a href="#cb45-188" aria-hidden="true" tabindex="-1"></a>[<span class="bu">len</span>(test[i]) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>)], [<span class="bu">len</span>(train[i]) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>)]</span>
+<span id="cb45-189"><a href="#cb45-189" aria-hidden="true" tabindex="-1"></a>show_image(stacked[<span class="dv">3</span>][<span class="dv">0</span>])  <span class="co"># Check sample</span></span>
+<span id="cb45-190"><a href="#cb45-190" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb45-191"><a href="#cb45-191" aria-hidden="true" tabindex="-1"></a>Is it a 3?</span>
+<span id="cb45-192"><a href="#cb45-192" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb45-193"><a href="#cb45-193" aria-hidden="true" tabindex="-1"></a>Nice.</span>
+<span id="cb45-194"><a href="#cb45-194" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-195"><a href="#cb45-195" aria-hidden="true" tabindex="-1"></a>It's important to keep track of what's what.</span>
+<span id="cb45-198"><a href="#cb45-198" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb45-199"><a href="#cb45-199" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb45-200"><a href="#cb45-200" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-fold: show</span></span>
+<span id="cb45-201"><a href="#cb45-201" aria-hidden="true" tabindex="-1"></a><span class="bu">type</span>(train), <span class="bu">type</span>(train[<span class="dv">0</span>]), <span class="bu">type</span>(train[<span class="dv">0</span>][<span class="dv">0</span>]), [</span>
+<span id="cb45-202"><a href="#cb45-202" aria-hidden="true" tabindex="-1"></a>    <span class="bu">type</span>(test), <span class="bu">type</span>(test[<span class="dv">0</span>]), <span class="bu">type</span>(test[<span class="dv">0</span>][<span class="dv">0</span>])]</span>
+<span id="cb45-203"><a href="#cb45-203" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb45-204"><a href="#cb45-204" aria-hidden="true" tabindex="-1"></a>Ok so our top level containers for training/testing data are basic python lists. Within those, we have 10 collections, one for each integer. Those are Tensors. And then, each image (a collection of pixels unto itself) within those tensors, are also Tensor type objects.</span>
+<span id="cb45-205"><a href="#cb45-205" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-206"><a href="#cb45-206" aria-hidden="true" tabindex="-1"></a>Instead of a basic Python list, we will need the top level containers as tensors to leverage the pyTorch functionality built into them. luckily it's an easy conversion</span>
+<span id="cb45-209"><a href="#cb45-209" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb45-210"><a href="#cb45-210" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb45-211"><a href="#cb45-211" aria-hidden="true" tabindex="-1"></a><span class="co"># Converts PyList of tensors to tensor of tesnors (join in new dimensions, retain target indexing)</span></span>
+<span id="cb45-212"><a href="#cb45-212" aria-hidden="true" tabindex="-1"></a>train <span class="op">=</span> torch.stack(train)</span>
+<span id="cb45-213"><a href="#cb45-213" aria-hidden="true" tabindex="-1"></a>test <span class="op">=</span> torch.stack(test)</span>
+<span id="cb45-214"><a href="#cb45-214" aria-hidden="true" tabindex="-1"></a>train.shape, test.shape</span>
+<span id="cb45-215"><a href="#cb45-215" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb45-216"><a href="#cb45-216" aria-hidden="true" tabindex="-1"></a>Now here is a crtiical piece, working with multidimensional arrays and keeping in mind what we understand these to be. Our test and training tensors have the same dimensionality but not the same size. </span>
+<span id="cb45-217"><a href="#cb45-217" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-218"><a href="#cb45-218" aria-hidden="true" tabindex="-1"></a><span class="fu">## Building Benchmark Function</span></span>
+<span id="cb45-219"><a href="#cb45-219" aria-hidden="true" tabindex="-1"></a>Where it gets fun now is in averaging and such across these dimensions. By doing so we can get the 'average drawing of a number,' which will be integral to creating our benchmark classification function.</span>
+<span id="cb45-220"><a href="#cb45-220" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-221"><a href="#cb45-221" aria-hidden="true" tabindex="-1"></a><span class="fu">### The 'Average' Digit</span></span>
+<span id="cb45-222"><a href="#cb45-222" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-223"><a href="#cb45-223" aria-hidden="true" tabindex="-1"></a>:::{#fig-ideals}</span>
+<span id="cb45-226"><a href="#cb45-226" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb45-227"><a href="#cb45-227" aria-hidden="true" tabindex="-1"></a><span class="co"># | column: page</span></span>
+<span id="cb45-228"><a href="#cb45-228" aria-hidden="true" tabindex="-1"></a><span class="co"># | layout-ncol: 5</span></span>
+<span id="cb45-229"><a href="#cb45-229" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb45-230"><a href="#cb45-230" aria-hidden="true" tabindex="-1"></a>means <span class="op">=</span> torch.stack([x.mean(<span class="dv">0</span>) <span class="cf">for</span> x <span class="kw">in</span> train])  <span class="co"># Compute the average digit</span></span>
+<span id="cb45-231"><a href="#cb45-231" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>):</span>
+<span id="cb45-232"><a href="#cb45-232" aria-hidden="true" tabindex="-1"></a>    show_image(means[i])</span>
+<span id="cb45-233"><a href="#cb45-233" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb45-234"><a href="#cb45-234" aria-hidden="true" tabindex="-1"></a>Now those are some digits!</span>
+<span id="cb45-235"><a href="#cb45-235" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb45-236"><a href="#cb45-236" aria-hidden="true" tabindex="-1"></a>I hope you think this is as cool as I do! It calls to mind the idea of seeing a video of someone doing something routine every day like brushing their teeth, but at a million times speed, all the variations of movement wash out and create this somewhat blurry view of the general pattern. Like a mashing of all possible worlds. What did that code do, how did we get this? Let's tear this one apart.</span>
+<span id="cb45-237"><a href="#cb45-237" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-238"><a href="#cb45-238" aria-hidden="true" tabindex="-1"></a>First of all, we're dealing with a 4 dimensional tensor, <span class="in">`train`</span>. When we jumped into a list comprehension iterating <span class="in">`for x in train`</span>, we 'stepped into' that 0^th^ dimension, so to speak. Then any given element <span class="in">`x`</span> is a 3 dimensional tensor. </span>
+<span id="cb45-239"><a href="#cb45-239" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-240"><a href="#cb45-240" aria-hidden="true" tabindex="-1"></a>We will go through 10 of them, one for each integer, and each will contain 174 <span class="in">`8x8`</span> images. When we take the mean in the 0^th^ dimension of <span class="in">`x`</span>, we are saying "Across these 172 samples of 8x8 containers, what are the average values for element?" A visual way to think of this is that you have 174 pages, each with an <span class="in">`8x8`</span> grid of numbers on it. We will reduce it to a single page by taking the average through all the pages, for each number; i.e. the 1^st^ number on our single summary page will be the average of the 1^st^ number from all of the 174 pages. The 2^nd^ number will be the average of all the 2^nd^ numbers, etc. </span>
+<span id="cb45-241"><a href="#cb45-241" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-242"><a href="#cb45-242" aria-hidden="true" tabindex="-1"></a>In practice, this means that the more samples in which a given pixel was inked, the darker that pixel will be in the average.</span>
+<span id="cb45-243"><a href="#cb45-243" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-244"><a href="#cb45-244" aria-hidden="true" tabindex="-1"></a><span class="fu">### Least-Difference As Decision</span></span>
+<span id="cb45-245"><a href="#cb45-245" aria-hidden="true" tabindex="-1"></a>Recall, our goal is first create a benchmark classification function that doesn't use neural network methodologies. Now that we have the aberage, or 'archetypal' form of each digit, we can define a function to compare an input digit against the ideal digits to identify which it has the least difference with.</span>
+<span id="cb45-246"><a href="#cb45-246" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-247"><a href="#cb45-247" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip collapse="true"}</span>
+<span id="cb45-248"><a href="#cb45-248" aria-hidden="true" tabindex="-1"></a><span class="fu">## Comparing Differences Between Pictures?</span></span>
+<span id="cb45-249"><a href="#cb45-249" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-250"><a href="#cb45-250" aria-hidden="true" tabindex="-1"></a>Since all of the 'images' we're talking about are represented as a collection of 64 numbers, each number indicating a pixels brightness, taking the difference between two images as a whole just entails taking the difference between each pair of corresponding pixels from each, and then taking the average or using some other function to convert those 64 differences into one number. </span>
+<span id="cb45-251"><a href="#cb45-251" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb45-252"><a href="#cb45-252" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-253"><a href="#cb45-253" aria-hidden="true" tabindex="-1"></a>Fortunately, the fastbook library again serves up a toolkit: the module F, containing functions we'll need in our travels on any ML journey.</span>
+<span id="cb45-254"><a href="#cb45-254" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-255"><a href="#cb45-255" aria-hidden="true" tabindex="-1"></a>Let's use the L1 loss and MSE as loss functions^<span class="co">[</span><span class="ot">Check out [this link](https://mathworld.wolfram.com/L2-Norm.html) for more on these norms. Be aware that MSE is just a colloquial name for the L2 norm, and also that a norm alone isn't a 'loss function' *per se*. Any function at all is a loss function if you use it to calculate loss. That cetainly doesn't mean it'll be a good one. Books could be written on the topic though, so we'll leave it there.</span><span class="co">]</span>. We'll pass in the first example of a zero we have against the 'average' zero:</span>
+<span id="cb45-256"><a href="#cb45-256" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-257"><a href="#cb45-257" aria-hidden="true" tabindex="-1"></a>:::{#fig-zeroTozero}</span>
+<span id="cb45-260"><a href="#cb45-260" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb45-261"><a href="#cb45-261" aria-hidden="true" tabindex="-1"></a><span class="co"># | column: page</span></span>
+<span id="cb45-262"><a href="#cb45-262" aria-hidden="true" tabindex="-1"></a><span class="co"># | layout-ncol: 2</span></span>
+<span id="cb45-263"><a href="#cb45-263" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb45-264"><a href="#cb45-264" aria-hidden="true" tabindex="-1"></a>show_images([test[<span class="dv">0</span>][<span class="dv">19</span>], means[<span class="dv">0</span>]])</span>
+<span id="cb45-265"><a href="#cb45-265" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb45-266"><a href="#cb45-266" aria-hidden="true" tabindex="-1"></a>Zero to hero?</span>
+<span id="cb45-267"><a href="#cb45-267" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb45-270"><a href="#cb45-270" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb45-271"><a href="#cb45-271" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb45-272"><a href="#cb45-272" aria-hidden="true" tabindex="-1"></a><span class="co">"L1 loss: "</span><span class="op">+</span><span class="bu">str</span>(F.l1_loss(test[<span class="dv">0</span>][<span class="dv">18</span>], means[<span class="dv">0</span>]).item()), <span class="st">"MSE Loss: "</span> <span class="op">+</span> <span class="op">\</span></span>
+<span id="cb45-273"><a href="#cb45-273" aria-hidden="true" tabindex="-1"></a>    <span class="bu">str</span>(F.mse_loss(test[<span class="dv">0</span>][<span class="dv">18</span>], means[<span class="dv">0</span>]).sqrt().item())</span>
+<span id="cb45-274"><a href="#cb45-274" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb45-275"><a href="#cb45-275" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-276"><a href="#cb45-276" aria-hidden="true" tabindex="-1"></a>Other than validating the fact that we aren't getting any errors due to bad inputs, this doesn't tell us much. Generally, the MSE loss will always be greater than the L1 loss. Because loss increases exponentially with deviation from target, in principle, it is a better loss function as it will give a stronger learning signal in training; i.e. a step in the right direction will have greater effect on minimizing the loss function, at greater distance from target. But I'm getting ahead of myself here.</span>
+<span id="cb45-277"><a href="#cb45-277" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-278"><a href="#cb45-278" aria-hidden="true" tabindex="-1"></a>A more meaningful test that this is making sense would be to compare the error of a different sample digit against our ideal zero. Lets go with a seven.</span>
+<span id="cb45-279"><a href="#cb45-279" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-280"><a href="#cb45-280" aria-hidden="true" tabindex="-1"></a>:::{#fig-sevenTozero}</span>
+<span id="cb45-283"><a href="#cb45-283" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb45-284"><a href="#cb45-284" aria-hidden="true" tabindex="-1"></a><span class="co"># | column: page</span></span>
+<span id="cb45-285"><a href="#cb45-285" aria-hidden="true" tabindex="-1"></a><span class="co"># | layout-ncol: 2</span></span>
+<span id="cb45-286"><a href="#cb45-286" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb45-287"><a href="#cb45-287" aria-hidden="true" tabindex="-1"></a>show_images([test[<span class="dv">7</span>][<span class="dv">0</span>], means[<span class="dv">0</span>]])</span>
+<span id="cb45-288"><a href="#cb45-288" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb45-289"><a href="#cb45-289" aria-hidden="true" tabindex="-1"></a>Lucky Number Seven?</span>
+<span id="cb45-290"><a href="#cb45-290" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb45-293"><a href="#cb45-293" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb45-294"><a href="#cb45-294" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb45-295"><a href="#cb45-295" aria-hidden="true" tabindex="-1"></a><span class="co">"L1 loss: "</span><span class="op">+</span><span class="bu">str</span>(F.l1_loss(test[<span class="dv">7</span>][<span class="dv">0</span>], means[<span class="dv">0</span>]).item()), <span class="st">"MSE Loss: "</span> <span class="op">+</span> <span class="op">\</span></span>
+<span id="cb45-296"><a href="#cb45-296" aria-hidden="true" tabindex="-1"></a>    <span class="bu">str</span>(F.mse_loss(test[<span class="dv">7</span>][<span class="dv">0</span>], means[<span class="dv">0</span>]).sqrt().item())</span>
+<span id="cb45-297"><a href="#cb45-297" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb45-298"><a href="#cb45-298" aria-hidden="true" tabindex="-1"></a>Seems about right- a random zero sample from the database has a lower measure of loss when tested against the average zero than a random seven does. Now that we know the measure is behaving, we'll pack into a function so we can call on it and simplify our upcoming code. We'll use the L1 norm:</span>
+<span id="cb45-299"><a href="#cb45-299" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-302"><a href="#cb45-302" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb45-303"><a href="#cb45-303" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-fold: show</span></span>
+<span id="cb45-304"><a href="#cb45-304" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb45-305"><a href="#cb45-305" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mnist_distance(a, b): <span class="cf">return</span> (a<span class="op">-</span>b).<span class="bu">abs</span>().mean((<span class="op">-</span><span class="dv">1</span>, <span class="op">-</span><span class="dv">2</span>))</span>
+<span id="cb45-306"><a href="#cb45-306" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-307"><a href="#cb45-307" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-308"><a href="#cb45-308" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb45-309"><a href="#cb45-309" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-310"><a href="#cb45-310" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip}</span>
+<span id="cb45-311"><a href="#cb45-311" aria-hidden="true" tabindex="-1"></a><span class="fu">## Coding The L1 Norm</span></span>
+<span id="cb45-312"><a href="#cb45-312" aria-hidden="true" tabindex="-1"></a>I would really encourage you to simmer with the function defined in this code block and make sure you understand how it works:</span>
+<span id="cb45-313"><a href="#cb45-313" aria-hidden="true" tabindex="-1"></a><span class="ss"> - </span>We're taking the difference of each element in each input by subtracting</span>
+<span id="cb45-314"><a href="#cb45-314" aria-hidden="true" tabindex="-1"></a><span class="ss"> - </span>We're taking the absolute value of all those differences</span>
+<span id="cb45-315"><a href="#cb45-315" aria-hidden="true" tabindex="-1"></a><span class="ss"> - </span>We're averaging across the last two dimensions of the tensor. Think about it... what happens if there is more than just two dimensions</span>
+<span id="cb45-316"><a href="#cb45-316" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb45-317"><a href="#cb45-317" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-318"><a href="#cb45-318" aria-hidden="true" tabindex="-1"></a><span class="fu">## Computing The Benchmark</span></span>
+<span id="cb45-319"><a href="#cb45-319" aria-hidden="true" tabindex="-1"></a>Having the benchmark function, lets take it for a whirl. We will pass in the average digits as one tensor, and the training digits as the other. This is a critical point! A foundational strategy for the approach to neural nets is that we work with tensor-wise operations. Instead of taking the difference of one image against another, one at a time, we pass entire tensors into functions that compute across them. This becomes an absolute necessity for the sake of algorithmic and code execution efficiency. </span>
+<span id="cb45-320"><a href="#cb45-320" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-323"><a href="#cb45-323" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb45-324"><a href="#cb45-324" aria-hidden="true" tabindex="-1"></a><span class="co"># | error: true</span></span>
+<span id="cb45-325"><a href="#cb45-325" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb45-326"><a href="#cb45-326" aria-hidden="true" tabindex="-1"></a>mnist_distance(train, means)  <span class="co"># Intentional error to demonstrate</span></span>
+<span id="cb45-327"><a href="#cb45-327" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb45-328"><a href="#cb45-328" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-329"><a href="#cb45-329" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-330"><a href="#cb45-330" aria-hidden="true" tabindex="-1"></a>An error! The error message points to a mismatch in the sizes of our tensors. Let's take at these:</span>
+<span id="cb45-331"><a href="#cb45-331" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-334"><a href="#cb45-334" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb45-335"><a href="#cb45-335" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb45-336"><a href="#cb45-336" aria-hidden="true" tabindex="-1"></a>means.shape, train.shape</span>
+<span id="cb45-337"><a href="#cb45-337" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb45-338"><a href="#cb45-338" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-339"><a href="#cb45-339" aria-hidden="true" tabindex="-1"></a>Right, our <span class="in">`means`</span> contains 10 images, each 8 by 8 pixels, one image for each 'average' digit. Meanwhile <span class="in">`train`</span> is storing our training data, so it has a *collection* of images for each digit. So the tensor has greate dimensionality because for each digit there are 154 images of 8x8 pixels.</span>
+<span id="cb45-340"><a href="#cb45-340" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-341"><a href="#cb45-341" aria-hidden="true" tabindex="-1"></a>The mnist_distance function we made subtracts every element in the input tensors, so it makes sense that there needs to be an equal number of individual elements for the computer to make sense of the instruction. When I say element in this context I mean the numeric value assigned to each pixel in each image indicating its brightness. So at first blush, we'd think we need to expand the <span class="in">`means`</span> tensor so as to contain many copies of the each average digit.</span>
+<span id="cb45-342"><a href="#cb45-342" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-343"><a href="#cb45-343" aria-hidden="true" tabindex="-1"></a>How can we fix this? This reveals a critical lesson in the technique called broadcasting.</span>
+<span id="cb45-344"><a href="#cb45-344" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-345"><a href="#cb45-345" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
+<span id="cb45-346"><a href="#cb45-346" aria-hidden="true" tabindex="-1"></a><span class="fu">## Broadcasting</span></span>
+<span id="cb45-347"><a href="#cb45-347" aria-hidden="true" tabindex="-1"></a>Broadcasting is a functionality <span class="co">[</span><span class="ot">pyTorch</span><span class="co">](https://pytorch.org/docs/stable/notes/broadcasting.html)</span> brings over from <span class="co">[</span><span class="ot">Numpy</span><span class="co">](https://numpy.org/doc/stable/user/basics.broadcasting.html)</span>. From the docs: </span>
+<span id="cb45-348"><a href="#cb45-348" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-349"><a href="#cb45-349" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; The term broadcasting describes how NumPy treats arrays with different shapes during arithmetic operations. Subject to certain constraints, the smaller array is “broadcast” across the larger array so that they have compatible shapes. Broadcasting provides a means of vectorizing array operations so that looping occurs in C instead of Python. It does this without making needless copies of data and usually leads to efficient algorithm implementations.</span></span>
+<span id="cb45-350"><a href="#cb45-350" aria-hidden="true" tabindex="-1"></a><span class="at">:::</span></span>
+<span id="cb45-351"><a href="#cb45-351" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-352"><a href="#cb45-352" aria-hidden="true" tabindex="-1"></a>Instead of using Python to make many copies of our average digits, we can just alter the structure of the tensor <span class="in">`means`</span> in memory so as to make it compatible for computation with <span class="in">`train`</span>. To do this, we use the <span class="in">`unsqueeze`</span> function to add an extra dimension along which we will broadcast. </span>
+<span id="cb45-353"><a href="#cb45-353" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-356"><a href="#cb45-356" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb45-357"><a href="#cb45-357" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-fold: show</span></span>
+<span id="cb45-358"><a href="#cb45-358" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb45-359"><a href="#cb45-359" aria-hidden="true" tabindex="-1"></a>train.shape, means.unsqueeze(<span class="dv">1</span>).shape</span>
+<span id="cb45-360"><a href="#cb45-360" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb45-361"><a href="#cb45-361" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-362"><a href="#cb45-362" aria-hidden="true" tabindex="-1"></a>The way I look at this is like folders in a file system! In this diagram, the <span class="in">`unsqueeze`</span> function added an extra layer to the nested boxes making up <span class="in">`means`</span>.</span>
+<span id="cb45-363"><a href="#cb45-363" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-364"><a href="#cb45-364" aria-hidden="true" tabindex="-1"></a><span class="al">![Visualizing Broadcasting](Broadcasting_Basics.drawio.png)</span>{#fig-broadcast}  </span>
+<span id="cb45-365"><a href="#cb45-365" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-366"><a href="#cb45-366" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-367"><a href="#cb45-367" aria-hidden="true" tabindex="-1"></a>From the bottom up (i.e. right to left of tensor indices) we have:</span>
+<span id="cb45-368"><a href="#cb45-368" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-369"><a href="#cb45-369" aria-hidden="true" tabindex="-1"></a><span class="ss"> - </span>A folder with 8 numbers^("files" in this analogy- the foundational stuff we are actually storing!) -  the pixel brightness values for the 8 pixels in a single row.</span>
+<span id="cb45-370"><a href="#cb45-370" aria-hidden="true" tabindex="-1"></a><span class="ss"> - </span>A folder with 8 of the preceding folders - one for each row of pixels making an image</span>
+<span id="cb45-371"><a href="#cb45-371" aria-hidden="true" tabindex="-1"></a><span class="ss"> - </span>A folder with 154 of the preceding folders - In <span class="in">`train`</span>, the 154 different samples of hand written digits, for a given integer. In <span class="in">`means`</span>, a single box, redundant on its own, but serving as the thing to broadcast</span>
+<span id="cb45-372"><a href="#cb45-372" aria-hidden="true" tabindex="-1"></a><span class="ss"> - </span>A directory (our tensor) with 10 of the preceding folders, one for each integer <span class="in">`0`</span> through <span class="in">`9`</span></span>
+<span id="cb45-373"><a href="#cb45-373" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-374"><a href="#cb45-374" aria-hidden="true" tabindex="-1"></a>Lets test that this modified structure works:</span>
+<span id="cb45-377"><a href="#cb45-377" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb45-378"><a href="#cb45-378" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb45-379"><a href="#cb45-379" aria-hidden="true" tabindex="-1"></a>res <span class="op">=</span> mnist_distance(train, means.unsqueeze(<span class="dv">1</span>))</span>
+<span id="cb45-380"><a href="#cb45-380" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(res.shape)</span>
+<span id="cb45-381"><a href="#cb45-381" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb45-382"><a href="#cb45-382" aria-hidden="true" tabindex="-1"></a>Great, no error! We see the result is a tensor structured as an array of 10 vectors, each with 154 elements. In other words,a directory of 10 folders, each with 154 files. </span>
+<span id="cb45-383"><a href="#cb45-383" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-384"><a href="#cb45-384" aria-hidden="true" tabindex="-1"></a>We understand the numbers stored to be the L1 norm loss measures for each of the 154 samples of each digit, against the 'average' version of that digit. So by looking for the min and max values within these 10 vectors, we can identify the best and worst samples, as compared against their target digit:</span>
+<span id="cb45-385"><a href="#cb45-385" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-386"><a href="#cb45-386" aria-hidden="true" tabindex="-1"></a>:::{#fig-BestAndWorst}</span>
+<span id="cb45-389"><a href="#cb45-389" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb45-390"><a href="#cb45-390" aria-hidden="true" tabindex="-1"></a><span class="co"># | layout-ncol: 2</span></span>
+<span id="cb45-391"><a href="#cb45-391" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb45-392"><a href="#cb45-392" aria-hidden="true" tabindex="-1"></a>bestWorstIndex <span class="op">=</span> [(<span class="bu">list</span>(x).index(<span class="bu">min</span>(x)), <span class="bu">list</span>(x).index(<span class="bu">max</span>(x))) <span class="cf">for</span> x <span class="kw">in</span> res]</span>
+<span id="cb45-393"><a href="#cb45-393" aria-hidden="true" tabindex="-1"></a>i <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb45-394"><a href="#cb45-394" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> b, w <span class="kw">in</span> bestWorstIndex:</span>
+<span id="cb45-395"><a href="#cb45-395" aria-hidden="true" tabindex="-1"></a>    show_image(train[i][b])</span>
+<span id="cb45-396"><a href="#cb45-396" aria-hidden="true" tabindex="-1"></a>    show_image(train[i][w])</span>
+<span id="cb45-397"><a href="#cb45-397" aria-hidden="true" tabindex="-1"></a>    i <span class="op">=</span> i<span class="op">+</span><span class="dv">1</span></span>
+<span id="cb45-398"><a href="#cb45-398" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb45-399"><a href="#cb45-399" aria-hidden="true" tabindex="-1"></a>The Best and Worst!</span>
+<span id="cb45-400"><a href="#cb45-400" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb45-401"><a href="#cb45-401" aria-hidden="true" tabindex="-1"></a>So we can get a sense for where this benchmark digit classification function might go wrong, such as by taking that worst 1 for a 7, or the worst 9 for a 4.</span>
+<span id="cb45-402"><a href="#cb45-402" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-403"><a href="#cb45-403" aria-hidden="true" tabindex="-1"></a>We're close now. The goal here is a single performance measure, classification accuracy, for the benchmark function against all input data. That will be the score to beat with the neural entwork implementation. </span>
+<span id="cb45-404"><a href="#cb45-404" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-405"><a href="#cb45-405" aria-hidden="true" tabindex="-1"></a>What we need to do is extend the logic of that last code segment, comparing each digit to not only the 'average' version of it's target number, but also against the average version of every other number. To do this, we'll have to broadcast some more. this is the structure we'll use:</span>
+<span id="cb45-406"><a href="#cb45-406" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-409"><a href="#cb45-409" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb45-410"><a href="#cb45-410" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb45-411"><a href="#cb45-411" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Further unsqueezed shape of means: '</span> <span class="op">+</span></span>
+<span id="cb45-412"><a href="#cb45-412" aria-hidden="true" tabindex="-1"></a>      <span class="bu">str</span>(means.unsqueeze(<span class="dv">1</span>).unsqueeze(<span class="dv">1</span>).shape))</span>
+<span id="cb45-413"><a href="#cb45-413" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Unsqueezed shape of train data   : '</span> <span class="op">+</span> <span class="bu">str</span>(train.unsqueeze(<span class="dv">0</span>).shape))</span>
+<span id="cb45-414"><a href="#cb45-414" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb45-415"><a href="#cb45-415" aria-hidden="true" tabindex="-1"></a>Why? Let's go back to our norm function:</span>
+<span id="cb45-416"><a href="#cb45-416" aria-hidden="true" tabindex="-1"></a><span class="in">`def mnist_distance(a, b): return (a-b).abs().mean((-1, -2))`</span></span>
+<span id="cb45-417"><a href="#cb45-417" aria-hidden="true" tabindex="-1"></a>The last two dimensions will be averaged to get a score number, and we want a score number for every combination of sample image, and 'average' digits 0-9. Thinking of nested boxes again, we should expect the structure of our result tensor to have a path through it to each one of these combinations.^<span class="co">[</span><span class="ot">There is some ambiguity as to how we could've gone about this, as to wehther or not we thought about the digit from which samples are drawn as the first layer, or the average digit being tested against as the first layer. I chose the latter.</span><span class="co">]</span> To build this path, we first imagine it:</span>
+<span id="cb45-418"><a href="#cb45-418" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-419"><a href="#cb45-419" aria-hidden="true" tabindex="-1"></a><span class="ss"> - </span>The tensor as our outermost box should have 10 boxes in it, one for each 'average' digit; in this box that digit will be the comparison item against every sample.</span>
+<span id="cb45-420"><a href="#cb45-420" aria-hidden="true" tabindex="-1"></a><span class="ss"> - </span>Within each of those boxes will be 10 more boxes, one for each of the sample pools (all samples of 0's, all samples of 1's, 2's, etc.)</span>
+<span id="cb45-421"><a href="#cb45-421" aria-hidden="true" tabindex="-1"></a><span class="ss"> - </span>Within each of those boxes will be 154 boxes, each containing the data for one sample image. The data is stored in array structure, i.e. 2 boxes, but we can leave it at that since at that level, all those 64 numbers per digit will be averaged out.</span>
+<span id="cb45-422"><a href="#cb45-422" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-423"><a href="#cb45-423" aria-hidden="true" tabindex="-1"></a>First of all, we unsqueeze the <span class="in">`means`</span> tensor we had at the first index *again* so that the dimension where the differentiation between average digit occurs stays at the highest dimension. The result is that 10,1,1,8,8 tensor. We unsqueezed multiple times because we want *copies of copies* of each of the mean digits. One level of copying at the layer of sample pool, and copying againt to each sample image within the sample pool. </span>
+<span id="cb45-424"><a href="#cb45-424" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-425"><a href="#cb45-425" aria-hidden="true" tabindex="-1"></a>Next, we need to make the <span class="in">`train`</span> tensor compatible with this. The thought is that this entire training set will be compared against each average, so there will need to be 10 copies of it. To achieve that we unsqueezed at the 0^th^ index to allow for broadcasting to more copies.</span>
+<span id="cb45-426"><a href="#cb45-426" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-427"><a href="#cb45-427" aria-hidden="true" tabindex="-1"></a>The result is that the 10,1,1,8,8 tensor and 1,10,154,8,8 tensors are broadcast to be equal in shape to perform computation. First in dimension 1, the train data is broadcast (10 copies created), in dimension 2 the mean data is broadcast creating 10 copies of everything below. Then in the 3rd dimension, the means is again broadcast up to 154, creating 154 more copies of what is in the dimensions below. In this way, the 1st dimension corresponds to the different 'ideal' or mean  digits 0-9, the 2nd dimension corresponds to all the data corresponding to the training data for digits 0-9. The 3rd dimension differentiates between individual samples of a given training digit. And the 4th and 5th dimension get us to individual pixels of those images.</span>
+<span id="cb45-428"><a href="#cb45-428" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-429"><a href="#cb45-429" aria-hidden="true" tabindex="-1"></a><span class="al">![And they say broadcast is dead!](Broadcasting_Full.drawio.png)</span>{#fig-bigbroadcast}  </span>
+<span id="cb45-430"><a href="#cb45-430" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-431"><a href="#cb45-431" aria-hidden="true" tabindex="-1"></a>Let's see if it worked!</span>
+<span id="cb45-432"><a href="#cb45-432" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-435"><a href="#cb45-435" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb45-436"><a href="#cb45-436" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb45-437"><a href="#cb45-437" aria-hidden="true" tabindex="-1"></a>all_comparison <span class="op">=</span> mnist_distance(</span>
+<span id="cb45-438"><a href="#cb45-438" aria-hidden="true" tabindex="-1"></a>    means.unsqueeze(<span class="dv">1</span>).unsqueeze(<span class="dv">1</span>), train.unsqueeze(<span class="dv">0</span>))</span>
+<span id="cb45-439"><a href="#cb45-439" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'shape of all comparison:     '</span><span class="op">+</span><span class="bu">str</span>(all_comparison.shape))</span>
+<span id="cb45-440"><a href="#cb45-440" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb45-441"><a href="#cb45-441" aria-hidden="true" tabindex="-1"></a>Great, no error!</span>
+<span id="cb45-442"><a href="#cb45-442" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-443"><a href="#cb45-443" aria-hidden="true" tabindex="-1"></a>The result is 3 dimensions instead of 5 because the mnist_distance function took the average across the last two dimensions, reducing the data in them to a scalar stored in the 3rd dimension. So for the 0^th^ dimension, we have 10 collections of data (horizontal slices), which is the ideal digit is compared against the 154 samples for each digit as indexed in the 1^st^ dimension (vertical slices), and the 2^nd^ dimension (depth) indexing the 154 samples.</span>
+<span id="cb45-444"><a href="#cb45-444" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-445"><a href="#cb45-445" aria-hidden="true" tabindex="-1"></a>Picturing the 3D result as a cube, each element in the cube contains the numeric result from mnist_dist for the comparison of an ideal and a test image. Any given sample image is compared against all 9 ideal digits, and where the miniumum mnist_distance corresponds to the integer that the training digit actually is, the benchmark function was correct.</span>
+<span id="cb45-446"><a href="#cb45-446" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-447"><a href="#cb45-447" aria-hidden="true" tabindex="-1"></a><span class="al">![Behold, the data cube! *a.k.a Visualizing a Tensor*](Data_cube.png)</span>{#fig-datacube}  </span>
+<span id="cb45-448"><a href="#cb45-448" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-449"><a href="#cb45-449" aria-hidden="true" tabindex="-1"></a>Alright, so we have a big tensor with every image compared against every 'average' digit. Now we need to do some smart indexing to identify the lowest loss function score for each sample image, indicating what number the benchmark function *thinks* that that image is, and to summarize all that output as a performance metric for us to beat.</span>
+<span id="cb45-450"><a href="#cb45-450" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-451"><a href="#cb45-451" aria-hidden="true" tabindex="-1"></a>Here are the lines in the following block where the maagic is baked into the cake:</span>
+<span id="cb45-452"><a href="#cb45-452" aria-hidden="true" tabindex="-1"></a><span class="ss"> 3. </span>Generalizing the function so it can handle inputs of varibable size</span>
+<span id="cb45-453"><a href="#cb45-453" aria-hidden="true" tabindex="-1"></a><span class="ss"> 11. </span>Using iterator to index an entire vertical slice of the data cube, yielding a 2D tensor. </span>
+<span id="cb45-454"><a href="#cb45-454" aria-hidden="true" tabindex="-1"></a>  i) The <span class="in">`.min(dim=0)`</span> looks across the 0^th^ dimension of the input tensor, in this case the 2D array. It yields a tensor containing the minimum values in each slice. the <span class="in">`.indices`</span> yields the indices at which those values were identified.</span>
+<span id="cb45-455"><a href="#cb45-455" aria-hidden="true" tabindex="-1"></a>  ii) In the bigger picture, <span class="in">`.min(dim=0)`</span> is looking at single columns of 10 numbers and returning the minimum value.</span>
+<span id="cb45-456"><a href="#cb45-456" aria-hidden="true" tabindex="-1"></a><span class="ss"> 12. </span>Tallying up how many classifications were attributed to each number 0 through 9.</span>
+<span id="cb45-457"><a href="#cb45-457" aria-hidden="true" tabindex="-1"></a><span class="ss"> 13. </span>Because our target values are number 0 to 9, they lend themselves to being used as indices. This same code for another kind of task might look very different. Here, our iterating/slicing strategy is such that we know the true digit for all the data points in iteration 0 are 0, iteration 1 are 1, etc, so we can simply take the number of classifications made to the current iteration number as the same thing as classifications to correct category, and add that to our running total.</span>
+<span id="cb45-458"><a href="#cb45-458" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-459"><a href="#cb45-459" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-460"><a href="#cb45-460" aria-hidden="true" tabindex="-1"></a>:::{#fig-bmkConfMat}</span>
+<span id="cb45-463"><a href="#cb45-463" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb45-464"><a href="#cb45-464" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb45-465"><a href="#cb45-465" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-466"><a href="#cb45-466" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-467"><a href="#cb45-467" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> acc_rslt(comp):</span>
+<span id="cb45-468"><a href="#cb45-468" aria-hidden="true" tabindex="-1"></a>    c <span class="op">=</span> comp.clone()</span>
+<span id="cb45-469"><a href="#cb45-469" aria-hidden="true" tabindex="-1"></a>    x, y, z <span class="op">=</span> [i <span class="cf">for</span> i <span class="kw">in</span> c.shape]</span>
+<span id="cb45-470"><a href="#cb45-470" aria-hidden="true" tabindex="-1"></a>    totSamp <span class="op">=</span> y<span class="op">*</span>z</span>
+<span id="cb45-471"><a href="#cb45-471" aria-hidden="true" tabindex="-1"></a>    totCorrect <span class="op">=</span> <span class="dv">0</span>  <span class="co"># Tallier</span></span>
+<span id="cb45-472"><a href="#cb45-472" aria-hidden="true" tabindex="-1"></a>    confM <span class="op">=</span> []  <span class="co"># confusion matrix will be result of stacking the bincount results</span></span>
+<span id="cb45-473"><a href="#cb45-473" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>):</span>
+<span id="cb45-474"><a href="#cb45-474" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Taking slice yields 2D object, shape (10,154), take min in each column (axis 1) to get digit prediction</span></span>
+<span id="cb45-475"><a href="#cb45-475" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Retrieve indices i.e. predictions for all comparisons</span></span>
+<span id="cb45-476"><a href="#cb45-476" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Yields a 1D tensor with count of integers indexed by integer</span></span>
+<span id="cb45-477"><a href="#cb45-477" aria-hidden="true" tabindex="-1"></a>        <span class="bu">id</span> <span class="op">=</span> c[:, i, :].<span class="bu">min</span>(dim<span class="op">=</span><span class="dv">0</span>).indices</span>
+<span id="cb45-478"><a href="#cb45-478" aria-hidden="true" tabindex="-1"></a>        predCnt <span class="op">=</span> torch.bincount(<span class="bu">id</span>, minlength<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb45-479"><a href="#cb45-479" aria-hidden="true" tabindex="-1"></a>        totCorrect <span class="op">=</span> totCorrect<span class="op">+</span>predCnt[i]</span>
+<span id="cb45-480"><a href="#cb45-480" aria-hidden="true" tabindex="-1"></a>        confM.append(predCnt)</span>
+<span id="cb45-481"><a href="#cb45-481" aria-hidden="true" tabindex="-1"></a>    confM <span class="op">=</span> torch.stack(confM)</span>
+<span id="cb45-482"><a href="#cb45-482" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (totCorrect<span class="op">/</span>totSamp<span class="op">*</span><span class="dv">100</span>), confM</span>
+<span id="cb45-483"><a href="#cb45-483" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-484"><a href="#cb45-484" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-485"><a href="#cb45-485" aria-hidden="true" tabindex="-1"></a>acc, conf <span class="op">=</span> acc_rslt(all_comparison)</span>
+<span id="cb45-486"><a href="#cb45-486" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'accuracy: '</span><span class="op">+</span><span class="bu">str</span>(<span class="bu">round</span>(acc.item(), <span class="dv">2</span>))<span class="op">+</span><span class="st">'%'</span>)</span>
+<span id="cb45-487"><a href="#cb45-487" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-488"><a href="#cb45-488" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame(conf)</span>
+<span id="cb45-489"><a href="#cb45-489" aria-hidden="true" tabindex="-1"></a>df.style.set_properties(<span class="op">**</span>{<span class="st">'font-size'</span>: <span class="st">'6pt'</span>}).background_gradient(<span class="st">'Greys'</span>)</span>
+<span id="cb45-490"><a href="#cb45-490" aria-hidden="true" tabindex="-1"></a>df.style.set_table_styles([<span class="bu">dict</span>(selector<span class="op">=</span><span class="st">'th'</span>, props<span class="op">=</span>[(</span>
+<span id="cb45-491"><a href="#cb45-491" aria-hidden="true" tabindex="-1"></a>    <span class="st">'text-align'</span>, <span class="st">'center'</span>)])]).set_properties(<span class="op">**</span>{<span class="st">'text-align'</span>: <span class="st">'center'</span>})</span>
+<span id="cb45-492"><a href="#cb45-492" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb45-493"><a href="#cb45-493" aria-hidden="true" tabindex="-1"></a>Confusion Matrix. Tally of Actual (row) Vs. Predicted (col)"</span>
+<span id="cb45-494"><a href="#cb45-494" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb45-495"><a href="#cb45-495" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-496"><a href="#cb45-496" aria-hidden="true" tabindex="-1"></a>Exciting! Just shy of 90% accuracy is the score to beat. And we can see which deigits performed better or worse. Row 8 shows that numbe r8 had the worst performance, with only 119/154 images classified correctly, with most 8's being incorrectly classified as 1's, or 9's. Following that, 5's had 131/154 correct, with 17 instances incorrectly classified as a 9. Now, we are *ready* to make a neural network.</span>
+<span id="cb45-497"><a href="#cb45-497" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-498"><a href="#cb45-498" aria-hidden="true" tabindex="-1"></a>::: {.callout-important }</span>
+<span id="cb45-499"><a href="#cb45-499" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-500"><a href="#cb45-500" aria-hidden="true" tabindex="-1"></a>If you want to understand each line of everything that follows, a strong grasp of broadcasting will be critical.</span>
+<span id="cb45-501"><a href="#cb45-501" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb45-502"><a href="#cb45-502" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-503"><a href="#cb45-503" aria-hidden="true" tabindex="-1"></a><span class="fu"># Outro</span></span>
+<span id="cb45-504"><a href="#cb45-504" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-505"><a href="#cb45-505" aria-hidden="true" tabindex="-1"></a>A couple of key take aways from this portion of the fastAI lesson. A notable one not to skip si the fact that there is no sense deploying neural networks if other methods can do the job better, so we should always be verifying that we perform better than the alternatives. I really had a few a-ha moments in learning about the broadcasting techniques and so I felt it would be great to share. It was a lot easier to scribble the drawings on paper than to put them on the screen but I hope you find them illuminating!</span>
+<span id="cb45-506"><a href="#cb45-506" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-507"><a href="#cb45-507" aria-hidden="true" tabindex="-1"></a>I *was* able to create that neural net to classify digits more accurately, in the end. I'll walk through that in the next post.</span>
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
