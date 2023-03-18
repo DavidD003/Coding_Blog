@@ -38,6 +38,7 @@ The required dependencies!:`scikit-learn`, `fastbook`, `matplotlib`
 :::
 
 ```{python}
+# | code-line-numbers: true
 # Install dependency
 from fastbook import *
 from fastai.vision.all import *
@@ -65,19 +66,23 @@ Pre-processing data before even touching any neural net methods can improve your
 :::
 
 ```{python}
+# | code-line-numbers: true
 mnist = load_digits()
 ```
 Always good to get to know your data..
 ```{python}
+# | code-line-numbers: true
 mnist.keys()
 ```
 What's in here?
 ```{python}
+# | code-line-numbers: true
 # Observing y value for data sequence
 mnist["target"], "# targets: " + str(len(mnist["target"]))
 ```
 So we have 1797 numbers in this data set.
 ```{python}
+# | code-line-numbers: true
 n0 = [[n for n in mnist["data"][0][i * 8: i * 8 + 7]] for i in range(0, 8)]
 n0, mnist["images"][0]
 ```
@@ -87,6 +92,7 @@ The values in the arrays are from 0-16, as described in the source documentation
 
 I had to do some funny indexing to tease that out. Something I learned along the way was the fantastic .view() function of the Tensor object in pyTorch. Tensors are like a numpy array, have a lot of features that will be critical for quickly creating neural nets. This object type was imported with fastbook.
 ```{python}
+# | code-line-numbers: true
 Tensor(mnist["data"][0]).view(-1, 8)
 ```
 
@@ -98,6 +104,7 @@ Using -1 in the argument for the view function will auto-size the tensor based o
 For a [classification task](https://docs.aws.amazon.com/machine-learning/latest/dg/types-of-ml-models.html) such as this, it's important to keep in mind that our data should be balanced in quantity per class. Let's take a look at how many we've got. 
 
 ```{python}
+# | code-line-numbers: true
 [str(i) + ": " + str(list(mnist["target"]).count(i))
  for i in range(10)]  # Count of each digit in dataset
 ```
@@ -114,6 +121,7 @@ If we train on a million images of 7's, and only a thousand 1's, we can be duped
 ```{python}
 # | column: page
 # | layout-ncol: 5
+# | code-line-numbers: true
 for i in range(10):
     show_image(mnist["images"][-i] / 16)  # Visualizing example digit
 ```
@@ -125,6 +133,7 @@ Turns out that pre-processing that comes baked in does make them pretty grainy. 
 We need to separate out our inputs for training purposes. We'll iterate across the 'targets' list, using the target numbers themselves as the index value to dump the corresponding 'image' data into the storage bin.
 ```{python}
 # | code-fold: show
+# | code-line-numbers: true
 stacked = []
 # This loop because stacked=[[]]*10 makes 1 list in list, with 10 copies of pointers... need separate objects
 for i in range(10):
@@ -147,6 +156,7 @@ We'll print out the size of these collections and take a peek at a sample to mak
 :::{#fig-checkSamp}
 ```{python}
 # | warning: False
+# | code-line-numbers: true
 # To make dataset a tensor, make it same number of dimensions
 stacked = tensor([x[:174] for x in stacked])
 # Segmentation: Pull 20 of each digit out of training set
@@ -162,6 +172,7 @@ Nice.
 
 It's important to keep track of what's what.
 ```{python}
+# | code-line-numbers: true
 # | code-fold: show
 type(train), type(train[0]), type(train[0][0]), [
     type(test), type(test[0]), type(test[0][0])]
@@ -170,6 +181,7 @@ Ok so our top level containers for training/testing data are basic python lists.
 
 Instead of a basic Python list, we will need the top level containers as tensors to leverage the pyTorch functionality built into them. luckily it's an easy conversion
 ```{python}
+# | code-line-numbers: true
 # Converts PyList of tensors to tensor of tesnors (join in new dimensions, retain target indexing)
 train = torch.stack(train)
 test = torch.stack(test)
@@ -186,13 +198,14 @@ Where it gets fun then is averaging and such across these dimensions. By doing s
 ```{python}
 # | column: page
 # | layout-ncol: 5
+# | code-line-numbers: true
 means = torch.stack([x.mean(0) for x in train])  # Compute the average digit
 for i in range(10):
     show_image(means[i])
 ```
 Now those are some digits!
 :::
-What just happened, how did we get this? let's tear this one apart.
+I hope you think this is as cool as I do! It calls to mind the idea of seeing a video of someone doing something routine every day like brushing their teeth, but at a million times speed, all the variations of movement wash out and create this somewhat blurry view of the general pattern. Like a mashing of all possible worlds. What did that code do, how did we get this? Let's tear this one apart.
 
 First of all, we're dealing with a 4 dimensional tensor, `train`. When we jumped into a list comprehension iterating `for x in train`, we 'stepped into' that 0^th^ dimension, so to speak. Then any given element `x` is a 3 dimensional tensor. 
 
@@ -201,17 +214,123 @@ We will go through 10 of them, one for each integer, and each will contain 174 `
 In practice, this means that the more samples in which a given pixel was inked, the darker that pixel will be in the average.
 
 ### Least-Difference As Decision
+Recall, our goal is first create a benchmark classification function that doesn't use neural network methodologies. Now that we have the aberage, or 'archetypal' form of each digit, we can define a function to compare an input digit against the ideal digits to identify which it has the least difference with.
 
+::: {.callout-tip collapse="true"}
+## Comparing Differences Between Pictures?
+
+Since all of the 'images' we're talking about are represented as a collection of 64 numbers, each number indicating a pixels brightness, taking the difference between two images as a whole just entails taking the difference between each pair of corresponding pixels from each, and then taking the average or using some other function to convert those 64 differences into one number. 
+:::
+
+Fortunately, the fastbook library again serves up a toolkit: the module F, containing functions we'll need in our travels on any ML journey.
+
+Let's use the L1 loss and MSE as loss functions^[Check out [this link](https://mathworld.wolfram.com/L2-Norm.html) for more on these norms. Be aware that MSE is just a colloquial name for the L2 norm, and also that a norm alone isn't a 'loss function' *per se*. Any function at all is a loss function if you use it to calculate loss. That cetainly doesn't mean it'll be a good one. Books could be written on the topic though, so we'll leave it there.]. We'll pass in the first example of a zero we have against the 'average' zero:
+
+:::{#fig-zeroTozero}
+```{python}
+# | column: page
+# | layout-ncol: 2
+# | code-line-numbers: true
+show_images([test[0][19], means[0]])
+```
+Zero to hero?
+:::
+```{python}
+# | code-line-numbers: true
+"L1 loss: "+str(F.l1_loss(test[0][18], means[0]).item()), "MSE Loss: " + \
+    str(F.mse_loss(test[0][18], means[0]).sqrt().item())
+```
+
+Other than validating the fact that we aren't getting any errors due to bad inputs, this doesn't tell us much. Generally, the MSE loss will always be greater than the L1 loss. Because loss increases exponentially with deviation from target, in principle, it is a better loss function as it will give a stronger learning signal in training; i.e. a step in the right direction will have greater effect on minimizing the loss function, at greater distance from target. But I'm getting ahead of myself here.
+
+A more meaningful test that this is making sense would be to compare the error of a different sample digit against our ideal zero. Lets go with a seven.
+
+:::{#fig-sevenTozero}
+```{python}
+# | column: page
+# | layout-ncol: 2
+# | code-line-numbers: true
+show_images([test[7][0], means[0]])
+```
+Lucky Number Seven?
+:::
+```{python}
+# | code-line-numbers: true
+"L1 loss: "+str(F.l1_loss(test[7][0], means[0]).item()), "MSE Loss: " + \
+    str(F.mse_loss(test[7][0], means[0]).sqrt().item())
+```
+Seems about right- a random zero sample from the database has a lower measure of loss when tested against the average zero than a random seven does. Now that we know the measure is behaving, we'll pack into a function so we can call on it and simplify our upcoming code. We'll use the L1 norm:
 
 ```{python}
+# | code-fold: show
+# | code-line-numbers: true
+def mnist_distance(a, b): return (a-b).abs().mean((-1, -2))
+
 
 ```
-```{python}
 
+::: {.callout-tip}
+## Coding The L1 Norm
+I would really encourage you to simmer with the function defined in this code block and make sure you understand how it works:
+ - We're taking the difference of each element in each input by subtracting
+ - We're taking the absolute value of all those differences
+ - We're averaging across the last two dimensions of the tensor. Think about it... what happens if there is more than just two dimensions
+:::
+
+## Computing The Benchmark
+Having the benchmark function, lets take it for a whirl. We will pass in the average digits as one tensor, and the training digits as the other. This is a critical point! A foundational strategy for the approach to neural nets is that we work with tensor-wise operations. Instead of taking the difference of one image against another, one at a time, we pass entire tensors into functions that compute across them. This becomes an absolute necessity for the sake of algorithmic and code execution efficiency. 
+
+```{python}
+# | error: true
+# | code-line-numbers: true
+mnist_distance(train, means)  # Intentional error to demonstrate
 ```
-```{python}
 
+
+An error! The error message points to a mismatch in the sizes of our tensors. Let's take at these:
+
+```{python}
+# | code-line-numbers: true
+means.shape, train.shape
 ```
-```{python}
 
+Right, our `means` contains 10 images, each 8 by 8 pixels, one image for each 'average' digit. Meanwhile `train` is storing our training data, so it has a *collection* of images for each digit. So the tensor has greate dimensionality because for each digit there are 154 images of 8x8 pixels.
+
+The mnist_distance function we made subtracts every element in the input tensors, so it makes sense that there needs to be an equal number of individual elements for the computer to make sense of the instruction. When I say element in this context I mean the numeric value assigned to each pixel in each image indicating its brightness. So at first blush, we'd think we need to expand the `means` tensor so as to contain many copies of the each average digit.
+
+How can we fix this? This reveals a critical lesson in the technique called broadcasting.
+
+::: {.callout-note}
+## Broadcasting
+Broadcasting is a functionality [pyTorch](https://pytorch.org/docs/stable/notes/broadcasting.html) brings over from [Numpy](https://numpy.org/doc/stable/user/basics.broadcasting.html). From the docs: 
+
+> The term broadcasting describes how NumPy treats arrays with different shapes during arithmetic operations. Subject to certain constraints, the smaller array is “broadcast” across the larger array so that they have compatible shapes. Broadcasting provides a means of vectorizing array operations so that looping occurs in C instead of Python. It does this without making needless copies of data and usually leads to efficient algorithm implementations.
+:::
+
+Instead of using Python to make many copies of our average digits, we can just alter the structure of the tensor `means` in memory so as to make it compatible for computation with `train`. To do this, we use the `unsqueeze` function to add an extra dimension along which we will broadcast. 
+
+```{python}
+# | code-fold: show
+# | code-line-numbers: true
+train.shape, means.unsqueeze(1).shape
+```
+
+The way I look at this is nested boxes! In this diagram, the `unsqueeze` function added  an extra layer to the nested boxes making up `means`.
+
+![Visualizing Broadcasting](Broadcasting_Basics.drawio.png){#fig-broadcast}  
+
+
+From the bottom up (i.e. right to left of tensor indices) we have:
+
+ - A box with 8 numbers -  the pixel brightness values for the 8 pixels in a single row.
+ - A box with 8 of the preceding boxes - one for each row of pixels making an image
+ - A box with 154 of the preceding boxes - In `train`, the 154 different samples of hand written digits, for a given integer. In `means`, a single box, redundant on its own, but serving as the thing to broadcast
+ - A box (our tensor) with 10 of the preceding boxes, one for each integer `0` through `9`
+
+
+
+But we just asked "Which of these two is more likely to be a zero?" We haven't really done digit classification just yet, to do that we need to compare any given test digit against the averages samples of 0 through 9 and see which yields the smallest loss measure.
+
+```{python}
+# | code-line-numbers: true
 ```
