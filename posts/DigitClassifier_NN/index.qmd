@@ -1,0 +1,208 @@
+---
+title: "A Simple Digit Classifier"
+author: "David De Sa"
+date: "2023-03-14"
+categories: [python, pyTorch, NeuralNetworks]
+image: "NN101_thumbnail.png"
+format:
+  html:
+    code-fold: true
+    toc: true
+    code-tools: true
+draft: true
+---
+
+## TL;DR
+The best way to learn is to teach, so in this post I try to teach the reader how my first neural network implementation works! Part 2 of 2. I built this in following along with the awesome lessons over at [fast.ai](course.fast.ai). Many thanks to that team.
+
+# Overview
+We're going to jump in where we left off in Part 1: We'll just reimport our data, and get into it.
+
+### What?
+We're going to create a neural network that, given a picture of a numeric digit, identifies the number.
+
+### Why?
+Does this really need explaining? Because the technology is amazing in both practical and philosophical ways.
+
+### Who?
+[Who am I](https://davidd003.github.io/Coding_Blog/about.html)!? Who are you?!
+
+### How?
+Using [PyTorch](https://pytorch.org/)^[If it ain't 'py', it ain't python, right?], an opensource toolkit for building neural networks. Truly an elevator ride up onto the shoulders of giants.
+
+# Code Review
+We'll first just re-import our data, and then get into building the groundwork for our neural network
+
+Let's get into it!
+
+::: {.callout-note collapse="true"}
+The required dependencies!:`scikit-learn`, `fastbook`, `matplotlib`
+:::
+
+```{python}
+# | code-line-numbers: true
+# Install dependency
+from fastbook import *
+from fastai.vision.all import *
+from sklearn.datasets import load_digits
+import fastbook
+
+fastbook.setup_book()
+
+
+matplotlib.rc("image", cmap="Greys")
+```
+## Data Acquisition
+A quick flashback to Part 1 of my Building A Digit Classifier blog!:
+
+::: {.callout-tip collapse="true"}
+## Understand Your Input!
+
+Pre-processing data before even touching any neural net methods can improve your final performance. Note the data set information offered at the [source page](https://archive.ics.uci.edu/ml/datasets/Optical+Recognition+of+Handwritten+Digits): 
+
+> We used preprocessing programs made available by NIST to extract normalized bitmaps of handwritten digits from a preprinted form. From a total of 43 people, 30 contributed to the training set and different 13 to the test set. 32x32 bitmaps are divided into nonoverlapping blocks of 4x4 and the number of on pixels are counted in each block. This generates an input matrix of 8x8 where each element is an integer in the range 0..16. This reduces dimensionality and gives invariance to small distortions.
+:::
+
+```{python}
+# | code-line-numbers: true
+mnist = load_digits()
+stacked = []
+# This loop because stacked=[[]]*10 makes 1 list in list, with 10 copies of pointers... need separate objects
+for i in range(10):
+    stacked.append([])
+# Assign all images to the right collection in the 'stacked' list, indexed by target
+for i in range(len(mnist["target"])):
+    stacked[mnist["target"][i]].append(mnist["images"][i])
+```
+
+### Segmentation
+The next step is to define which data will be our training, and our validation set. It was important to bucket out our data first so by randomly sampling our data we didn't generate a validation set with a large imbalance in the number of classes to be tested in it. 
+
+First we convert to a tensor, then segment training from validation data. Arbitrarily taking 20 examples from each digit, so, 11.5% of the total data set towards validation.
+
+We'll print out the size of these collections and take a peek at a sample to make sure we indexed right.
+
+:::{#fig-checkSamp}
+```{python}
+# | warning: False
+# | code-line-numbers: true
+# To make dataset a tensor, make it same number of dimensions
+stacked = tensor([x[:174] for x in stacked])
+# Segmentation: Pull 20 of each digit out of training set
+test = [dig[-20:] for dig in stacked]
+train = [dig[:-20] for dig in stacked]
+# Confirm counts of samples
+[len(test[i]) for i in range(10)], [len(train[i]) for i in range(10)]
+show_image(stacked[3][0])  # Check sample
+```
+Is it a 3?
+:::
+Nice.
+
+It's important to keep track of what's what.
+```{python}
+# | code-line-numbers: true
+# | code-fold: show
+type(train), type(train[0]), type(train[0][0]), [
+    type(test), type(test[0]), type(test[0][0])]
+```
+Ok so our top level containers for training/testing data are basic python lists. Within those, we have 10 collections, one for each integer. Those are Tensors. And then, each image (a collection of pixels unto itself) within those tensors, are also Tensor type objects.
+
+Instead of a basic Python list, we will need the top level containers as tensors to leverage the pyTorch functionality built into them. luckily it's an easy conversion:
+```{python}
+# | code-line-numbers: true
+# Converts PyList of tensors to tensor of tesnors (join in new dimensions, retain target indexing)
+train = torch.stack(train)
+test = torch.stack(test)
+train.shape, test.shape
+```
+Now here is a critical piece, working with multidimensional arrays and keeping in mind what we understand these to be. Our test and training tensors have the same dimensionality but not the same size. 
+
+### Setup DataLoaders
+First get data into the requisite shape for the processes that will follow. 
+```{python}
+# | code-line-numbers: true
+# Build training/valid sets for passing to DataLoader
+train_x = torch.cat([x for x in train]).view(-1, 8*8)
+test_x = torch.cat([x for x in test]).view(-1, 8*8)
+train_y, test_y = [], []
+for n in range(10):
+    train_y.extend([n]*154)
+    test_y.extend([n]*20)
+train_y = tensor(train_y).unsqueeze(-1)
+test_y = tensor(test_y).unsqueeze(-1)
+train_x.shape, test_x.shape, train_y.shape, test_y.shape
+```
+
+Note the unsqueezing such that the `_y` tensors have a singleton dimension. Might seem strange on first blush but makes sense when considering that our 'target' just happens to be individual integers. But in other use cases, the target could be something more complex, requiring a larger data structure. In which case that dimension could be larger than a singleton.
+
+Now we can prime our DataLoaders. DataLoaders are a super handy object from the Pytorch library that will make life easier by holding our data for us, and serving it up in randomized batches.
+
+```{python}
+# | code-line-numbers: true
+# Zip each input data item to its target output
+dset = list(zip(train_x, train_y))
+valid_dset = list(zip(test_x, test_y))
+# Define DataLoader objects to pass to learner
+dl = DataLoader(dset, batch_size=25, shuffle=true)
+valid_dl = DataLoader(valid_dset, batch_size=5, shuffle=true)
+
+dls = DataLoaders(dl, valid_dl)
+```
+
+## Building The NN Foundation
+Every NN needs weights and biases. We're going to want to initialize lots of them, and in differently shaped structures, so first we define a function to help us do that:
+
+```{python}
+# | code-line-numbers: true
+def init_params(size, std=.1): return (torch.randn(size)*std).requires_grad_()
+
+
+```
+
+::: {.callout-note collapse="true"}
+## Requiring Grad!
+Note that any memory structures created with that function will also store their gradient in memory as computation is performed on them. This will be critical to executing back propagation of the gradient so as to optimize our function.
+:::
+
+Now we can generate our weights and biases. We define the structure sizes with our input and output size in mind, and the principles of matrix multiplication. 
+
+The general structure we will start with will be, of course, an initial layer with one neuron for each input, which will yield a single activation per input. After a nonlinearty, the second layer will have 10 weights and biases, such that the output is a 1D vector of size 10, per input. Each output neuron will represent an estimation of likelihood that the integer is that which the neuron represents (0-9).
+
+![Visualizing Layer 1](Layer 1 Diagram.png){#fig-Layer1}  
+
+::: {.callout-tip }
+## Matrix Multiplication!
+Never fear! It's easy. I never forgot the trick Dr. Mohammed Jaber taught us 4th year as we had to use these methods from first year: ROW. COLUMN.
+
+Take row i from the first matrix, and column j from the second. The element in index i,j of the resulting matrix will be the dot product of that row and column vector.
+:::
+
+```{python}
+# | code-line-numbers: true
+# Have to provide extra dimension for matrix mutiplication, making it a single-column vector
+w1 = init_params((8*8, 1))
+b1 = init_params(1)
+# Have to provide an extra dimension (1) for matrix multiplication
+w2 = init_params((1, 10))
+b2 = init_params(1)
+```
+ - Layer 1:
+    - 64 weights, one per pixel. Formatted in a column vector because they are the second term in the matrix multiplication equation, with a single input (image) being fed as a single row vector of 64 elements, one per pixel. 
+    - 1 bias; it will be broadcast such that the same bias is added to all instances in our batch. See @fig-Layer1
+ - Layer 2:
+    - 10 weights, to generate one output neuron per category/class to assign. 
+    - 10 biases, one *for each* output neuron
+
+```{python}
+# | code-line-numbers: true
+```
+```{python}
+# | code-line-numbers: true
+```
+```{python}
+# | code-line-numbers: true
+```
+```{python}
+# | code-line-numbers: true
+```
