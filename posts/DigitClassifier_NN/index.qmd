@@ -494,6 +494,7 @@ train_epoch(myModel, 0.01, [w1, b1, w2, b2], my_loss)
 print("PostTrain Accuracy: "+str(validate_epoch(myModel)))
 ```
 UH OH!
+
 ::: {.callout-note collapse="true"}
 ## Overfitting
 
@@ -502,23 +503,224 @@ Our loss is going down, but our error is erratic, staying the same, or going up!
 
 Is this a problem? Yes! But one that can be solved. Overall we are still in good territory.. We know the math and programming is working from a nuts and bolts perspective. What this indicates to us is that we need to tune the *metaparameters* of our neural network function. How many layers are there? How wide are the layers? We may be in a situation where the NN doesn't have sufficient *capacity*^[(Further reading)[https://machinelearningmastery.com/how-to-control-neural-network-model-capacity-with-nodes-and-layers/] on capacity.] to get us the outcomes we're looking for.
 
-## Optimize Network 
+## Building Test Infrastructure
 
 We've built an NN from first principles now, putting together the building blocks of parameter initialization, running the algebra through the net, backpropagation to compute the gradient, and parameter calibration through the gradient descent method. This all executing repeatedly across batches of data.
 
-Before we adjust the network structure to optimize the outcomes, let's define a yet higher encapsulation function to further condense the commands needed to execute this whole process:
+Before we adjust the network structure to optimize the outcomes, let's define a yet higher encapsulation of these tools to further condense the commands needed to execute this whole process, as well as enable more execution flexibility. This is where the `BasicOptim` class omes in:
 
 ```{python}
 # | code-line-numbers: true
 # | code-fold: show
+
+
 class BasicOptim:
-    def __init__(self,params,lr): self.params,self.lr = list(params),lr
+    def __init__(self, params, lr): self.params, self.lr = list(params), lr
 
     def step(self, *args, **kwargs):
-        for p in self.params: p.data -= p.grad.data * self.lr
+        for p in self.params:
+            p.data -= p.grad.data * self.lr
 
     def zero_grad(self, *args, **kwargs):
-        for p in self.params: p.grad = None
+        for p in self.params:
+            p.grad = None
+```
+Now, we can condense the training loop, and also neatly add the function of tracking loss across batches.
+
+```{python}
+# | code-line-numbers: true
+# | code-fold: show
+
+
+def train_epoch(model, opt, lr, params, f_loss):
+    losses = []  # Will allow for recording epoch wise loss
+    for xb, yb in dls[0]:
+        calc_grad(xb, yb, model, f_loss)
+        opt.step()
+        losses.append(calc_grad(xb, yb, model, f_loss))
+        opt.zero_grad()
+    return tensor(losses)
+
+
+```
+And per usual, give it a test:
+```{python}
+# | code-line-numbers: true
+# | code-fold: show
+my_opt = BasicOptim([w1, b1, w2, b2], 0.01)
+res = train_epoch(myModel, my_opt, 0.01, [w1, b1, w2, b2], my_loss)
+res.mean(), res
+```
+Great: bug free. But... still this issue of the loss bouncing around withot a clear improvement trend...
+
+Knowing that I want to experiment with the models metaprameters to improve it, I'll finally define yet another object to contain those we've made so far and run trials with customized parameters, and providing the means for monitoring these trials more easily.
+```{python}
+# | code-line-numbers: true
+# | code-fold: show
+
+
+class cTrial:
+    def __init__(self, numE=10, lr=0.01, model=myModel, opt=my_opt, params=[w1, b1, w2, b2], f_loss=my_loss):
+        self.numE = numE
+        self.lr = lr
+        self.model = model
+        self.opt = opt
+        self.params = params
+        self.f_loss = f_loss
+        self.res = []
+        self.valids = []
+        self.wtsHist = []  # For tracking change in weights across learning
+
+    def run(self, numE=None, wkLr=None):
+        self.valids = []  # Reset
+        epch_losses = []  # Reset
+        self.wtsHist = [[], [], [], []]  # 4 contents, w1,b1,w2,b2
+        if numE is None:
+            numE = self.numE
+        if wkLr is None:
+            wkLr = self.lr
+        for i in range(numE):
+            # -- Record wts for analysis
+            self.wtsHist[0].append(list(x.item() for x in w1.data.view(-1)))
+            self.wtsHist[1].append(list(x.item() for x in b1.data.view(-1)))
+            self.wtsHist[2].append(list(x.item() for x in w2.data.view(-1)))
+            self.wtsHist[3].append(list(x.item() for x in b2.data.view(-1)))
+            # --
+            res = train_epoch(self.model, self.opt, self.lr,
+                              self.params, self.f_loss)
+            epch_losses.append(res)
+            self.valids.append(validate_epoch(self.model))
+        self.res = torch.stack(epch_losses)
+        self.valids = tensor(self.valids)
+
+
+```
+This object allows for defining all the parameters necessary for a trial, and then running it one line of code, alternaitvely overwriting the number of Epochs, and learning rate parameters.
+
+## Experimenting To Optimize NN
+
+Let's get into it. We make a trial object and run it:
+
+```{python}
+# | code-line-numbers: true
+# | code-fold: show
+my_try = cTrial()
+my_try.run(numE=50, wkLr=0.001)
+my_try.res.shape
+```
+Our functions are logging loss for each mini batch across all epochs. So this makes sense. We had 1540 data points, with minibatches of 25. `25*62=1550`, so we have 61 minibatches of 25 one last minibatch of 15. And 50 collections of 62, one for each epoch.
+
+### First Try
+
+So let's see the results by taking the average loss across each epoch, hopefully, it'll be dropping!
+```{python}
+# | label: fig-loss1
+# | fig-cap: "Average loss across epochs"
+# | code-line-numbers: true
+plt.plot(my_try.res.mean(dim=1))
+```
+
+So loss is going down, it's working right? The real test isn't reduction to our measure loss, but to see that carry through to an increase in testing accuracy:
+
+```{python}
+# | label: fig-val1
+# | fig-cap: "Prediction accuracy across epochs"
+# | code-line-numbers: true
+plt.plot(my_try.valids)
+```
+Disaster strikes! We're never getting more than 20% accuracy! Well, they call it *deep learning*, so let's make our model deeper. Two layers? A pittance!
+
+### Second Try
+
+Our Model V2 will look like this:
+
+ - 64 input activations (image pixels) to 32 neurons in the first layer, with a unique (not broadcasted) bias for each neuron
+ - The next layer will reduce the 32 neurons to 16, with anothe runique bias for each
+ - The next will reduce teh 16 layers to 10 (output layer activations) with a unique bias for each
+ - Between each layer we will use the ReLu for nonlinearity.
+
+::: {.callout-tip collapse="true"}
+## Visualizing V2 Of Our NN
+Can you picture the matrix multiplication? It's important to get it straight! What would the equivalent of @fig-Layer1 look like for our NN V2?
+
+:::
+
+Defining parameters:
+```{python}
+# | code-line-numbers: true
+# | code-fold: show
+# Initialize parameters using the functions defined above to make it easy to generate variously sized tensors
+W1 = init_params((8*8, 32))  # 64 in, 32 out
+B1 = init_params(32)  # Feature-specific biases added
+W2 = init_params((32, 16))  # 32 in, 16 out
+B2 = init_params(16)  # Feature-specific biases added
+W3 = init_params((16, 10))  # 16 in, 10 out
+B3 = init_params(10)  # Feature-specific biases added
+```
+
+Define the model:
+```{python}
+# | code-line-numbers: true
+# | code-fold: show
+
+
+def mdlV2(xb):
+    res = xb@W1+B1
+    res = res.max(tensor(0.))
+    res = res@W2+B2  # returns 10 features for each input
+    res = res.max(tensor(0.))
+    res = res@W3+B3  # returns 10 features for each input
+    return res
+
+
+```
+Test it with a mini sample to ensure the Tensors were defined in the correct size to achieve our purpose:
+```{python}
+# | code-line-numbers: true
+mdlV2(mini_x)
+```
+Run it!
+
+:::{#fig-V2}
+```{python}
+# | column: page
+# | code-line-numbers: true
+my_try = cTrial(model=mdlV2, opt=BasicOptim(
+    [W1, B1, W2, B2, W3, B3], 0.01), params=[W1, B1, W2, B2, W3, B3])
+my_try.run(numE=20, wkLr=20)
+plt.plot(my_try.res.mean(dim=1)[1:])
+plt.plot(my_try.valids)
+plt.plot([0.9 for x in my_try.valids])
+```
+
+Accuracy Increasing As Loss Reduces
+
+:::
+
+Fantastic! Like an Olympic high jumper, we vault just over the top of the target! Time for champagne?! Not so fast! These results are those from exeucting on the training set. Remember when we partitioned off the validation set? Let's see how the model does on that data.
+
+The point of a validation set is to increase cofnidence that our model hasn't faux-optimized by 'playing our game' so to speak, and learning to score well on test data while not actually generalizing across the domain of all possible inputs
+```{python}
+# | code-line-numbers: true
+# | code-fold: show
+
+
+def confMtx(model):
+    conf = torch.zeros([10, 10], dtype=torch.int32)
+    for xv, yv in dls[1]:
+        preds = model(xv).max(dim=-1).indices
+        for i in range(len(xv)):
+            conf[yv[i].item()][preds[i].item()] += 1
+    df = pd.DataFrame(conf)
+    df.style.set_properties(**{'font-size': '6pt'}
+                            ).background_gradient('Greys')
+    df.style.set_table_styles([dict(selector='th', props=[(
+        'text-align', 'center')])]).set_properties(**{'text-align': 'center'})
+    df.style.set_caption("Top Axis: Predicted value. Left Axis: Actual Value")
+    return df
+
+    # return df
+confMtx(mdlV2)
 ```
 ```{python}
 # | code-line-numbers: true
@@ -552,7 +754,4 @@ class BasicOptim:
 # | code-line-numbers: true
 # | code-fold: show
 ```
-```{python}
-# | code-line-numbers: true
-# | code-fold: show
-```
+
