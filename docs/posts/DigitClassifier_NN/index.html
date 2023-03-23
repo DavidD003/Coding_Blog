@@ -227,7 +227,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#segmentation" id="toc-segmentation" class="nav-link" data-scroll-target="#segmentation">Segmentation</a></li>
   <li><a href="#setup-dataloaders" id="toc-setup-dataloaders" class="nav-link" data-scroll-target="#setup-dataloaders">Setup DataLoaders</a></li>
   </ul></li>
-  <li><a href="#building-the-nn-foundation" id="toc-building-the-nn-foundation" class="nav-link" data-scroll-target="#building-the-nn-foundation">Building The NN Foundation</a></li>
+  <li><a href="#laying-the-nn-foundations" id="toc-laying-the-nn-foundations" class="nav-link" data-scroll-target="#laying-the-nn-foundations">Laying The NN Foundations</a></li>
+  <li><a href="#building-the-nn" id="toc-building-the-nn" class="nav-link" data-scroll-target="#building-the-nn">Building the NN</a></li>
+  <li><a href="#calculating-loss" id="toc-calculating-loss" class="nav-link" data-scroll-target="#calculating-loss">Calculating Loss</a></li>
+  <li><a href="#measuring-accuracy" id="toc-measuring-accuracy" class="nav-link" data-scroll-target="#measuring-accuracy">Measuring Accuracy</a></li>
+  <li><a href="#execute-training" id="toc-execute-training" class="nav-link" data-scroll-target="#execute-training">Execute Training</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -351,7 +355,7 @@ Understand Your Input!
 <span id="cb3-7"><a href="#cb3-7"></a>[<span class="bu">len</span>(test[i]) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>)], [<span class="bu">len</span>(train[i]) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>)]</span>
 <span id="cb3-8"><a href="#cb3-8"></a>show_image(stacked[<span class="dv">3</span>][<span class="dv">0</span>])  <span class="co"># Check sample</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="3">
+<div class="cell-output cell-output-display" data-execution_count="29">
 <pre><code>&lt;Axes: &gt;</code></pre>
 </div>
 <div class="cell-output cell-output-display">
@@ -369,7 +373,7 @@ Understand Your Input!
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1"></a><span class="bu">type</span>(train), <span class="bu">type</span>(train[<span class="dv">0</span>]), <span class="bu">type</span>(train[<span class="dv">0</span>][<span class="dv">0</span>]), [</span>
 <span id="cb5-2"><a href="#cb5-2"></a>    <span class="bu">type</span>(test), <span class="bu">type</span>(test[<span class="dv">0</span>]), <span class="bu">type</span>(test[<span class="dv">0</span>][<span class="dv">0</span>])]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="4">
+<div class="cell-output cell-output-display" data-execution_count="30">
 <pre><code>(list, torch.Tensor, torch.Tensor, [list, torch.Tensor, torch.Tensor])</code></pre>
 </div>
 </div>
@@ -383,7 +387,7 @@ Understand Your Input!
 <span id="cb7-3"><a href="#cb7-3"></a>test <span class="op">=</span> torch.stack(test)</span>
 <span id="cb7-4"><a href="#cb7-4"></a>train.shape, test.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="5">
+<div class="cell-output cell-output-display" data-execution_count="31">
 <pre><code>(torch.Size([10, 154, 8, 8]), torch.Size([10, 20, 8, 8]))</code></pre>
 </div>
 </div>
@@ -406,7 +410,7 @@ Understand Your Input!
 <span id="cb9-9"><a href="#cb9-9"></a>test_y <span class="op">=</span> tensor(test_y).unsqueeze(<span class="op">-</span><span class="dv">1</span>)</span>
 <span id="cb9-10"><a href="#cb9-10"></a>train_x.shape, test_x.shape, train_y.shape, test_y.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="6">
+<div class="cell-output cell-output-display" data-execution_count="32">
 <pre><code>(torch.Size([1540, 64]),
  torch.Size([200, 64]),
  torch.Size([1540, 1]),
@@ -430,8 +434,8 @@ Understand Your Input!
 </div>
 </section>
 </section>
-<section id="building-the-nn-foundation" class="level2">
-<h2 class="anchored" data-anchor-id="building-the-nn-foundation">Building The NN Foundation</h2>
+<section id="laying-the-nn-foundations" class="level2">
+<h2 class="anchored" data-anchor-id="laying-the-nn-foundations">Laying The NN Foundations</h2>
 <p>Every NN needs weights and biases. We’re going to want to initialize lots of them, and in differently shaped structures, so first we define a function to help us do that:</p>
 <div class="cell" data-execution_count="8">
 <details>
@@ -457,6 +461,7 @@ Requiring Grad!
 </div>
 <p>Now we can generate our weights and biases. We define the structure sizes with our input and output size in mind, and the principles of matrix multiplication.</p>
 <p>The general structure we will start with will be, of course, an initial layer with one neuron for each input, which will yield a single activation per input. After a nonlinearty, the second layer will have 10 weights and biases, such that the output is a 1D vector of size 10, per input. Each output neuron will represent an estimation of likelihood that the integer is that which the neuron represents (0-9).</p>
+<p><a href="#fig-Layer1">Figure&nbsp;2</a> shows the start of the proces… A row in the input batch represents a single image. At the end of the 1<sup>st</sup> layer, it is reduced to a single activation value to be passed through a non-linearity prior to going through the 2<sup>nd</sup> layer</p>
 <div id="fig-Layer1" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="Layer 1 Diagram.png" class="img-fluid figure-img"></p>
@@ -497,9 +502,429 @@ Matrix Multiplication!
 <li>Layer 2:
 <ul>
 <li>10 weights, to generate one output neuron per category/class to assign.</li>
-<li>10 biases, one <em>for each</em> output neuron</li>
+<li>1 bias, to be <em>broadcast</em> across each input vector.<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></li>
 </ul></li>
 </ul>
+<p>We will use the basic <a href="https://deepai.org/machine-learning-glossary-and-terms/relu">ReLU</a> activation function as the non-linearity between the two linear layers.</p>
+</section>
+<section id="building-the-nn" class="level2">
+<h2 class="anchored" data-anchor-id="building-the-nn">Building the NN</h2>
+<p>Similarly to our parameter generation function, we want o make our little network into a function block so that we can treat it as a black box to plug and play with other code sections:</p>
+<div class="cell" data-execution_count="10">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1"></a><span class="kw">def</span> myModel(xb):</span>
+<span id="cb14-2"><a href="#cb14-2"></a>    res <span class="op">=</span> xb<span class="op">@</span>w1<span class="op">+</span>b1</span>
+<span id="cb14-3"><a href="#cb14-3"></a>    res <span class="op">=</span> res.<span class="bu">max</span>(tensor(<span class="fl">0.</span>))</span>
+<span id="cb14-4"><a href="#cb14-4"></a>    res <span class="op">=</span> res<span class="op">@</span>w2<span class="op">+</span>b2  <span class="co"># returns 10 features for each input</span></span>
+<span id="cb14-5"><a href="#cb14-5"></a>    <span class="cf">return</span> res</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Let’s take it for a spin! We’ll manually identify a subset of our training dataset for testing purposes.</p>
+<div class="cell" data-execution_count="11">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1"></a>mini_samp <span class="op">=</span> <span class="dv">5</span></span>
+<span id="cb15-2"><a href="#cb15-2"></a>mini_x <span class="op">=</span> train_x[:mini_samp]</span>
+<span id="cb15-3"><a href="#cb15-3"></a>mini_y <span class="op">=</span> train_y[:mini_samp]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell" data-execution_count="12">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1"></a>res <span class="op">=</span> myModel(mini_x)</span>
+<span id="cb16-2"><a href="#cb16-2"></a>res, res.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="38">
+<pre><code>(tensor([[ 0.0392,  0.0968, -0.1264, -0.0286, -0.1667, -0.0667, -0.0731,  0.0230, -0.0675, -0.1758],
+         [ 0.2856,  0.4509, -0.1896,  0.0910, -0.3052, -0.0182, -0.0367,  0.2391, -0.0206, -0.3315],
+         [ 0.1481,  0.2533, -0.1544,  0.0243, -0.2279, -0.0452, -0.0570,  0.1185, -0.0468, -0.2446],
+         [-0.0926, -0.0926, -0.0926, -0.0926, -0.0926, -0.0926, -0.0926, -0.0926, -0.0926, -0.0926],
+         [ 0.2645,  0.4205, -0.1842,  0.0808, -0.2933, -0.0223, -0.0399,  0.2206, -0.0246, -0.3181]], grad_fn=&lt;AddBackward0&gt;),
+ torch.Size([5, 10]))</code></pre>
+</div>
+</div>
+<p>Excellent! For the 5 input images passed in, we have an output that is 5 vectors of size 10, that is, each input has 10 output values, one for each possible classification outcome 0 through 9.</p>
+<p>And note that the result tensor retains the gradient! This comes into play in the next step.</p>
+</section>
+<section id="calculating-loss" class="level2">
+<h2 class="anchored" data-anchor-id="calculating-loss">Calculating Loss</h2>
+<p>Loss is the measure of the neural networks success. The most critical characteristic of a loss function is that it be differentiable with a smooth gradient. But just because the math doesn’t break doesn’t mean the function will eb any good. There are a variety of well understood functions that can be used, with selection being a matter of preference as well as the use case at hand.</p>
+<p>Since we are assigning a single class to the input, from multiple options, we’ll use the SoftMax function. It reduces all outputs to a number between 0 and 1, with a given number being exponentially closer to one, the larger it is compared to the other numbers in the set.</p>
+<p>This is a double-hitter: it allows the net to learn to win by giving the correct digit’s output neuron the highest activation, while also motivating the reduction in activation of the incorrect neurons.</p>
+<div class="cell" data-execution_count="13">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1"></a><span class="kw">def</span> my_loss(preds, target, lr<span class="op">=</span><span class="fl">0.01</span>):</span>
+<span id="cb18-2"><a href="#cb18-2"></a>    maxes <span class="op">=</span> F.softmax(preds, dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb18-3"><a href="#cb18-3"></a>    correctIndices <span class="op">=</span> [r[t] <span class="cf">for</span> r, t <span class="kw">in</span> <span class="bu">zip</span>(maxes, target)]</span>
+<span id="cb18-4"><a href="#cb18-4"></a>    resy <span class="op">=</span> [<span class="op">-</span>torch.log(tens) <span class="cf">for</span> tens <span class="kw">in</span> correctIndices]</span>
+<span id="cb18-5"><a href="#cb18-5"></a>    <span class="cf">return</span> <span class="bu">sum</span>(resy)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Keep in mind that we need to ensure these functions can work with different batch sizes. Fortunately, the PyTorch built in functions are designed for this.</p>
+<p>Our function first takes the SoftMax of the outputs for each input. Then, it pulls out the resulting value for the index of the correct class. Recall, this will be a number between 0 and 1. If we took this number alone as our loss, measure, there would be a couple of issues.</p>
+<p>First of all, convention is that we want to <em>reduce</em> loss in the course of our optimization. But we have defined the index of the <em>highest</em> softmax result as our classification integer. So that doesn’t jive. Secondly, it isn’t desirable to have the measure of loss constrained to such a small range 0 to 1, because this essentially reduces the information we’re getting - large differences in inputs will show very small changes in loss. For effective learning, we would want a strong learning signal, i.e.&nbsp;small changes to input parameters reflecting meaningful differences in the measure of loss.</p>
+<p>The solution? First, taking the log of the SoftMax activation. As the following code shows, a difference of 0.001 in the input to the log function creates a differences of more than 0.01 in the output, an order of magnitude difference.</p>
+<div class="cell" data-execution_count="14">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1"></a>torch.log(Tensor([<span class="fl">.5</span>, <span class="fl">.499</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="40">
+<pre><code>tensor([-0.6931, -0.6951])</code></pre>
+</div>
+</div>
+<p>After the log, we took the negative of those values. That’s because the log of a number between 0 and 1 will always be negative, getting absolutely larger the further from 1 it is. Seeing as we want the output to be absolutely smaller the closer to 1 it is, taking the negative accomplishes this perfectly.</p>
+<p>Lastly, we summed the loss measure across the samples in the mini batch since we want to optimize globally, not just for individual samples.</p>
+<p>So let’s test it!</p>
+<div class="cell" data-execution_count="15">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1"></a><span class="co"># Testing the loss function works(assuming mini_x of 3 samples)</span></span>
+<span id="cb21-2"><a href="#cb21-2"></a>lossResults <span class="op">=</span> my_loss(myModel(mini_x), mini_y)</span>
+<span id="cb21-3"><a href="#cb21-3"></a>lossResults</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="41">
+<pre><code>tensor([10.7966], grad_fn=&lt;AddBackward0&gt;)</code></pre>
+</div>
+</div>
+<p>This output might look nice, but it’s a roll of the dice!</p>
+<div class="callout-warning callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Beware Of Implementing Your Own Math
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>While the formula for the SoftMax is easy enough to understand, Our home-brewed version won’t work. I tried to do so at first and had all kinds of headaches arising from arithmetic underflow in the outcomes! How the hell do you deal with that? The best solution: Use the function implementation baked into the PyTorch libraries! Let the pro’s handle those <em>deep</em> issues. We’re still riding on training wheels!</p>
+</div>
+</div>
+<p>It turns out the <code>-log</code> of the SoftMax is the Cross Entropy Loss Function. And just importing it from the PyTorch library will save us from the pitfall described in the preceding blurb… So here is our final loss function!</p>
+<div class="cell" data-execution_count="16">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1"></a><span class="kw">def</span> my_loss(preds, target):</span>
+<span id="cb23-2"><a href="#cb23-2"></a>    loss_fn <span class="op">=</span> nn.CrossEntropyLoss()</span>
+<span id="cb23-3"><a href="#cb23-3"></a>    <span class="co"># Turn tensor of singleton tensors one per target into a single tensor with all as elements</span></span>
+<span id="cb23-4"><a href="#cb23-4"></a>    tgts <span class="op">=</span> target.view(<span class="op">-</span><span class="dv">1</span>)</span>
+<span id="cb23-5"><a href="#cb23-5"></a>    <span class="cf">return</span> loss_fn(preds, tgts)  <span class="co"># Nice</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Now if you’re reading this you’re probably thinking that <em>gradient descent</em> is the next step here, so as to reduce the loss between minibatches, but we’ll take a quick detour first.</p>
+</section>
+<section id="measuring-accuracy" class="level2">
+<h2 class="anchored" data-anchor-id="measuring-accuracy">Measuring Accuracy</h2>
+<p>Before going further, let’s take a minute to set up some functions we’ll need in the training process. The first yields the percentage accuracy of the model across a batch, and the second function builds on that to iterate across the batchers in our valdiation set and yield the accuracy rate across a whole epoch<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>.</p>
+<div class="cell" data-execution_count="17">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1"></a><span class="kw">def</span> batch_accuracy(mdl, xb, yb):</span>
+<span id="cb24-2"><a href="#cb24-2"></a>    otpts <span class="op">=</span> mdl(xb)  <span class="co"># Get output activations from model</span></span>
+<span id="cb24-3"><a href="#cb24-3"></a>    <span class="co"># The indices of the max activation is the predicted digit of the input</span></span>
+<span id="cb24-4"><a href="#cb24-4"></a>    preds <span class="op">=</span> otpts.<span class="bu">max</span>(dim<span class="op">=-</span><span class="dv">1</span>).indices</span>
+<span id="cb24-5"><a href="#cb24-5"></a>    <span class="co"># Types must be tensors to return sequence of true/false</span></span>
+<span id="cb24-6"><a href="#cb24-6"></a>    correct <span class="op">=</span> preds <span class="op">==</span> yb.view(<span class="op">-</span><span class="dv">1</span>)</span>
+<span id="cb24-7"><a href="#cb24-7"></a>    <span class="co">#                    Use view to take it from shape=[5,1] to [5], same as preds. else will broadcast and end result all messed up</span></span>
+<span id="cb24-8"><a href="#cb24-8"></a>    <span class="cf">return</span> correct.<span class="bu">float</span>().mean()</span>
+<span id="cb24-9"><a href="#cb24-9"></a></span>
+<span id="cb24-10"><a href="#cb24-10"></a></span>
+<span id="cb24-11"><a href="#cb24-11"></a><span class="kw">def</span> validate_epoch(mdl):</span>
+<span id="cb24-12"><a href="#cb24-12"></a>    outcomes <span class="op">=</span> [batch_accuracy(mdl, xb, yb) <span class="cf">for</span> xb, yb <span class="kw">in</span> valid_dl]</span>
+<span id="cb24-13"><a href="#cb24-13"></a>    <span class="cf">return</span> <span class="bu">round</span>(torch.stack(outcomes).mean().item(), <span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>It’s always good to double check these functions are working as intended after making them… Let’s grab some validation set data, double checking along the way that the outputs (integer assignment) match the input (drawings of digit):</p>
+<div class="cell" data-execution_count="18">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1"></a>validIter <span class="op">=</span> <span class="bu">iter</span>(dls[<span class="dv">1</span>])</span>
+<span id="cb25-2"><a href="#cb25-2"></a>xv, yv <span class="op">=</span> <span class="bu">next</span>(validIter)</span>
+<span id="cb25-3"><a href="#cb25-3"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(xv)):</span>
+<span id="cb25-4"><a href="#cb25-4"></a>    show_image(xv[i].view((<span class="dv">8</span>, <span class="dv">8</span>)))</span>
+<span id="cb25-5"><a href="#cb25-5"></a>    <span class="bu">print</span>(yv[i].data.item())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>8
+3
+0
+2
+5</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="index_files/figure-html/cell-19-output-2.png" width="93" height="93"></p>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="index_files/figure-html/cell-19-output-3.png" width="93" height="93"></p>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="index_files/figure-html/cell-19-output-4.png" width="93" height="93"></p>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="index_files/figure-html/cell-19-output-5.png" width="93" height="93"></p>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="index_files/figure-html/cell-19-output-6.png" width="93" height="93"></p>
+</div>
+</div>
+<p>Ok nice, now lets see that our validation function is yielding the correct accuracy score on classifying a mini batch. Since we haven’t trained the model yet we’ll expect the performacne to be junk but that doesn’t mean we can’t test the % accuracy function.</p>
+<div class="cell" data-execution_count="19">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1"></a>validIter <span class="op">=</span> <span class="bu">iter</span>(dls[<span class="dv">1</span>])</span>
+<span id="cb27-2"><a href="#cb27-2"></a>xv, yv <span class="op">=</span> <span class="bu">next</span>(validIter)</span>
+<span id="cb27-3"><a href="#cb27-3"></a>o <span class="op">=</span> myModel(xv)</span>
+<span id="cb27-4"><a href="#cb27-4"></a><span class="bu">print</span>(o.<span class="bu">max</span>(dim<span class="op">=-</span><span class="dv">1</span>).indices, yv, batch_accuracy(myModel, xv, yv))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>tensor([1, 1, 1, 1, 1]) tensor([[8],
+        [7],
+        [2],
+        [2],
+        [8]]) tensor(0.)</code></pre>
+</div>
+</div>
+<p>We want to see the last number spit out be an accurate representation of how many numbers match between the first and second tensor output. I don’t know what the final blog output will be since the inputs to the neural net are random every time, but I re ran this code cell a number of times, seeing correct assignments of one or two integers to confirm the functions were working as expected.</p>
+</section>
+<section id="execute-training" class="level2">
+<h2 class="anchored" data-anchor-id="execute-training">Execute Training</h2>
+<p>Alright now we get to the good stuff! First we’ll make an iterator to load our test dataset.</p>
+<div class="cell" data-execution_count="20">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1"></a>testLoader <span class="op">=</span> <span class="bu">iter</span>(dls[<span class="dv">0</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>And now we we will run our first training loop… the steps are:</p>
+<ul>
+<li>Define learning rate<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>.</li>
+<li>Pull out a minibatch of inputs and target values from the test data set.</li>
+<li>Calculate the loss on this batch by passing the outputs from the model through the loss function</li>
+<li>Execute the <code>.backward()</code> method to calculate the gradient for all parameters.</li>
+<li>The next bits will be executed with torch.no_grad(), because we don’t want the math inherent to calibrating the parameters themselves to have its gradient captured.</li>
+<li>Having the gradient stored in the tensor object of each parameter, update each parameter by subtracting the gadient multiplied by the learning rate.</li>
+<li>Reset the gradient to zero for the next learning iteration.</li>
+</ul>
+<div class="cell" data-execution_count="21">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1"></a>lr <span class="op">=</span> <span class="fl">0.01</span></span>
+<span id="cb30-2"><a href="#cb30-2"></a>xb, yb <span class="op">=</span> <span class="bu">next</span>(testLoader)</span>
+<span id="cb30-3"><a href="#cb30-3"></a>loss <span class="op">=</span> my_loss(myModel(xb), yb)</span>
+<span id="cb30-4"><a href="#cb30-4"></a>loss.backward()</span>
+<span id="cb30-5"><a href="#cb30-5"></a><span class="cf">with</span> torch.no_grad():</span>
+<span id="cb30-6"><a href="#cb30-6"></a>    <span class="cf">for</span> p <span class="kw">in</span> w1, b1, w2, b2:</span>
+<span id="cb30-7"><a href="#cb30-7"></a>        p.data <span class="op">=</span> p.data<span class="op">-</span>p.grad.data<span class="op">*</span>lr</span>
+<span id="cb30-8"><a href="#cb30-8"></a>        p.grad.zero_()</span>
+<span id="cb30-9"><a href="#cb30-9"></a><span class="bu">print</span>(<span class="st">"Loss before training: "</span><span class="op">+</span><span class="bu">str</span>(loss.item()) <span class="op">+</span></span>
+<span id="cb30-10"><a href="#cb30-10"></a>      <span class="st">"  |   Loss after training: "</span><span class="op">+</span><span class="bu">str</span>(my_loss(myModel(xb), yb).item()))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Loss before training: 2.3273937702178955  |   Loss after training: 2.3215909004211426</code></pre>
+</div>
+</div>
+<p>Success! Our measure of loss has reduced after re running the same batch with the adjusted N parameters. Across a large enough dataset<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>, we would expect to see a reduced error rate associated with this.</p>
+<p>Let’s try it again, this time printing out the average values of the parameters in the weights and bias vectors, to get a sense for how much they change from one iteration to the next.</p>
+<div class="cell" data-execution_count="22">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">type</span>(w1.grad) <span class="op">==</span> NoneType:</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(tensor([(x.data.mean()) <span class="cf">for</span> x <span class="kw">in</span> [w1, b1, w2, b2]]))</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Average parameters: "</span>, tensor(</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>        [(x.data.mean(), x.grad.data.mean()) <span class="cf">for</span> x <span class="kw">in</span> [w1, b1, w2, b2]]))</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> p <span class="kw">in</span> w1, b1, w2, b2:</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>        p.grad.zero_()</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Run the learning (copied from last cell):</span></span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>lr <span class="op">=</span> <span class="fl">0.01</span></span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>xb, yb <span class="op">=</span> <span class="bu">next</span>(testLoader)</span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>loss <span class="op">=</span> my_loss(myModel(xb), yb)</span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>loss.backward()</span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> torch.no_grad():</span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> p <span class="kw">in</span> w1, b1, w2, b2:</span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a>        p.data <span class="op">=</span> p.data<span class="op">-</span>p.grad.data<span class="op">*</span>lr</span>
+<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a>        p.grad.zero_()</span>
+<span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Loss before training: "</span><span class="op">+</span><span class="bu">str</span>(loss.item()) <span class="op">+</span></span>
+<span id="cb32-19"><a href="#cb32-19" aria-hidden="true" tabindex="-1"></a>      <span class="st">"  |   Loss after training: "</span><span class="op">+</span><span class="bu">str</span>(my_loss(myModel(xb), yb).item()))</span>
+<span id="cb32-20"><a href="#cb32-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-21"><a href="#cb32-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Print average param values again:</span></span>
+<span id="cb32-22"><a href="#cb32-22" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">type</span>(w1.grad) <span class="op">==</span> NoneType:</span>
+<span id="cb32-23"><a href="#cb32-23" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(tensor([(x.data.mean()) <span class="cf">for</span> x <span class="kw">in</span> [w1, b1, w2, b2]]))</span>
+<span id="cb32-24"><a href="#cb32-24" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb32-25"><a href="#cb32-25" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Average parameters: "</span>, tensor(</span>
+<span id="cb32-26"><a href="#cb32-26" aria-hidden="true" tabindex="-1"></a>        [(x.data.mean(), x.grad.data.mean()) <span class="cf">for</span> x <span class="kw">in</span> [w1, b1, w2, b2]]))</span>
+<span id="cb32-27"><a href="#cb32-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> p <span class="kw">in</span> w1, b1, w2, b2:</span>
+<span id="cb32-28"><a href="#cb32-28" aria-hidden="true" tabindex="-1"></a>        p.grad.zero_()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Average parameters:  tensor([[-0.0033,  0.0000],
+        [ 0.0862,  0.0000],
+        [ 0.0337,  0.0000],
+        [-0.0926,  0.0000]])
+Loss before training: 2.353576898574829  |   Loss after training: 2.333199977874756
+Average parameters:  tensor([[-0.0045,  0.0000],
+        [ 0.0860,  0.0000],
+        [ 0.0337,  0.0000],
+        [-0.0926,  0.0000]])</code></pre>
+</div>
+</div>
+<p>What we see here is that our change in paramters created a reduction in the measure of loss, <em>even though</em> it wasn’t even identifiable at 4 decimal points accuracy!</p>
+<p>So let’s take it to the next level. We trained on one minibatch of data. Let’s try doing a whole epoch- iterating over every minibatch in the training set.</p>
+<p>First, we’ll reset our weights to random numbers, clearing the slate of that last learning:</p>
+<div class="cell" data-execution_count="23">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1"></a>w1 <span class="op">=</span> init_params((<span class="dv">8</span><span class="op">*</span><span class="dv">8</span>, <span class="dv">1</span>))</span>
+<span id="cb34-2"><a href="#cb34-2"></a>b1 <span class="op">=</span> init_params(<span class="dv">1</span>)</span>
+<span id="cb34-3"><a href="#cb34-3"></a>w2 <span class="op">=</span> init_params((<span class="dv">1</span>, <span class="dv">10</span>))</span>
+<span id="cb34-4"><a href="#cb34-4"></a>b2 <span class="op">=</span> init_params(<span class="dv">1</span>)</span>
+<span id="cb34-5"><a href="#cb34-5"></a></span>
+<span id="cb34-6"><a href="#cb34-6"></a><span class="co"># Print average param values again:</span></span>
+<span id="cb34-7"><a href="#cb34-7"></a><span class="cf">if</span> <span class="bu">type</span>(w1.grad) <span class="op">==</span> NoneType:</span>
+<span id="cb34-8"><a href="#cb34-8"></a>    <span class="bu">print</span>(tensor([(x.data.mean()) <span class="cf">for</span> x <span class="kw">in</span> [w1, b1, w2, b2]]))</span>
+<span id="cb34-9"><a href="#cb34-9"></a><span class="cf">else</span>:</span>
+<span id="cb34-10"><a href="#cb34-10"></a>    <span class="bu">print</span>(<span class="st">"Average parameters: "</span>, tensor(</span>
+<span id="cb34-11"><a href="#cb34-11"></a>        [(x.data.mean(), x.grad.data.mean()) <span class="cf">for</span> x <span class="kw">in</span> [w1, b1, w2, b2]]))</span>
+<span id="cb34-12"><a href="#cb34-12"></a>    <span class="cf">for</span> p <span class="kw">in</span> w1, b1, w2, b2:</span>
+<span id="cb34-13"><a href="#cb34-13"></a>        p.grad.zero_()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>tensor([-0.0039, -0.1600,  0.0096, -0.0360])</code></pre>
+</div>
+</div>
+<p>And now execute learning.</p>
+<div class="cell" data-execution_count="24">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1"></a>lr <span class="op">=</span> <span class="fl">0.01</span></span>
+<span id="cb36-2"><a href="#cb36-2"></a><span class="cf">for</span> xb, yb <span class="kw">in</span> dls[<span class="dv">0</span>]:</span>
+<span id="cb36-3"><a href="#cb36-3"></a>    loss <span class="op">=</span> my_loss(myModel(xb), yb)</span>
+<span id="cb36-4"><a href="#cb36-4"></a>    loss.backward()</span>
+<span id="cb36-5"><a href="#cb36-5"></a>    <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb36-6"><a href="#cb36-6"></a>        <span class="cf">for</span> p <span class="kw">in</span> w1, b1, w2, b2:</span>
+<span id="cb36-7"><a href="#cb36-7"></a>            p.data <span class="op">=</span> p.data<span class="op">-</span>p.grad.data<span class="op">*</span>lr</span>
+<span id="cb36-8"><a href="#cb36-8"></a>            p.grad.zero_()</span>
+<span id="cb36-9"><a href="#cb36-9"></a>    <span class="bu">print</span>(<span class="st">"Loss: "</span><span class="op">+</span><span class="bu">str</span>(loss.item()))  <span class="co"># Prints loss for each minibatch</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Loss: 2.396993637084961
+Loss: 2.3822765350341797
+Loss: 2.260348320007324
+Loss: 2.3272624015808105
+Loss: 2.2339725494384766
+Loss: 2.2115659713745117
+Loss: 2.36749267578125
+Loss: 2.2987968921661377
+Loss: 2.24696683883667
+Loss: 2.2218852043151855
+Loss: 2.1901235580444336
+Loss: 2.223564386367798
+Loss: 2.222050666809082
+Loss: 2.3343074321746826
+Loss: 2.1647329330444336
+Loss: 2.2685706615448
+Loss: 2.2301828861236572
+Loss: 2.2987945079803467
+Loss: 2.2233567237854004
+Loss: 2.280475378036499
+Loss: 2.2588987350463867
+Loss: 2.242337703704834
+Loss: 2.225619077682495
+Loss: 2.25649356842041
+Loss: 2.2208750247955322
+Loss: 2.2136268615722656
+Loss: 2.2424728870391846
+Loss: 2.233030319213867
+Loss: 2.2520716190338135
+Loss: 2.2793757915496826
+Loss: 2.1994197368621826
+Loss: 2.120187282562256
+Loss: 2.1292951107025146
+Loss: 2.207841396331787
+Loss: 2.205940008163452
+Loss: 2.16477108001709
+Loss: 2.2061352729797363
+Loss: 2.194096565246582
+Loss: 2.1103997230529785
+Loss: 2.218090295791626
+Loss: 2.2401371002197266
+Loss: 2.1660947799682617
+Loss: 2.136357307434082
+Loss: 2.2326133251190186
+Loss: 2.159325361251831
+Loss: 2.1380481719970703
+Loss: 2.1099190711975098
+Loss: 2.1427855491638184
+Loss: 2.1616415977478027
+Loss: 2.1398086547851562
+Loss: 2.19006085395813
+Loss: 2.1740212440490723
+Loss: 1.9568562507629395
+Loss: 2.133082866668701
+Loss: 2.188779592514038
+Loss: 2.2035515308380127
+Loss: 2.0909535884857178
+Loss: 2.1889305114746094
+Loss: 2.1808621883392334
+Loss: 2.2083559036254883
+Loss: 2.2190909385681152
+Loss: 2.0841939449310303</code></pre>
+</div>
+</div>
+<p>Hmmm…. sometimes when I run this I see the loss stay around the same value, other times it drops just a little before stabilizing…</p>
+<p>We are going to need a better way to look at the trending of the loss function across iterations, so we may as well make that function now:</p>
+<div class="cell" data-execution_count="25">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1"></a><span class="kw">def</span> calc_grad(xb, yb, model, f_loss):</span>
+<span id="cb38-2"><a href="#cb38-2"></a>    preds <span class="op">=</span> model(xb)</span>
+<span id="cb38-3"><a href="#cb38-3"></a>    loss <span class="op">=</span> f_loss(preds, yb)</span>
+<span id="cb38-4"><a href="#cb38-4"></a>    loss.backward()</span>
+<span id="cb38-5"><a href="#cb38-5"></a>    <span class="cf">return</span> loss.data.item()  <span class="co"># Return the loss (see why later)</span></span>
+<span id="cb38-6"><a href="#cb38-6"></a></span>
+<span id="cb38-7"><a href="#cb38-7"></a></span>
+<span id="cb38-8"><a href="#cb38-8"></a>calc_grad(mini_x, mini_y, myModel, my_loss)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="51">
+<pre><code>2.3025851249694824</code></pre>
+</div>
+</div>
+<p>This is another step towards modularizing (if that is a word) our code. Making use of that last function, our training loop now looks like this:</p>
+<div class="cell" data-execution_count="26">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1"></a><span class="co"># Initializing weights again for a fresh start</span></span>
+<span id="cb40-2"><a href="#cb40-2"></a>w1 <span class="op">=</span> init_params((<span class="dv">8</span><span class="op">*</span><span class="dv">8</span>, <span class="dv">1</span>))</span>
+<span id="cb40-3"><a href="#cb40-3"></a>b1 <span class="op">=</span> init_params(<span class="dv">1</span>)</span>
+<span id="cb40-4"><a href="#cb40-4"></a>w2 <span class="op">=</span> init_params((<span class="dv">1</span>, <span class="dv">10</span>))</span>
+<span id="cb40-5"><a href="#cb40-5"></a>b2 <span class="op">=</span> init_params(<span class="dv">1</span>)</span>
+<span id="cb40-6"><a href="#cb40-6"></a></span>
+<span id="cb40-7"><a href="#cb40-7"></a><span class="bu">print</span>(<span class="st">"PreTrain Accuracy: "</span><span class="op">+</span><span class="bu">str</span>(validate_epoch(myModel)))</span>
+<span id="cb40-8"><a href="#cb40-8"></a></span>
+<span id="cb40-9"><a href="#cb40-9"></a></span>
+<span id="cb40-10"><a href="#cb40-10"></a><span class="kw">def</span> train_epoch(model, lr, params, f_loss):</span>
+<span id="cb40-11"><a href="#cb40-11"></a>    <span class="cf">for</span> xb, yb <span class="kw">in</span> dls[<span class="dv">0</span>]:</span>
+<span id="cb40-12"><a href="#cb40-12"></a>        calc_grad(xb, yb, model, f_loss)</span>
+<span id="cb40-13"><a href="#cb40-13"></a>        <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb40-14"><a href="#cb40-14"></a>            <span class="cf">for</span> p <span class="kw">in</span> w1, b1, w2, b2:</span>
+<span id="cb40-15"><a href="#cb40-15"></a>                p.data <span class="op">=</span> p.data<span class="op">-</span>p.grad.data<span class="op">*</span>lr</span>
+<span id="cb40-16"><a href="#cb40-16"></a>                p.grad.zero_()</span>
+<span id="cb40-17"><a href="#cb40-17"></a></span>
+<span id="cb40-18"><a href="#cb40-18"></a></span>
+<span id="cb40-19"><a href="#cb40-19"></a>train_epoch(myModel, <span class="fl">0.01</span>, [w1, b1, w2, b2], my_loss)</span>
+<span id="cb40-20"><a href="#cb40-20"></a><span class="bu">print</span>(<span class="st">"PostTrain Accuracy: "</span><span class="op">+</span><span class="bu">str</span>(validate_epoch(myModel)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>PreTrain Accuracy: 0.07</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>PostTrain Accuracy: 0.095</code></pre>
+</div>
+</div>
 
 
 <!-- -->
@@ -512,6 +937,10 @@ Matrix Multiplication!
 
 <ol>
 <li id="fn1"><p>If it ain’t ‘py’, it ain’t python, right?<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>Increasing the size of the bias vector so as to have a unique bias for each output neuron will be an opportunity to increase the capacity of the model.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>An epoch is a full pass through the entire data set, in a context where we will make multiple passes (epochs) so as to keep learning.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>The learning rate is the factor by which we will multiply the gradient when adding the negative gradient to each parameter so as to update it for the next learning iteration.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>The changes to parameters can be so small that the actual outcome on any single run doesn’t change across a few inputs. But with enough learning iterations we will see the desired outcome.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -698,214 +1127,541 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="sourceCode" id="cb14" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "A Simple Digit Classifier"</span></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "David De Sa"</span></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> "2023-03-14"</span></span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="an">categories:</span><span class="co"> [python, pyTorch, NeuralNetworks]</span></span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="an">image:</span><span class="co"> "NN101_thumbnail.png"</span></span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="co">    code-fold: true</span></span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="co">    toc: true</span></span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools: true</span></span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="an">draft:</span><span class="co"> true</span></span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="fu">## TL;DR</span></span>
-<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>The best way to learn is to teach, so in this post I try to teach the reader how my first neural network implementation works! Part 2 of 2. I built this in following along with the awesome lessons over at <span class="co">[</span><span class="ot">fast.ai</span><span class="co">](course.fast.ai)</span>. Many thanks to that team.</span>
-<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a><span class="fu"># Overview</span></span>
-<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>We're going to jump in where we left off in Part 1: We'll just reimport our data, and get into it.</span>
-<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a><span class="fu">### What?</span></span>
-<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>We're going to create a neural network that, given a picture of a numeric digit, identifies the number.</span>
-<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a><span class="fu">### Why?</span></span>
-<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>Does this really need explaining? Because the technology is amazing in both practical and philosophical ways.</span>
-<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a><span class="fu">### Who?</span></span>
-<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Who am I</span><span class="co">](https://davidd003.github.io/Coding_Blog/about.html)</span>!? Who are you?!</span>
-<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a><span class="fu">### How?</span></span>
-<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>Using <span class="co">[</span><span class="ot">PyTorch</span><span class="co">](https://pytorch.org/)</span>^<span class="co">[</span><span class="ot">If it ain't 'py', it ain't python, right?</span><span class="co">]</span>, an opensource toolkit for building neural networks. Truly an elevator ride up onto the shoulders of giants.</span>
-<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a><span class="fu"># Code Review</span></span>
-<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>We'll first just re-import our data, and then get into building the groundwork for our neural network</span>
-<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>Let's get into it!</span>
-<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true"}</span>
-<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>The required dependencies!:<span class="in">`scikit-learn`</span>, <span class="in">`fastbook`</span>, <span class="in">`matplotlib`</span></span>
-<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
-<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a><span class="co"># Install dependency</span></span>
-<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastbook <span class="im">import</span> <span class="op">*</span></span>
-<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastai.vision.<span class="bu">all</span> <span class="im">import</span> <span class="op">*</span></span>
-<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> load_digits</span>
-<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> fastbook</span>
-<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a>fastbook.setup_book()</span>
-<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-55"><a href="#cb14-55" aria-hidden="true" tabindex="-1"></a>matplotlib.rc(<span class="st">"image"</span>, cmap<span class="op">=</span><span class="st">"Greys"</span>)</span>
-<span id="cb14-56"><a href="#cb14-56" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb14-57"><a href="#cb14-57" aria-hidden="true" tabindex="-1"></a><span class="fu">## Data Acquisition</span></span>
-<span id="cb14-58"><a href="#cb14-58" aria-hidden="true" tabindex="-1"></a>A quick flashback to Part 1 of my Building A Digit Classifier blog!:</span>
-<span id="cb14-59"><a href="#cb14-59" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-60"><a href="#cb14-60" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip collapse="true"}</span>
-<span id="cb14-61"><a href="#cb14-61" aria-hidden="true" tabindex="-1"></a><span class="fu">## Understand Your Input!</span></span>
-<span id="cb14-62"><a href="#cb14-62" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-63"><a href="#cb14-63" aria-hidden="true" tabindex="-1"></a>Pre-processing data before even touching any neural net methods can improve your final performance. Note the data set information offered at the <span class="co">[</span><span class="ot">source page</span><span class="co">](https://archive.ics.uci.edu/ml/datasets/Optical+Recognition+of+Handwritten+Digits)</span>: </span>
-<span id="cb14-64"><a href="#cb14-64" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-65"><a href="#cb14-65" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; We used preprocessing programs made available by NIST to extract normalized bitmaps of handwritten digits from a preprinted form. From a total of 43 people, 30 contributed to the training set and different 13 to the test set. 32x32 bitmaps are divided into nonoverlapping blocks of 4x4 and the number of on pixels are counted in each block. This generates an input matrix of 8x8 where each element is an integer in the range 0..16. This reduces dimensionality and gives invariance to small distortions.</span></span>
-<span id="cb14-66"><a href="#cb14-66" aria-hidden="true" tabindex="-1"></a><span class="at">:::</span></span>
-<span id="cb14-67"><a href="#cb14-67" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-70"><a href="#cb14-70" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb14-71"><a href="#cb14-71" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
-<span id="cb14-72"><a href="#cb14-72" aria-hidden="true" tabindex="-1"></a>mnist <span class="op">=</span> load_digits()</span>
-<span id="cb14-73"><a href="#cb14-73" aria-hidden="true" tabindex="-1"></a>stacked <span class="op">=</span> []</span>
-<span id="cb14-74"><a href="#cb14-74" aria-hidden="true" tabindex="-1"></a><span class="co"># This loop because stacked=[[]]*10 makes 1 list in list, with 10 copies of pointers... need separate objects</span></span>
-<span id="cb14-75"><a href="#cb14-75" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>):</span>
-<span id="cb14-76"><a href="#cb14-76" aria-hidden="true" tabindex="-1"></a>    stacked.append([])</span>
-<span id="cb14-77"><a href="#cb14-77" aria-hidden="true" tabindex="-1"></a><span class="co"># Assign all images to the right collection in the 'stacked' list, indexed by target</span></span>
-<span id="cb14-78"><a href="#cb14-78" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(mnist[<span class="st">"target"</span>])):</span>
-<span id="cb14-79"><a href="#cb14-79" aria-hidden="true" tabindex="-1"></a>    stacked[mnist[<span class="st">"target"</span>][i]].append(mnist[<span class="st">"images"</span>][i])</span>
-<span id="cb14-80"><a href="#cb14-80" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb14-81"><a href="#cb14-81" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-82"><a href="#cb14-82" aria-hidden="true" tabindex="-1"></a><span class="fu">### Segmentation</span></span>
-<span id="cb14-83"><a href="#cb14-83" aria-hidden="true" tabindex="-1"></a>The next step is to define which data will be our training, and our validation set. It was important to bucket out our data first so by randomly sampling our data we didn't generate a validation set with a large imbalance in the number of classes to be tested in it. </span>
-<span id="cb14-84"><a href="#cb14-84" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-85"><a href="#cb14-85" aria-hidden="true" tabindex="-1"></a>First we convert to a tensor, then segment training from validation data. Arbitrarily taking 20 examples from each digit, so, 11.5% of the total data set towards validation.</span>
-<span id="cb14-86"><a href="#cb14-86" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-87"><a href="#cb14-87" aria-hidden="true" tabindex="-1"></a>We'll print out the size of these collections and take a peek at a sample to make sure we indexed right.</span>
-<span id="cb14-88"><a href="#cb14-88" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-89"><a href="#cb14-89" aria-hidden="true" tabindex="-1"></a>:::{#fig-checkSamp}</span>
-<span id="cb14-92"><a href="#cb14-92" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb14-93"><a href="#cb14-93" aria-hidden="true" tabindex="-1"></a><span class="co"># | warning: False</span></span>
-<span id="cb14-94"><a href="#cb14-94" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
-<span id="cb14-95"><a href="#cb14-95" aria-hidden="true" tabindex="-1"></a><span class="co"># To make dataset a tensor, make it same number of dimensions</span></span>
-<span id="cb14-96"><a href="#cb14-96" aria-hidden="true" tabindex="-1"></a>stacked <span class="op">=</span> tensor([x[:<span class="dv">174</span>] <span class="cf">for</span> x <span class="kw">in</span> stacked])</span>
-<span id="cb14-97"><a href="#cb14-97" aria-hidden="true" tabindex="-1"></a><span class="co"># Segmentation: Pull 20 of each digit out of training set</span></span>
-<span id="cb14-98"><a href="#cb14-98" aria-hidden="true" tabindex="-1"></a>test <span class="op">=</span> [dig[<span class="op">-</span><span class="dv">20</span>:] <span class="cf">for</span> dig <span class="kw">in</span> stacked]</span>
-<span id="cb14-99"><a href="#cb14-99" aria-hidden="true" tabindex="-1"></a>train <span class="op">=</span> [dig[:<span class="op">-</span><span class="dv">20</span>] <span class="cf">for</span> dig <span class="kw">in</span> stacked]</span>
-<span id="cb14-100"><a href="#cb14-100" aria-hidden="true" tabindex="-1"></a><span class="co"># Confirm counts of samples</span></span>
-<span id="cb14-101"><a href="#cb14-101" aria-hidden="true" tabindex="-1"></a>[<span class="bu">len</span>(test[i]) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>)], [<span class="bu">len</span>(train[i]) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>)]</span>
-<span id="cb14-102"><a href="#cb14-102" aria-hidden="true" tabindex="-1"></a>show_image(stacked[<span class="dv">3</span>][<span class="dv">0</span>])  <span class="co"># Check sample</span></span>
-<span id="cb14-103"><a href="#cb14-103" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb14-104"><a href="#cb14-104" aria-hidden="true" tabindex="-1"></a>Is it a 3?</span>
-<span id="cb14-105"><a href="#cb14-105" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb14-106"><a href="#cb14-106" aria-hidden="true" tabindex="-1"></a>Nice.</span>
-<span id="cb14-107"><a href="#cb14-107" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-108"><a href="#cb14-108" aria-hidden="true" tabindex="-1"></a>It's important to keep track of what's what.</span>
-<span id="cb14-111"><a href="#cb14-111" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb14-112"><a href="#cb14-112" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
-<span id="cb14-113"><a href="#cb14-113" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-fold: show</span></span>
-<span id="cb14-114"><a href="#cb14-114" aria-hidden="true" tabindex="-1"></a><span class="bu">type</span>(train), <span class="bu">type</span>(train[<span class="dv">0</span>]), <span class="bu">type</span>(train[<span class="dv">0</span>][<span class="dv">0</span>]), [</span>
-<span id="cb14-115"><a href="#cb14-115" aria-hidden="true" tabindex="-1"></a>    <span class="bu">type</span>(test), <span class="bu">type</span>(test[<span class="dv">0</span>]), <span class="bu">type</span>(test[<span class="dv">0</span>][<span class="dv">0</span>])]</span>
-<span id="cb14-116"><a href="#cb14-116" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb14-117"><a href="#cb14-117" aria-hidden="true" tabindex="-1"></a>Ok so our top level containers for training/testing data are basic python lists. Within those, we have 10 collections, one for each integer. Those are Tensors. And then, each image (a collection of pixels unto itself) within those tensors, are also Tensor type objects.</span>
-<span id="cb14-118"><a href="#cb14-118" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-119"><a href="#cb14-119" aria-hidden="true" tabindex="-1"></a>Instead of a basic Python list, we will need the top level containers as tensors to leverage the pyTorch functionality built into them. luckily it's an easy conversion:</span>
-<span id="cb14-122"><a href="#cb14-122" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb14-123"><a href="#cb14-123" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
-<span id="cb14-124"><a href="#cb14-124" aria-hidden="true" tabindex="-1"></a><span class="co"># Converts PyList of tensors to tensor of tesnors (join in new dimensions, retain target indexing)</span></span>
-<span id="cb14-125"><a href="#cb14-125" aria-hidden="true" tabindex="-1"></a>train <span class="op">=</span> torch.stack(train)</span>
-<span id="cb14-126"><a href="#cb14-126" aria-hidden="true" tabindex="-1"></a>test <span class="op">=</span> torch.stack(test)</span>
-<span id="cb14-127"><a href="#cb14-127" aria-hidden="true" tabindex="-1"></a>train.shape, test.shape</span>
-<span id="cb14-128"><a href="#cb14-128" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb14-129"><a href="#cb14-129" aria-hidden="true" tabindex="-1"></a>Now here is a critical piece, working with multidimensional arrays and keeping in mind what we understand these to be. Our test and training tensors have the same dimensionality but not the same size. </span>
-<span id="cb14-130"><a href="#cb14-130" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-131"><a href="#cb14-131" aria-hidden="true" tabindex="-1"></a><span class="fu">### Setup DataLoaders</span></span>
-<span id="cb14-132"><a href="#cb14-132" aria-hidden="true" tabindex="-1"></a>First get data into the requisite shape for the processes that will follow. </span>
-<span id="cb14-135"><a href="#cb14-135" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb14-136"><a href="#cb14-136" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
-<span id="cb14-137"><a href="#cb14-137" aria-hidden="true" tabindex="-1"></a><span class="co"># Build training/valid sets for passing to DataLoader</span></span>
-<span id="cb14-138"><a href="#cb14-138" aria-hidden="true" tabindex="-1"></a>train_x <span class="op">=</span> torch.cat([x <span class="cf">for</span> x <span class="kw">in</span> train]).view(<span class="op">-</span><span class="dv">1</span>, <span class="dv">8</span><span class="op">*</span><span class="dv">8</span>)</span>
-<span id="cb14-139"><a href="#cb14-139" aria-hidden="true" tabindex="-1"></a>test_x <span class="op">=</span> torch.cat([x <span class="cf">for</span> x <span class="kw">in</span> test]).view(<span class="op">-</span><span class="dv">1</span>, <span class="dv">8</span><span class="op">*</span><span class="dv">8</span>)</span>
-<span id="cb14-140"><a href="#cb14-140" aria-hidden="true" tabindex="-1"></a>train_y, test_y <span class="op">=</span> [], []</span>
-<span id="cb14-141"><a href="#cb14-141" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> n <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>):</span>
-<span id="cb14-142"><a href="#cb14-142" aria-hidden="true" tabindex="-1"></a>    train_y.extend([n]<span class="op">*</span><span class="dv">154</span>)</span>
-<span id="cb14-143"><a href="#cb14-143" aria-hidden="true" tabindex="-1"></a>    test_y.extend([n]<span class="op">*</span><span class="dv">20</span>)</span>
-<span id="cb14-144"><a href="#cb14-144" aria-hidden="true" tabindex="-1"></a>train_y <span class="op">=</span> tensor(train_y).unsqueeze(<span class="op">-</span><span class="dv">1</span>)</span>
-<span id="cb14-145"><a href="#cb14-145" aria-hidden="true" tabindex="-1"></a>test_y <span class="op">=</span> tensor(test_y).unsqueeze(<span class="op">-</span><span class="dv">1</span>)</span>
-<span id="cb14-146"><a href="#cb14-146" aria-hidden="true" tabindex="-1"></a>train_x.shape, test_x.shape, train_y.shape, test_y.shape</span>
-<span id="cb14-147"><a href="#cb14-147" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb14-148"><a href="#cb14-148" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-149"><a href="#cb14-149" aria-hidden="true" tabindex="-1"></a>Note the unsqueezing such that the <span class="in">`_y`</span> tensors have a singleton dimension. Might seem strange on first blush but makes sense when considering that our 'target' just happens to be individual integers. But in other use cases, the target could be something more complex, requiring a larger data structure. In which case that dimension could be larger than a singleton.</span>
-<span id="cb14-150"><a href="#cb14-150" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-151"><a href="#cb14-151" aria-hidden="true" tabindex="-1"></a>Now we can prime our DataLoaders. DataLoaders are a super handy object from the Pytorch library that will make life easier by holding our data for us, and serving it up in randomized batches.</span>
-<span id="cb14-152"><a href="#cb14-152" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-155"><a href="#cb14-155" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb14-156"><a href="#cb14-156" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
-<span id="cb14-157"><a href="#cb14-157" aria-hidden="true" tabindex="-1"></a><span class="co"># Zip each input data item to its target output</span></span>
-<span id="cb14-158"><a href="#cb14-158" aria-hidden="true" tabindex="-1"></a>dset <span class="op">=</span> <span class="bu">list</span>(<span class="bu">zip</span>(train_x, train_y))</span>
-<span id="cb14-159"><a href="#cb14-159" aria-hidden="true" tabindex="-1"></a>valid_dset <span class="op">=</span> <span class="bu">list</span>(<span class="bu">zip</span>(test_x, test_y))</span>
-<span id="cb14-160"><a href="#cb14-160" aria-hidden="true" tabindex="-1"></a><span class="co"># Define DataLoader objects to pass to learner</span></span>
-<span id="cb14-161"><a href="#cb14-161" aria-hidden="true" tabindex="-1"></a>dl <span class="op">=</span> DataLoader(dset, batch_size<span class="op">=</span><span class="dv">25</span>, shuffle<span class="op">=</span>true)</span>
-<span id="cb14-162"><a href="#cb14-162" aria-hidden="true" tabindex="-1"></a>valid_dl <span class="op">=</span> DataLoader(valid_dset, batch_size<span class="op">=</span><span class="dv">5</span>, shuffle<span class="op">=</span>true)</span>
-<span id="cb14-163"><a href="#cb14-163" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-164"><a href="#cb14-164" aria-hidden="true" tabindex="-1"></a>dls <span class="op">=</span> DataLoaders(dl, valid_dl)</span>
-<span id="cb14-165"><a href="#cb14-165" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb14-166"><a href="#cb14-166" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-167"><a href="#cb14-167" aria-hidden="true" tabindex="-1"></a><span class="fu">## Building The NN Foundation</span></span>
-<span id="cb14-168"><a href="#cb14-168" aria-hidden="true" tabindex="-1"></a>Every NN needs weights and biases. We're going to want to initialize lots of them, and in differently shaped structures, so first we define a function to help us do that:</span>
-<span id="cb14-169"><a href="#cb14-169" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-172"><a href="#cb14-172" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb14-173"><a href="#cb14-173" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
-<span id="cb14-174"><a href="#cb14-174" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> init_params(size, std<span class="op">=</span><span class="fl">.1</span>): <span class="cf">return</span> (torch.randn(size)<span class="op">*</span>std).requires_grad_()</span>
-<span id="cb14-175"><a href="#cb14-175" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-176"><a href="#cb14-176" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-177"><a href="#cb14-177" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb14-178"><a href="#cb14-178" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-179"><a href="#cb14-179" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true"}</span>
-<span id="cb14-180"><a href="#cb14-180" aria-hidden="true" tabindex="-1"></a><span class="fu">## Requiring Grad!</span></span>
-<span id="cb14-181"><a href="#cb14-181" aria-hidden="true" tabindex="-1"></a>Note that any memory structures created with that function will also store their gradient in memory as computation is performed on them. This will be critical to executing back propagation of the gradient so as to optimize our function.</span>
-<span id="cb14-182"><a href="#cb14-182" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb14-183"><a href="#cb14-183" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-184"><a href="#cb14-184" aria-hidden="true" tabindex="-1"></a>Now we can generate our weights and biases. We define the structure sizes with our input and output size in mind, and the principles of matrix multiplication. </span>
-<span id="cb14-185"><a href="#cb14-185" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-186"><a href="#cb14-186" aria-hidden="true" tabindex="-1"></a>The general structure we will start with will be, of course, an initial layer with one neuron for each input, which will yield a single activation per input. After a nonlinearty, the second layer will have 10 weights and biases, such that the output is a 1D vector of size 10, per input. Each output neuron will represent an estimation of likelihood that the integer is that which the neuron represents (0-9).</span>
-<span id="cb14-187"><a href="#cb14-187" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-188"><a href="#cb14-188" aria-hidden="true" tabindex="-1"></a><span class="al">![Visualizing Layer 1](Layer 1 Diagram.png)</span>{#fig-Layer1}  </span>
-<span id="cb14-189"><a href="#cb14-189" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-190"><a href="#cb14-190" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip }</span>
-<span id="cb14-191"><a href="#cb14-191" aria-hidden="true" tabindex="-1"></a><span class="fu">## Matrix Multiplication!</span></span>
-<span id="cb14-192"><a href="#cb14-192" aria-hidden="true" tabindex="-1"></a>Never fear! It's easy. I never forgot the trick Dr. Mohammed Jaber taught us 4th year as we had to use these methods from first year: ROW. COLUMN.</span>
-<span id="cb14-193"><a href="#cb14-193" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-194"><a href="#cb14-194" aria-hidden="true" tabindex="-1"></a>Take row i from the first matrix, and column j from the second. The element in index i,j of the resulting matrix will be the dot product of that row and column vector.</span>
-<span id="cb14-195"><a href="#cb14-195" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb14-196"><a href="#cb14-196" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-199"><a href="#cb14-199" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb14-200"><a href="#cb14-200" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
-<span id="cb14-201"><a href="#cb14-201" aria-hidden="true" tabindex="-1"></a><span class="co"># Have to provide extra dimension for matrix mutiplication, making it a single-column vector</span></span>
-<span id="cb14-202"><a href="#cb14-202" aria-hidden="true" tabindex="-1"></a>w1 <span class="op">=</span> init_params((<span class="dv">8</span><span class="op">*</span><span class="dv">8</span>, <span class="dv">1</span>))</span>
-<span id="cb14-203"><a href="#cb14-203" aria-hidden="true" tabindex="-1"></a>b1 <span class="op">=</span> init_params(<span class="dv">1</span>)</span>
-<span id="cb14-204"><a href="#cb14-204" aria-hidden="true" tabindex="-1"></a><span class="co"># Have to provide an extra dimension (1) for matrix multiplication</span></span>
-<span id="cb14-205"><a href="#cb14-205" aria-hidden="true" tabindex="-1"></a>w2 <span class="op">=</span> init_params((<span class="dv">1</span>, <span class="dv">10</span>))</span>
-<span id="cb14-206"><a href="#cb14-206" aria-hidden="true" tabindex="-1"></a>b2 <span class="op">=</span> init_params(<span class="dv">1</span>)</span>
-<span id="cb14-207"><a href="#cb14-207" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb14-208"><a href="#cb14-208" aria-hidden="true" tabindex="-1"></a><span class="ss"> - </span>Layer 1:</span>
-<span id="cb14-209"><a href="#cb14-209" aria-hidden="true" tabindex="-1"></a><span class="ss">    - </span>64 weights, one per pixel. Formatted in a column vector because they are the second term in the matrix multiplication equation, with a single input (image) being fed as a single row vector of 64 elements, one per pixel. </span>
-<span id="cb14-210"><a href="#cb14-210" aria-hidden="true" tabindex="-1"></a><span class="ss">    - </span>1 bias; it will be broadcast such that the same bias is added to all instances in our batch. See @fig-Layer1</span>
-<span id="cb14-211"><a href="#cb14-211" aria-hidden="true" tabindex="-1"></a><span class="ss"> - </span>Layer 2:</span>
-<span id="cb14-212"><a href="#cb14-212" aria-hidden="true" tabindex="-1"></a><span class="ss">    - </span>10 weights, to generate one output neuron per category/class to assign. </span>
-<span id="cb14-213"><a href="#cb14-213" aria-hidden="true" tabindex="-1"></a><span class="ss">    - </span>10 biases, one *for each* output neuron</span>
-<span id="cb14-214"><a href="#cb14-214" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-217"><a href="#cb14-217" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb14-218"><a href="#cb14-218" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
-<span id="cb14-219"><a href="#cb14-219" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb14-222"><a href="#cb14-222" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb14-223"><a href="#cb14-223" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
-<span id="cb14-224"><a href="#cb14-224" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb14-227"><a href="#cb14-227" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb14-228"><a href="#cb14-228" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
-<span id="cb14-229"><a href="#cb14-229" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb14-232"><a href="#cb14-232" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb14-233"><a href="#cb14-233" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
-<span id="cb14-234"><a href="#cb14-234" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<div class="sourceCode" id="cb43" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "A Simple Digit Classifier"</span></span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "David De Sa"</span></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> "2023-03-14"</span></span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a><span class="an">categories:</span><span class="co"> [python, pyTorch, NeuralNetworks]</span></span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a><span class="an">image:</span><span class="co"> "NN101_thumbnail.png"</span></span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a><span class="co">    code-fold: true</span></span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a><span class="co">    toc: true</span></span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools: true</span></span>
+<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a><span class="an">draft:</span><span class="co"> true</span></span>
+<span id="cb43-13"><a href="#cb43-13" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb43-14"><a href="#cb43-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-15"><a href="#cb43-15" aria-hidden="true" tabindex="-1"></a><span class="fu">## TL;DR</span></span>
+<span id="cb43-16"><a href="#cb43-16" aria-hidden="true" tabindex="-1"></a>The best way to learn is to teach, so in this post I try to teach the reader how my first neural network implementation works! Part 2 of 2. I built this in following along with the awesome lessons over at <span class="co">[</span><span class="ot">fast.ai</span><span class="co">](course.fast.ai)</span>. Many thanks to that team.</span>
+<span id="cb43-17"><a href="#cb43-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-18"><a href="#cb43-18" aria-hidden="true" tabindex="-1"></a><span class="fu"># Overview</span></span>
+<span id="cb43-19"><a href="#cb43-19" aria-hidden="true" tabindex="-1"></a>We're going to jump in where we left off in Part 1: We'll just reimport our data, and get into it.</span>
+<span id="cb43-20"><a href="#cb43-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-21"><a href="#cb43-21" aria-hidden="true" tabindex="-1"></a><span class="fu">### What?</span></span>
+<span id="cb43-22"><a href="#cb43-22" aria-hidden="true" tabindex="-1"></a>We're going to create a neural network that, given a picture of a numeric digit, identifies the number.</span>
+<span id="cb43-23"><a href="#cb43-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-24"><a href="#cb43-24" aria-hidden="true" tabindex="-1"></a><span class="fu">### Why?</span></span>
+<span id="cb43-25"><a href="#cb43-25" aria-hidden="true" tabindex="-1"></a>Does this really need explaining? Because the technology is amazing in both practical and philosophical ways.</span>
+<span id="cb43-26"><a href="#cb43-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-27"><a href="#cb43-27" aria-hidden="true" tabindex="-1"></a><span class="fu">### Who?</span></span>
+<span id="cb43-28"><a href="#cb43-28" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Who am I</span><span class="co">](https://davidd003.github.io/Coding_Blog/about.html)</span>!? Who are you?!</span>
+<span id="cb43-29"><a href="#cb43-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-30"><a href="#cb43-30" aria-hidden="true" tabindex="-1"></a><span class="fu">### How?</span></span>
+<span id="cb43-31"><a href="#cb43-31" aria-hidden="true" tabindex="-1"></a>Using <span class="co">[</span><span class="ot">PyTorch</span><span class="co">](https://pytorch.org/)</span>^<span class="co">[</span><span class="ot">If it ain't 'py', it ain't python, right?</span><span class="co">]</span>, an opensource toolkit for building neural networks. Truly an elevator ride up onto the shoulders of giants.</span>
+<span id="cb43-32"><a href="#cb43-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-33"><a href="#cb43-33" aria-hidden="true" tabindex="-1"></a><span class="fu"># Code Review</span></span>
+<span id="cb43-34"><a href="#cb43-34" aria-hidden="true" tabindex="-1"></a>We'll first just re-import our data, and then get into building the groundwork for our neural network</span>
+<span id="cb43-35"><a href="#cb43-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-36"><a href="#cb43-36" aria-hidden="true" tabindex="-1"></a>Let's get into it!</span>
+<span id="cb43-37"><a href="#cb43-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-38"><a href="#cb43-38" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true"}</span>
+<span id="cb43-39"><a href="#cb43-39" aria-hidden="true" tabindex="-1"></a>The required dependencies!:<span class="in">`scikit-learn`</span>, <span class="in">`fastbook`</span>, <span class="in">`matplotlib`</span></span>
+<span id="cb43-40"><a href="#cb43-40" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb43-41"><a href="#cb43-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-44"><a href="#cb43-44" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb43-45"><a href="#cb43-45" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb43-46"><a href="#cb43-46" aria-hidden="true" tabindex="-1"></a><span class="co"># Install dependency</span></span>
+<span id="cb43-47"><a href="#cb43-47" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastbook <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb43-48"><a href="#cb43-48" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastai.vision.<span class="bu">all</span> <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb43-49"><a href="#cb43-49" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> load_digits</span>
+<span id="cb43-50"><a href="#cb43-50" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> fastbook</span>
+<span id="cb43-51"><a href="#cb43-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-52"><a href="#cb43-52" aria-hidden="true" tabindex="-1"></a>fastbook.setup_book()</span>
+<span id="cb43-53"><a href="#cb43-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-54"><a href="#cb43-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-55"><a href="#cb43-55" aria-hidden="true" tabindex="-1"></a>matplotlib.rc(<span class="st">"image"</span>, cmap<span class="op">=</span><span class="st">"Greys"</span>)</span>
+<span id="cb43-56"><a href="#cb43-56" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb43-57"><a href="#cb43-57" aria-hidden="true" tabindex="-1"></a><span class="fu">## Data Acquisition</span></span>
+<span id="cb43-58"><a href="#cb43-58" aria-hidden="true" tabindex="-1"></a>A quick flashback to Part 1 of my Building A Digit Classifier blog!:</span>
+<span id="cb43-59"><a href="#cb43-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-60"><a href="#cb43-60" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip collapse="true"}</span>
+<span id="cb43-61"><a href="#cb43-61" aria-hidden="true" tabindex="-1"></a><span class="fu">## Understand Your Input!</span></span>
+<span id="cb43-62"><a href="#cb43-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-63"><a href="#cb43-63" aria-hidden="true" tabindex="-1"></a>Pre-processing data before even touching any neural net methods can improve your final performance. Note the data set information offered at the <span class="co">[</span><span class="ot">source page</span><span class="co">](https://archive.ics.uci.edu/ml/datasets/Optical+Recognition+of+Handwritten+Digits)</span>: </span>
+<span id="cb43-64"><a href="#cb43-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-65"><a href="#cb43-65" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; We used preprocessing programs made available by NIST to extract normalized bitmaps of handwritten digits from a preprinted form. From a total of 43 people, 30 contributed to the training set and different 13 to the test set. 32x32 bitmaps are divided into nonoverlapping blocks of 4x4 and the number of on pixels are counted in each block. This generates an input matrix of 8x8 where each element is an integer in the range 0..16. This reduces dimensionality and gives invariance to small distortions.</span></span>
+<span id="cb43-66"><a href="#cb43-66" aria-hidden="true" tabindex="-1"></a><span class="at">:::</span></span>
+<span id="cb43-67"><a href="#cb43-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-70"><a href="#cb43-70" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb43-71"><a href="#cb43-71" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb43-72"><a href="#cb43-72" aria-hidden="true" tabindex="-1"></a>mnist <span class="op">=</span> load_digits()</span>
+<span id="cb43-73"><a href="#cb43-73" aria-hidden="true" tabindex="-1"></a>stacked <span class="op">=</span> []</span>
+<span id="cb43-74"><a href="#cb43-74" aria-hidden="true" tabindex="-1"></a><span class="co"># This loop because stacked=[[]]*10 makes 1 list in list, with 10 copies of pointers... need separate objects</span></span>
+<span id="cb43-75"><a href="#cb43-75" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>):</span>
+<span id="cb43-76"><a href="#cb43-76" aria-hidden="true" tabindex="-1"></a>    stacked.append([])</span>
+<span id="cb43-77"><a href="#cb43-77" aria-hidden="true" tabindex="-1"></a><span class="co"># Assign all images to the right collection in the 'stacked' list, indexed by target</span></span>
+<span id="cb43-78"><a href="#cb43-78" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(mnist[<span class="st">"target"</span>])):</span>
+<span id="cb43-79"><a href="#cb43-79" aria-hidden="true" tabindex="-1"></a>    stacked[mnist[<span class="st">"target"</span>][i]].append(mnist[<span class="st">"images"</span>][i])</span>
+<span id="cb43-80"><a href="#cb43-80" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb43-81"><a href="#cb43-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-82"><a href="#cb43-82" aria-hidden="true" tabindex="-1"></a><span class="fu">### Segmentation</span></span>
+<span id="cb43-83"><a href="#cb43-83" aria-hidden="true" tabindex="-1"></a>The next step is to define which data will be our training, and our validation set. It was important to bucket out our data first so by randomly sampling our data we didn't generate a validation set with a large imbalance in the number of classes to be tested in it. </span>
+<span id="cb43-84"><a href="#cb43-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-85"><a href="#cb43-85" aria-hidden="true" tabindex="-1"></a>First we convert to a tensor, then segment training from validation data. Arbitrarily taking 20 examples from each digit, so, 11.5% of the total data set towards validation.</span>
+<span id="cb43-86"><a href="#cb43-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-87"><a href="#cb43-87" aria-hidden="true" tabindex="-1"></a>We'll print out the size of these collections and take a peek at a sample to make sure we indexed right.</span>
+<span id="cb43-88"><a href="#cb43-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-89"><a href="#cb43-89" aria-hidden="true" tabindex="-1"></a>:::{#fig-checkSamp}</span>
+<span id="cb43-92"><a href="#cb43-92" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb43-93"><a href="#cb43-93" aria-hidden="true" tabindex="-1"></a><span class="co"># | warning: False</span></span>
+<span id="cb43-94"><a href="#cb43-94" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb43-95"><a href="#cb43-95" aria-hidden="true" tabindex="-1"></a><span class="co"># To make dataset a tensor, make it same number of dimensions</span></span>
+<span id="cb43-96"><a href="#cb43-96" aria-hidden="true" tabindex="-1"></a>stacked <span class="op">=</span> tensor([x[:<span class="dv">174</span>] <span class="cf">for</span> x <span class="kw">in</span> stacked])</span>
+<span id="cb43-97"><a href="#cb43-97" aria-hidden="true" tabindex="-1"></a><span class="co"># Segmentation: Pull 20 of each digit out of training set</span></span>
+<span id="cb43-98"><a href="#cb43-98" aria-hidden="true" tabindex="-1"></a>test <span class="op">=</span> [dig[<span class="op">-</span><span class="dv">20</span>:] <span class="cf">for</span> dig <span class="kw">in</span> stacked]</span>
+<span id="cb43-99"><a href="#cb43-99" aria-hidden="true" tabindex="-1"></a>train <span class="op">=</span> [dig[:<span class="op">-</span><span class="dv">20</span>] <span class="cf">for</span> dig <span class="kw">in</span> stacked]</span>
+<span id="cb43-100"><a href="#cb43-100" aria-hidden="true" tabindex="-1"></a><span class="co"># Confirm counts of samples</span></span>
+<span id="cb43-101"><a href="#cb43-101" aria-hidden="true" tabindex="-1"></a>[<span class="bu">len</span>(test[i]) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>)], [<span class="bu">len</span>(train[i]) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>)]</span>
+<span id="cb43-102"><a href="#cb43-102" aria-hidden="true" tabindex="-1"></a>show_image(stacked[<span class="dv">3</span>][<span class="dv">0</span>])  <span class="co"># Check sample</span></span>
+<span id="cb43-103"><a href="#cb43-103" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb43-104"><a href="#cb43-104" aria-hidden="true" tabindex="-1"></a>Is it a 3?</span>
+<span id="cb43-105"><a href="#cb43-105" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb43-106"><a href="#cb43-106" aria-hidden="true" tabindex="-1"></a>Nice.</span>
+<span id="cb43-107"><a href="#cb43-107" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-108"><a href="#cb43-108" aria-hidden="true" tabindex="-1"></a>It's important to keep track of what's what.</span>
+<span id="cb43-111"><a href="#cb43-111" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb43-112"><a href="#cb43-112" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb43-113"><a href="#cb43-113" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-fold: show</span></span>
+<span id="cb43-114"><a href="#cb43-114" aria-hidden="true" tabindex="-1"></a><span class="bu">type</span>(train), <span class="bu">type</span>(train[<span class="dv">0</span>]), <span class="bu">type</span>(train[<span class="dv">0</span>][<span class="dv">0</span>]), [</span>
+<span id="cb43-115"><a href="#cb43-115" aria-hidden="true" tabindex="-1"></a>    <span class="bu">type</span>(test), <span class="bu">type</span>(test[<span class="dv">0</span>]), <span class="bu">type</span>(test[<span class="dv">0</span>][<span class="dv">0</span>])]</span>
+<span id="cb43-116"><a href="#cb43-116" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb43-117"><a href="#cb43-117" aria-hidden="true" tabindex="-1"></a>Ok so our top level containers for training/testing data are basic python lists. Within those, we have 10 collections, one for each integer. Those are Tensors. And then, each image (a collection of pixels unto itself) within those tensors, are also Tensor type objects.</span>
+<span id="cb43-118"><a href="#cb43-118" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-119"><a href="#cb43-119" aria-hidden="true" tabindex="-1"></a>Instead of a basic Python list, we will need the top level containers as tensors to leverage the pyTorch functionality built into them. luckily it's an easy conversion:</span>
+<span id="cb43-122"><a href="#cb43-122" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb43-123"><a href="#cb43-123" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb43-124"><a href="#cb43-124" aria-hidden="true" tabindex="-1"></a><span class="co"># Converts PyList of tensors to tensor of tesnors (join in new dimensions, retain target indexing)</span></span>
+<span id="cb43-125"><a href="#cb43-125" aria-hidden="true" tabindex="-1"></a>train <span class="op">=</span> torch.stack(train)</span>
+<span id="cb43-126"><a href="#cb43-126" aria-hidden="true" tabindex="-1"></a>test <span class="op">=</span> torch.stack(test)</span>
+<span id="cb43-127"><a href="#cb43-127" aria-hidden="true" tabindex="-1"></a>train.shape, test.shape</span>
+<span id="cb43-128"><a href="#cb43-128" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb43-129"><a href="#cb43-129" aria-hidden="true" tabindex="-1"></a>Now here is a critical piece, working with multidimensional arrays and keeping in mind what we understand these to be. Our test and training tensors have the same dimensionality but not the same size. </span>
+<span id="cb43-130"><a href="#cb43-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-131"><a href="#cb43-131" aria-hidden="true" tabindex="-1"></a><span class="fu">### Setup DataLoaders</span></span>
+<span id="cb43-132"><a href="#cb43-132" aria-hidden="true" tabindex="-1"></a>First get data into the requisite shape for the processes that will follow. </span>
+<span id="cb43-135"><a href="#cb43-135" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb43-136"><a href="#cb43-136" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb43-137"><a href="#cb43-137" aria-hidden="true" tabindex="-1"></a><span class="co"># Build training/valid sets for passing to DataLoader</span></span>
+<span id="cb43-138"><a href="#cb43-138" aria-hidden="true" tabindex="-1"></a>train_x <span class="op">=</span> torch.cat([x <span class="cf">for</span> x <span class="kw">in</span> train]).view(<span class="op">-</span><span class="dv">1</span>, <span class="dv">8</span><span class="op">*</span><span class="dv">8</span>)</span>
+<span id="cb43-139"><a href="#cb43-139" aria-hidden="true" tabindex="-1"></a>test_x <span class="op">=</span> torch.cat([x <span class="cf">for</span> x <span class="kw">in</span> test]).view(<span class="op">-</span><span class="dv">1</span>, <span class="dv">8</span><span class="op">*</span><span class="dv">8</span>)</span>
+<span id="cb43-140"><a href="#cb43-140" aria-hidden="true" tabindex="-1"></a>train_y, test_y <span class="op">=</span> [], []</span>
+<span id="cb43-141"><a href="#cb43-141" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> n <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>):</span>
+<span id="cb43-142"><a href="#cb43-142" aria-hidden="true" tabindex="-1"></a>    train_y.extend([n]<span class="op">*</span><span class="dv">154</span>)</span>
+<span id="cb43-143"><a href="#cb43-143" aria-hidden="true" tabindex="-1"></a>    test_y.extend([n]<span class="op">*</span><span class="dv">20</span>)</span>
+<span id="cb43-144"><a href="#cb43-144" aria-hidden="true" tabindex="-1"></a>train_y <span class="op">=</span> tensor(train_y).unsqueeze(<span class="op">-</span><span class="dv">1</span>)</span>
+<span id="cb43-145"><a href="#cb43-145" aria-hidden="true" tabindex="-1"></a>test_y <span class="op">=</span> tensor(test_y).unsqueeze(<span class="op">-</span><span class="dv">1</span>)</span>
+<span id="cb43-146"><a href="#cb43-146" aria-hidden="true" tabindex="-1"></a>train_x.shape, test_x.shape, train_y.shape, test_y.shape</span>
+<span id="cb43-147"><a href="#cb43-147" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb43-148"><a href="#cb43-148" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-149"><a href="#cb43-149" aria-hidden="true" tabindex="-1"></a>Note the unsqueezing such that the <span class="in">`_y`</span> tensors have a singleton dimension. Might seem strange on first blush but makes sense when considering that our 'target' just happens to be individual integers. But in other use cases, the target could be something more complex, requiring a larger data structure. In which case that dimension could be larger than a singleton.</span>
+<span id="cb43-150"><a href="#cb43-150" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-151"><a href="#cb43-151" aria-hidden="true" tabindex="-1"></a>Now we can prime our DataLoaders. DataLoaders are a super handy object from the Pytorch library that will make life easier by holding our data for us, and serving it up in randomized batches.</span>
+<span id="cb43-152"><a href="#cb43-152" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-155"><a href="#cb43-155" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb43-156"><a href="#cb43-156" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb43-157"><a href="#cb43-157" aria-hidden="true" tabindex="-1"></a><span class="co"># Zip each input data item to its target output</span></span>
+<span id="cb43-158"><a href="#cb43-158" aria-hidden="true" tabindex="-1"></a>dset <span class="op">=</span> <span class="bu">list</span>(<span class="bu">zip</span>(train_x, train_y))</span>
+<span id="cb43-159"><a href="#cb43-159" aria-hidden="true" tabindex="-1"></a>valid_dset <span class="op">=</span> <span class="bu">list</span>(<span class="bu">zip</span>(test_x, test_y))</span>
+<span id="cb43-160"><a href="#cb43-160" aria-hidden="true" tabindex="-1"></a><span class="co"># Define DataLoader objects to pass to learner</span></span>
+<span id="cb43-161"><a href="#cb43-161" aria-hidden="true" tabindex="-1"></a>dl <span class="op">=</span> DataLoader(dset, batch_size<span class="op">=</span><span class="dv">25</span>, shuffle<span class="op">=</span>true)</span>
+<span id="cb43-162"><a href="#cb43-162" aria-hidden="true" tabindex="-1"></a>valid_dl <span class="op">=</span> DataLoader(valid_dset, batch_size<span class="op">=</span><span class="dv">5</span>, shuffle<span class="op">=</span>true)</span>
+<span id="cb43-163"><a href="#cb43-163" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-164"><a href="#cb43-164" aria-hidden="true" tabindex="-1"></a>dls <span class="op">=</span> DataLoaders(dl, valid_dl)</span>
+<span id="cb43-165"><a href="#cb43-165" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb43-166"><a href="#cb43-166" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-167"><a href="#cb43-167" aria-hidden="true" tabindex="-1"></a><span class="fu">## Laying The NN Foundations</span></span>
+<span id="cb43-168"><a href="#cb43-168" aria-hidden="true" tabindex="-1"></a>Every NN needs weights and biases. We're going to want to initialize lots of them, and in differently shaped structures, so first we define a function to help us do that:</span>
+<span id="cb43-169"><a href="#cb43-169" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-172"><a href="#cb43-172" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb43-173"><a href="#cb43-173" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb43-174"><a href="#cb43-174" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> init_params(size, std<span class="op">=</span><span class="fl">.1</span>): <span class="cf">return</span> (torch.randn(size)<span class="op">*</span>std).requires_grad_()</span>
+<span id="cb43-175"><a href="#cb43-175" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-176"><a href="#cb43-176" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-177"><a href="#cb43-177" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb43-178"><a href="#cb43-178" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-179"><a href="#cb43-179" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true"}</span>
+<span id="cb43-180"><a href="#cb43-180" aria-hidden="true" tabindex="-1"></a><span class="fu">## Requiring Grad!</span></span>
+<span id="cb43-181"><a href="#cb43-181" aria-hidden="true" tabindex="-1"></a>Note that any memory structures created with that function will also store their gradient in memory as computation is performed on them. This will be critical to executing back propagation of the gradient so as to optimize our function.</span>
+<span id="cb43-182"><a href="#cb43-182" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb43-183"><a href="#cb43-183" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-184"><a href="#cb43-184" aria-hidden="true" tabindex="-1"></a>Now we can generate our weights and biases. We define the structure sizes with our input and output size in mind, and the principles of matrix multiplication. </span>
+<span id="cb43-185"><a href="#cb43-185" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-186"><a href="#cb43-186" aria-hidden="true" tabindex="-1"></a>The general structure we will start with will be, of course, an initial layer with one neuron for each input, which will yield a single activation per input. After a nonlinearty, the second layer will have 10 weights and biases, such that the output is a 1D vector of size 10, per input. Each output neuron will represent an estimation of likelihood that the integer is that which the neuron represents (0-9).</span>
+<span id="cb43-187"><a href="#cb43-187" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-188"><a href="#cb43-188" aria-hidden="true" tabindex="-1"></a>@fig-Layer1 shows the start of the proces... A row in the input batch represents a single image. At the end of the 1^st^ layer, it is reduced to a single activation value to be passed through a non-linearity prior to going through the 2^nd^ layer</span>
+<span id="cb43-189"><a href="#cb43-189" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-190"><a href="#cb43-190" aria-hidden="true" tabindex="-1"></a><span class="al">![Visualizing Layer 1](Layer 1 Diagram.png)</span>{#fig-Layer1}  </span>
+<span id="cb43-191"><a href="#cb43-191" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-192"><a href="#cb43-192" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip }</span>
+<span id="cb43-193"><a href="#cb43-193" aria-hidden="true" tabindex="-1"></a><span class="fu">## Matrix Multiplication!</span></span>
+<span id="cb43-194"><a href="#cb43-194" aria-hidden="true" tabindex="-1"></a>Never fear! It's easy. I never forgot the trick Dr. Mohammed Jaber taught us 4th year as we had to use these methods from first year: ROW. COLUMN.</span>
+<span id="cb43-195"><a href="#cb43-195" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-196"><a href="#cb43-196" aria-hidden="true" tabindex="-1"></a>Take row i from the first matrix, and column j from the second. The element in index i,j of the resulting matrix will be the dot product of that row and column vector.</span>
+<span id="cb43-197"><a href="#cb43-197" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb43-198"><a href="#cb43-198" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-201"><a href="#cb43-201" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb43-202"><a href="#cb43-202" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb43-203"><a href="#cb43-203" aria-hidden="true" tabindex="-1"></a><span class="co"># Have to provide extra dimension for matrix mutiplication, making it a single-column vector</span></span>
+<span id="cb43-204"><a href="#cb43-204" aria-hidden="true" tabindex="-1"></a>w1 <span class="op">=</span> init_params((<span class="dv">8</span><span class="op">*</span><span class="dv">8</span>, <span class="dv">1</span>))</span>
+<span id="cb43-205"><a href="#cb43-205" aria-hidden="true" tabindex="-1"></a>b1 <span class="op">=</span> init_params(<span class="dv">1</span>)</span>
+<span id="cb43-206"><a href="#cb43-206" aria-hidden="true" tabindex="-1"></a><span class="co"># Have to provide an extra dimension (1) for matrix multiplication</span></span>
+<span id="cb43-207"><a href="#cb43-207" aria-hidden="true" tabindex="-1"></a>w2 <span class="op">=</span> init_params((<span class="dv">1</span>, <span class="dv">10</span>))</span>
+<span id="cb43-208"><a href="#cb43-208" aria-hidden="true" tabindex="-1"></a>b2 <span class="op">=</span> init_params(<span class="dv">1</span>)</span>
+<span id="cb43-209"><a href="#cb43-209" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb43-210"><a href="#cb43-210" aria-hidden="true" tabindex="-1"></a><span class="ss"> - </span>Layer 1:</span>
+<span id="cb43-211"><a href="#cb43-211" aria-hidden="true" tabindex="-1"></a><span class="ss">    - </span>64 weights, one per pixel. Formatted in a column vector because they are the second term in the matrix multiplication equation, with a single input (image) being fed as a single row vector of 64 elements, one per pixel. </span>
+<span id="cb43-212"><a href="#cb43-212" aria-hidden="true" tabindex="-1"></a><span class="ss">    - </span>1 bias; it will be broadcast such that the same bias is added to all instances in our batch. See @fig-Layer1</span>
+<span id="cb43-213"><a href="#cb43-213" aria-hidden="true" tabindex="-1"></a><span class="ss"> - </span>Layer 2:</span>
+<span id="cb43-214"><a href="#cb43-214" aria-hidden="true" tabindex="-1"></a><span class="ss">    - </span>10 weights, to generate one output neuron per category/class to assign. </span>
+<span id="cb43-215"><a href="#cb43-215" aria-hidden="true" tabindex="-1"></a><span class="ss">    - </span>1 bias, to be *broadcast* across each input vector.^<span class="co">[</span><span class="ot">Increasing the size of the bias vector so as to have a unique bias for each output neuron will be an opportunity to increase the capacity of the model.</span><span class="co">]</span></span>
+<span id="cb43-216"><a href="#cb43-216" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-217"><a href="#cb43-217" aria-hidden="true" tabindex="-1"></a>We will use the basic <span class="co">[</span><span class="ot">ReLU</span><span class="co">](https://deepai.org/machine-learning-glossary-and-terms/relu)</span> activation function as the non-linearity between the two linear layers.</span>
+<span id="cb43-218"><a href="#cb43-218" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-219"><a href="#cb43-219" aria-hidden="true" tabindex="-1"></a><span class="fu">## Building the NN</span></span>
+<span id="cb43-220"><a href="#cb43-220" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-221"><a href="#cb43-221" aria-hidden="true" tabindex="-1"></a>Similarly to our parameter generation function, we want o make our little network into a function block so that we can treat it as a black box to plug and play with other code sections:</span>
+<span id="cb43-224"><a href="#cb43-224" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb43-225"><a href="#cb43-225" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb43-226"><a href="#cb43-226" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-fold: show</span></span>
+<span id="cb43-227"><a href="#cb43-227" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-228"><a href="#cb43-228" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-229"><a href="#cb43-229" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> myModel(xb):</span>
+<span id="cb43-230"><a href="#cb43-230" aria-hidden="true" tabindex="-1"></a>    res <span class="op">=</span> xb<span class="op">@</span>w1<span class="op">+</span>b1</span>
+<span id="cb43-231"><a href="#cb43-231" aria-hidden="true" tabindex="-1"></a>    res <span class="op">=</span> res.<span class="bu">max</span>(tensor(<span class="fl">0.</span>))</span>
+<span id="cb43-232"><a href="#cb43-232" aria-hidden="true" tabindex="-1"></a>    res <span class="op">=</span> res<span class="op">@</span>w2<span class="op">+</span>b2  <span class="co"># returns 10 features for each input</span></span>
+<span id="cb43-233"><a href="#cb43-233" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> res</span>
+<span id="cb43-234"><a href="#cb43-234" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-235"><a href="#cb43-235" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-236"><a href="#cb43-236" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb43-237"><a href="#cb43-237" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-238"><a href="#cb43-238" aria-hidden="true" tabindex="-1"></a>Let's take it for a spin! We'll manually identify a subset of our training dataset for testing purposes.</span>
+<span id="cb43-241"><a href="#cb43-241" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb43-242"><a href="#cb43-242" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb43-243"><a href="#cb43-243" aria-hidden="true" tabindex="-1"></a>mini_samp <span class="op">=</span> <span class="dv">5</span></span>
+<span id="cb43-244"><a href="#cb43-244" aria-hidden="true" tabindex="-1"></a>mini_x <span class="op">=</span> train_x[:mini_samp]</span>
+<span id="cb43-245"><a href="#cb43-245" aria-hidden="true" tabindex="-1"></a>mini_y <span class="op">=</span> train_y[:mini_samp]</span>
+<span id="cb43-246"><a href="#cb43-246" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb43-249"><a href="#cb43-249" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb43-250"><a href="#cb43-250" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb43-251"><a href="#cb43-251" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-fold: show</span></span>
+<span id="cb43-252"><a href="#cb43-252" aria-hidden="true" tabindex="-1"></a>res <span class="op">=</span> myModel(mini_x)</span>
+<span id="cb43-253"><a href="#cb43-253" aria-hidden="true" tabindex="-1"></a>res, res.shape</span>
+<span id="cb43-254"><a href="#cb43-254" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb43-255"><a href="#cb43-255" aria-hidden="true" tabindex="-1"></a>Excellent! For the 5 input images passed in, we have an output that is 5 vectors of size 10, that is, each input has 10 output values, one for each possible classification outcome 0 through 9. </span>
+<span id="cb43-256"><a href="#cb43-256" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-257"><a href="#cb43-257" aria-hidden="true" tabindex="-1"></a>And note that the result tensor retains the gradient! This comes into play in the next step.</span>
+<span id="cb43-258"><a href="#cb43-258" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-259"><a href="#cb43-259" aria-hidden="true" tabindex="-1"></a><span class="fu">## Calculating Loss</span></span>
+<span id="cb43-260"><a href="#cb43-260" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-261"><a href="#cb43-261" aria-hidden="true" tabindex="-1"></a>Loss is the measure of the neural networks success. The most critical characteristic of a loss function is that it be differentiable with a smooth gradient. But just because the math doesn't break doesn't mean the function will eb any good. There are a variety of well understood functions that can be used, with selection being a matter of preference as well as the use case at hand.</span>
+<span id="cb43-262"><a href="#cb43-262" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-263"><a href="#cb43-263" aria-hidden="true" tabindex="-1"></a>Since we are assigning a single class to the input, from multiple options, we'll use the SoftMax function. It reduces all outputs to a number between 0 and 1, with a given number being exponentially closer to one, the larger it is compared to the other numbers in the set. </span>
+<span id="cb43-264"><a href="#cb43-264" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-265"><a href="#cb43-265" aria-hidden="true" tabindex="-1"></a>This is a double-hitter: it allows the net to learn to win by giving the correct digit's output neuron the highest activation, while also motivating the reduction in activation of the incorrect neurons. </span>
+<span id="cb43-266"><a href="#cb43-266" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-269"><a href="#cb43-269" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb43-270"><a href="#cb43-270" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb43-271"><a href="#cb43-271" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-fold: show</span></span>
+<span id="cb43-272"><a href="#cb43-272" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-273"><a href="#cb43-273" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-274"><a href="#cb43-274" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> my_loss(preds, target, lr<span class="op">=</span><span class="fl">0.01</span>):</span>
+<span id="cb43-275"><a href="#cb43-275" aria-hidden="true" tabindex="-1"></a>    maxes <span class="op">=</span> F.softmax(preds, dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb43-276"><a href="#cb43-276" aria-hidden="true" tabindex="-1"></a>    correctIndices <span class="op">=</span> [r[t] <span class="cf">for</span> r, t <span class="kw">in</span> <span class="bu">zip</span>(maxes, target)]</span>
+<span id="cb43-277"><a href="#cb43-277" aria-hidden="true" tabindex="-1"></a>    resy <span class="op">=</span> [<span class="op">-</span>torch.log(tens) <span class="cf">for</span> tens <span class="kw">in</span> correctIndices]</span>
+<span id="cb43-278"><a href="#cb43-278" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">sum</span>(resy)</span>
+<span id="cb43-279"><a href="#cb43-279" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-280"><a href="#cb43-280" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-281"><a href="#cb43-281" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb43-282"><a href="#cb43-282" aria-hidden="true" tabindex="-1"></a>Keep in mind that we need to ensure these functions can work with different batch sizes. Fortunately, the PyTorch built in functions are designed for this. </span>
+<span id="cb43-283"><a href="#cb43-283" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-284"><a href="#cb43-284" aria-hidden="true" tabindex="-1"></a>Our function first takes the SoftMax of the outputs for each input. Then, it pulls out the resulting value for the index of the correct class. Recall, this will be a number between 0 and 1. If we took this number alone as our loss, measure, there would be a couple of issues.</span>
+<span id="cb43-285"><a href="#cb43-285" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-286"><a href="#cb43-286" aria-hidden="true" tabindex="-1"></a>First of all, convention is that we want to *reduce* loss in the course of our optimization. But we have defined the index of the *highest* softmax result as our classification integer. So that doesn't jive. Secondly, it isn't desirable to have the measure of loss constrained to such a small range 0 to 1, because this essentially reduces the information we're getting - large differences in inputs will show very small changes in loss. For effective learning, we would want a strong learning signal, i.e. small changes to input parameters reflecting meaningful differences in the measure of loss.</span>
+<span id="cb43-287"><a href="#cb43-287" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-288"><a href="#cb43-288" aria-hidden="true" tabindex="-1"></a>The solution? First, taking the log of the SoftMax activation. As the following code shows, a difference of 0.001 in the input to the log function creates a differences of more than 0.01 in the output, an order of magnitude difference.</span>
+<span id="cb43-289"><a href="#cb43-289" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-292"><a href="#cb43-292" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb43-293"><a href="#cb43-293" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb43-294"><a href="#cb43-294" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-fold: show</span></span>
+<span id="cb43-295"><a href="#cb43-295" aria-hidden="true" tabindex="-1"></a>torch.log(Tensor([<span class="fl">.5</span>, <span class="fl">.499</span>]))</span>
+<span id="cb43-296"><a href="#cb43-296" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb43-297"><a href="#cb43-297" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-298"><a href="#cb43-298" aria-hidden="true" tabindex="-1"></a>After the log, we took the negative of those values. That's because the log of a number between 0 and 1 will always be negative, getting absolutely larger the further from 1 it is. Seeing as we want the output to be absolutely smaller the closer to 1 it is, taking the negative accomplishes this perfectly.</span>
+<span id="cb43-299"><a href="#cb43-299" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-300"><a href="#cb43-300" aria-hidden="true" tabindex="-1"></a>Lastly, we summed the loss measure across the samples in the mini batch since we want to optimize globally, not just for individual samples.</span>
+<span id="cb43-301"><a href="#cb43-301" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-302"><a href="#cb43-302" aria-hidden="true" tabindex="-1"></a>So let's test it!</span>
+<span id="cb43-303"><a href="#cb43-303" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-306"><a href="#cb43-306" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb43-307"><a href="#cb43-307" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb43-308"><a href="#cb43-308" aria-hidden="true" tabindex="-1"></a><span class="co"># Testing the loss function works(assuming mini_x of 3 samples)</span></span>
+<span id="cb43-309"><a href="#cb43-309" aria-hidden="true" tabindex="-1"></a>lossResults <span class="op">=</span> my_loss(myModel(mini_x), mini_y)</span>
+<span id="cb43-310"><a href="#cb43-310" aria-hidden="true" tabindex="-1"></a>lossResults</span>
+<span id="cb43-311"><a href="#cb43-311" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb43-312"><a href="#cb43-312" aria-hidden="true" tabindex="-1"></a>This output might look nice, but it's a roll of the dice!</span>
+<span id="cb43-313"><a href="#cb43-313" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-314"><a href="#cb43-314" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning}</span>
+<span id="cb43-315"><a href="#cb43-315" aria-hidden="true" tabindex="-1"></a><span class="fu">## Beware Of Implementing Your Own Math</span></span>
+<span id="cb43-316"><a href="#cb43-316" aria-hidden="true" tabindex="-1"></a>While the formula for the SoftMax is easy enough to understand, Our home-brewed version won't work. I tried to do so at first and had all kinds of headaches arising from arithmetic underflow in the outcomes! How the hell do you deal with that? The best solution: Use the function implementation baked into the PyTorch libraries! Let the pro's handle those *deep* issues. We're still riding on training wheels!</span>
+<span id="cb43-317"><a href="#cb43-317" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb43-318"><a href="#cb43-318" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-319"><a href="#cb43-319" aria-hidden="true" tabindex="-1"></a>It turns out the <span class="in">`-log`</span> of the SoftMax is the Cross Entropy Loss Function. And just importing it from the PyTorch library will save us from the pitfall described in the preceding blurb... So here is our final loss function!</span>
+<span id="cb43-322"><a href="#cb43-322" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb43-323"><a href="#cb43-323" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb43-324"><a href="#cb43-324" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-325"><a href="#cb43-325" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-326"><a href="#cb43-326" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> my_loss(preds, target):</span>
+<span id="cb43-327"><a href="#cb43-327" aria-hidden="true" tabindex="-1"></a>    loss_fn <span class="op">=</span> nn.CrossEntropyLoss()</span>
+<span id="cb43-328"><a href="#cb43-328" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Turn tensor of singleton tensors one per target into a single tensor with all as elements</span></span>
+<span id="cb43-329"><a href="#cb43-329" aria-hidden="true" tabindex="-1"></a>    tgts <span class="op">=</span> target.view(<span class="op">-</span><span class="dv">1</span>)</span>
+<span id="cb43-330"><a href="#cb43-330" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> loss_fn(preds, tgts)  <span class="co"># Nice</span></span>
+<span id="cb43-331"><a href="#cb43-331" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb43-332"><a href="#cb43-332" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-333"><a href="#cb43-333" aria-hidden="true" tabindex="-1"></a>Now if you're reading this you're probably thinking that *gradient descent* is the next step here, so as to reduce the loss between minibatches, but we'll take a quick detour first.</span>
+<span id="cb43-334"><a href="#cb43-334" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-335"><a href="#cb43-335" aria-hidden="true" tabindex="-1"></a><span class="fu">## Measuring Accuracy</span></span>
+<span id="cb43-336"><a href="#cb43-336" aria-hidden="true" tabindex="-1"></a>Before going further, let's take a minute to set up some functions we'll need in the training process. The first yields the percentage accuracy of the model across a batch, and the second function builds on that to iterate across the batchers in our valdiation set and yield the accuracy rate across a whole epoch^<span class="co">[</span><span class="ot">An epoch is a full pass through the entire data set, in a context where we will make multiple passes (epochs) so as to keep learning.</span><span class="co">]</span>.</span>
+<span id="cb43-339"><a href="#cb43-339" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb43-340"><a href="#cb43-340" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb43-341"><a href="#cb43-341" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-342"><a href="#cb43-342" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-343"><a href="#cb43-343" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> batch_accuracy(mdl, xb, yb):</span>
+<span id="cb43-344"><a href="#cb43-344" aria-hidden="true" tabindex="-1"></a>    otpts <span class="op">=</span> mdl(xb)  <span class="co"># Get output activations from model</span></span>
+<span id="cb43-345"><a href="#cb43-345" aria-hidden="true" tabindex="-1"></a>    <span class="co"># The indices of the max activation is the predicted digit of the input</span></span>
+<span id="cb43-346"><a href="#cb43-346" aria-hidden="true" tabindex="-1"></a>    preds <span class="op">=</span> otpts.<span class="bu">max</span>(dim<span class="op">=-</span><span class="dv">1</span>).indices</span>
+<span id="cb43-347"><a href="#cb43-347" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Types must be tensors to return sequence of true/false</span></span>
+<span id="cb43-348"><a href="#cb43-348" aria-hidden="true" tabindex="-1"></a>    correct <span class="op">=</span> preds <span class="op">==</span> yb.view(<span class="op">-</span><span class="dv">1</span>)</span>
+<span id="cb43-349"><a href="#cb43-349" aria-hidden="true" tabindex="-1"></a>    <span class="co">#                    Use view to take it from shape=[5,1] to [5], same as preds. else will broadcast and end result all messed up</span></span>
+<span id="cb43-350"><a href="#cb43-350" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> correct.<span class="bu">float</span>().mean()</span>
+<span id="cb43-351"><a href="#cb43-351" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-352"><a href="#cb43-352" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-353"><a href="#cb43-353" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> validate_epoch(mdl):</span>
+<span id="cb43-354"><a href="#cb43-354" aria-hidden="true" tabindex="-1"></a>    outcomes <span class="op">=</span> [batch_accuracy(mdl, xb, yb) <span class="cf">for</span> xb, yb <span class="kw">in</span> valid_dl]</span>
+<span id="cb43-355"><a href="#cb43-355" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">round</span>(torch.stack(outcomes).mean().item(), <span class="dv">4</span>)</span>
+<span id="cb43-356"><a href="#cb43-356" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-357"><a href="#cb43-357" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-358"><a href="#cb43-358" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb43-359"><a href="#cb43-359" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-360"><a href="#cb43-360" aria-hidden="true" tabindex="-1"></a>It's always good to double check these functions are working as intended after making them... Let's grab some validation set data, double checking along the way that the outputs (integer assignment) match the input (drawings of digit):</span>
+<span id="cb43-363"><a href="#cb43-363" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb43-364"><a href="#cb43-364" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb43-365"><a href="#cb43-365" aria-hidden="true" tabindex="-1"></a>validIter <span class="op">=</span> <span class="bu">iter</span>(dls[<span class="dv">1</span>])</span>
+<span id="cb43-366"><a href="#cb43-366" aria-hidden="true" tabindex="-1"></a>xv, yv <span class="op">=</span> <span class="bu">next</span>(validIter)</span>
+<span id="cb43-367"><a href="#cb43-367" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(xv)):</span>
+<span id="cb43-368"><a href="#cb43-368" aria-hidden="true" tabindex="-1"></a>    show_image(xv[i].view((<span class="dv">8</span>, <span class="dv">8</span>)))</span>
+<span id="cb43-369"><a href="#cb43-369" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(yv[i].data.item())</span>
+<span id="cb43-370"><a href="#cb43-370" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb43-371"><a href="#cb43-371" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-372"><a href="#cb43-372" aria-hidden="true" tabindex="-1"></a>Ok nice, now lets see that our validation function is yielding the correct accuracy score on classifying a mini batch. Since we haven't trained the model yet we'll expect the performacne to be junk but that doesn't mean we can't test the % accuracy function.</span>
+<span id="cb43-375"><a href="#cb43-375" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb43-376"><a href="#cb43-376" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb43-377"><a href="#cb43-377" aria-hidden="true" tabindex="-1"></a>validIter <span class="op">=</span> <span class="bu">iter</span>(dls[<span class="dv">1</span>])</span>
+<span id="cb43-378"><a href="#cb43-378" aria-hidden="true" tabindex="-1"></a>xv, yv <span class="op">=</span> <span class="bu">next</span>(validIter)</span>
+<span id="cb43-379"><a href="#cb43-379" aria-hidden="true" tabindex="-1"></a>o <span class="op">=</span> myModel(xv)</span>
+<span id="cb43-380"><a href="#cb43-380" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(o.<span class="bu">max</span>(dim<span class="op">=-</span><span class="dv">1</span>).indices, yv, batch_accuracy(myModel, xv, yv))</span>
+<span id="cb43-381"><a href="#cb43-381" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb43-382"><a href="#cb43-382" aria-hidden="true" tabindex="-1"></a>We want to see the last number spit out be an accurate representation of how many numbers match between the first and second tensor output. I don't know what the final blog output will be since the inputs to the neural net are random every time, but I re ran this code cell a number of times, seeing correct assignments of one or two integers to confirm the functions were working as expected.</span>
+<span id="cb43-383"><a href="#cb43-383" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-384"><a href="#cb43-384" aria-hidden="true" tabindex="-1"></a><span class="fu">## Execute Training</span></span>
+<span id="cb43-385"><a href="#cb43-385" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-386"><a href="#cb43-386" aria-hidden="true" tabindex="-1"></a>Alright now we get to the good stuff! First we'll make an iterator to load our test dataset.</span>
+<span id="cb43-389"><a href="#cb43-389" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb43-390"><a href="#cb43-390" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb43-391"><a href="#cb43-391" aria-hidden="true" tabindex="-1"></a>testLoader <span class="op">=</span> <span class="bu">iter</span>(dls[<span class="dv">0</span>])</span>
+<span id="cb43-392"><a href="#cb43-392" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb43-393"><a href="#cb43-393" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-394"><a href="#cb43-394" aria-hidden="true" tabindex="-1"></a>And now we we will run our first training loop... the steps are:</span>
+<span id="cb43-395"><a href="#cb43-395" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-396"><a href="#cb43-396" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Define learning rate^<span class="co">[</span><span class="ot">The learning rate is the factor by which we will multiply the gradient when adding the negative gradient to each parameter so as to update it for the next learning iteration.</span><span class="co">]</span>.</span>
+<span id="cb43-397"><a href="#cb43-397" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Pull out a minibatch of inputs and target values from the test data set.</span>
+<span id="cb43-398"><a href="#cb43-398" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Calculate the loss on this batch by passing the outputs from the model through the loss function</span>
+<span id="cb43-399"><a href="#cb43-399" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Execute the <span class="in">`.backward()`</span> method to calculate the gradient for all parameters.</span>
+<span id="cb43-400"><a href="#cb43-400" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>The next bits will be executed with torch.no_grad(), because we don't want the math inherent to calibrating the parameters themselves to have its gradient captured.</span>
+<span id="cb43-401"><a href="#cb43-401" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Having the gradient stored in the tensor object of each parameter, update each parameter by subtracting the gadient multiplied by the learning rate.</span>
+<span id="cb43-402"><a href="#cb43-402" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Reset the gradient to zero for the next learning iteration.</span>
+<span id="cb43-403"><a href="#cb43-403" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-404"><a href="#cb43-404" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-407"><a href="#cb43-407" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb43-408"><a href="#cb43-408" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb43-409"><a href="#cb43-409" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-fold: show</span></span>
+<span id="cb43-410"><a href="#cb43-410" aria-hidden="true" tabindex="-1"></a>lr <span class="op">=</span> <span class="fl">0.01</span></span>
+<span id="cb43-411"><a href="#cb43-411" aria-hidden="true" tabindex="-1"></a>xb, yb <span class="op">=</span> <span class="bu">next</span>(testLoader)</span>
+<span id="cb43-412"><a href="#cb43-412" aria-hidden="true" tabindex="-1"></a>loss <span class="op">=</span> my_loss(myModel(xb), yb)</span>
+<span id="cb43-413"><a href="#cb43-413" aria-hidden="true" tabindex="-1"></a>loss.backward()</span>
+<span id="cb43-414"><a href="#cb43-414" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> torch.no_grad():</span>
+<span id="cb43-415"><a href="#cb43-415" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> p <span class="kw">in</span> w1, b1, w2, b2:</span>
+<span id="cb43-416"><a href="#cb43-416" aria-hidden="true" tabindex="-1"></a>        p.data <span class="op">=</span> p.data<span class="op">-</span>p.grad.data<span class="op">*</span>lr</span>
+<span id="cb43-417"><a href="#cb43-417" aria-hidden="true" tabindex="-1"></a>        p.grad.zero_()</span>
+<span id="cb43-418"><a href="#cb43-418" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Loss before training: "</span><span class="op">+</span><span class="bu">str</span>(loss.item()) <span class="op">+</span></span>
+<span id="cb43-419"><a href="#cb43-419" aria-hidden="true" tabindex="-1"></a>      <span class="st">"  |   Loss after training: "</span><span class="op">+</span><span class="bu">str</span>(my_loss(myModel(xb), yb).item()))</span>
+<span id="cb43-420"><a href="#cb43-420" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb43-421"><a href="#cb43-421" aria-hidden="true" tabindex="-1"></a>Success! Our measure of loss has reduced after re running the same batch with the adjusted N parameters. Across a large enough dataset^<span class="co">[</span><span class="ot">The changes to parameters can be so small that the actual outcome on any single run doesn't change across a few inputs. But with enough learning iterations we will see the desired outcome.</span><span class="co">]</span>, we would expect to see a reduced error rate associated with this.</span>
+<span id="cb43-422"><a href="#cb43-422" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-423"><a href="#cb43-423" aria-hidden="true" tabindex="-1"></a>Let's try it again, this time printing out the average values of the parameters in the weights and bias vectors, to get a sense for how much they change from one iteration to the next.</span>
+<span id="cb43-424"><a href="#cb43-424" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-427"><a href="#cb43-427" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb43-428"><a href="#cb43-428" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">type</span>(w1.grad) <span class="op">==</span> NoneType:</span>
+<span id="cb43-429"><a href="#cb43-429" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(tensor([(x.data.mean()) <span class="cf">for</span> x <span class="kw">in</span> [w1, b1, w2, b2]]))</span>
+<span id="cb43-430"><a href="#cb43-430" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb43-431"><a href="#cb43-431" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Average parameters: "</span>, tensor(</span>
+<span id="cb43-432"><a href="#cb43-432" aria-hidden="true" tabindex="-1"></a>        [(x.data.mean(), x.grad.data.mean()) <span class="cf">for</span> x <span class="kw">in</span> [w1, b1, w2, b2]]))</span>
+<span id="cb43-433"><a href="#cb43-433" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> p <span class="kw">in</span> w1, b1, w2, b2:</span>
+<span id="cb43-434"><a href="#cb43-434" aria-hidden="true" tabindex="-1"></a>        p.grad.zero_()</span>
+<span id="cb43-435"><a href="#cb43-435" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-436"><a href="#cb43-436" aria-hidden="true" tabindex="-1"></a><span class="co"># Run the learning (copied from last cell):</span></span>
+<span id="cb43-437"><a href="#cb43-437" aria-hidden="true" tabindex="-1"></a>lr <span class="op">=</span> <span class="fl">0.01</span></span>
+<span id="cb43-438"><a href="#cb43-438" aria-hidden="true" tabindex="-1"></a>xb, yb <span class="op">=</span> <span class="bu">next</span>(testLoader)</span>
+<span id="cb43-439"><a href="#cb43-439" aria-hidden="true" tabindex="-1"></a>loss <span class="op">=</span> my_loss(myModel(xb), yb)</span>
+<span id="cb43-440"><a href="#cb43-440" aria-hidden="true" tabindex="-1"></a>loss.backward()</span>
+<span id="cb43-441"><a href="#cb43-441" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> torch.no_grad():</span>
+<span id="cb43-442"><a href="#cb43-442" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> p <span class="kw">in</span> w1, b1, w2, b2:</span>
+<span id="cb43-443"><a href="#cb43-443" aria-hidden="true" tabindex="-1"></a>        p.data <span class="op">=</span> p.data<span class="op">-</span>p.grad.data<span class="op">*</span>lr</span>
+<span id="cb43-444"><a href="#cb43-444" aria-hidden="true" tabindex="-1"></a>        p.grad.zero_()</span>
+<span id="cb43-445"><a href="#cb43-445" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Loss before training: "</span><span class="op">+</span><span class="bu">str</span>(loss.item()) <span class="op">+</span></span>
+<span id="cb43-446"><a href="#cb43-446" aria-hidden="true" tabindex="-1"></a>      <span class="st">"  |   Loss after training: "</span><span class="op">+</span><span class="bu">str</span>(my_loss(myModel(xb), yb).item()))</span>
+<span id="cb43-447"><a href="#cb43-447" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-448"><a href="#cb43-448" aria-hidden="true" tabindex="-1"></a><span class="co"># Print average param values again:</span></span>
+<span id="cb43-449"><a href="#cb43-449" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">type</span>(w1.grad) <span class="op">==</span> NoneType:</span>
+<span id="cb43-450"><a href="#cb43-450" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(tensor([(x.data.mean()) <span class="cf">for</span> x <span class="kw">in</span> [w1, b1, w2, b2]]))</span>
+<span id="cb43-451"><a href="#cb43-451" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb43-452"><a href="#cb43-452" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Average parameters: "</span>, tensor(</span>
+<span id="cb43-453"><a href="#cb43-453" aria-hidden="true" tabindex="-1"></a>        [(x.data.mean(), x.grad.data.mean()) <span class="cf">for</span> x <span class="kw">in</span> [w1, b1, w2, b2]]))</span>
+<span id="cb43-454"><a href="#cb43-454" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> p <span class="kw">in</span> w1, b1, w2, b2:</span>
+<span id="cb43-455"><a href="#cb43-455" aria-hidden="true" tabindex="-1"></a>        p.grad.zero_()</span>
+<span id="cb43-456"><a href="#cb43-456" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb43-457"><a href="#cb43-457" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-458"><a href="#cb43-458" aria-hidden="true" tabindex="-1"></a>What we see here is that our change in paramters created a reduction in the measure of loss, *even though* it wasn't even identifiable at 4 decimal points accuracy!</span>
+<span id="cb43-459"><a href="#cb43-459" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-460"><a href="#cb43-460" aria-hidden="true" tabindex="-1"></a>So let's take it to the next level. We trained on one minibatch of data. Let's try doing a whole epoch- iterating over every minibatch in the training set.</span>
+<span id="cb43-461"><a href="#cb43-461" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-462"><a href="#cb43-462" aria-hidden="true" tabindex="-1"></a>First, we'll reset our weights to random numbers, clearing the slate of that last learning:</span>
+<span id="cb43-463"><a href="#cb43-463" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-466"><a href="#cb43-466" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb43-467"><a href="#cb43-467" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb43-468"><a href="#cb43-468" aria-hidden="true" tabindex="-1"></a>w1 <span class="op">=</span> init_params((<span class="dv">8</span><span class="op">*</span><span class="dv">8</span>, <span class="dv">1</span>))</span>
+<span id="cb43-469"><a href="#cb43-469" aria-hidden="true" tabindex="-1"></a>b1 <span class="op">=</span> init_params(<span class="dv">1</span>)</span>
+<span id="cb43-470"><a href="#cb43-470" aria-hidden="true" tabindex="-1"></a>w2 <span class="op">=</span> init_params((<span class="dv">1</span>, <span class="dv">10</span>))</span>
+<span id="cb43-471"><a href="#cb43-471" aria-hidden="true" tabindex="-1"></a>b2 <span class="op">=</span> init_params(<span class="dv">1</span>)</span>
+<span id="cb43-472"><a href="#cb43-472" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-473"><a href="#cb43-473" aria-hidden="true" tabindex="-1"></a><span class="co"># Print average param values again:</span></span>
+<span id="cb43-474"><a href="#cb43-474" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">type</span>(w1.grad) <span class="op">==</span> NoneType:</span>
+<span id="cb43-475"><a href="#cb43-475" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(tensor([(x.data.mean()) <span class="cf">for</span> x <span class="kw">in</span> [w1, b1, w2, b2]]))</span>
+<span id="cb43-476"><a href="#cb43-476" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb43-477"><a href="#cb43-477" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Average parameters: "</span>, tensor(</span>
+<span id="cb43-478"><a href="#cb43-478" aria-hidden="true" tabindex="-1"></a>        [(x.data.mean(), x.grad.data.mean()) <span class="cf">for</span> x <span class="kw">in</span> [w1, b1, w2, b2]]))</span>
+<span id="cb43-479"><a href="#cb43-479" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> p <span class="kw">in</span> w1, b1, w2, b2:</span>
+<span id="cb43-480"><a href="#cb43-480" aria-hidden="true" tabindex="-1"></a>        p.grad.zero_()</span>
+<span id="cb43-481"><a href="#cb43-481" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb43-482"><a href="#cb43-482" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-483"><a href="#cb43-483" aria-hidden="true" tabindex="-1"></a>And now execute learning.</span>
+<span id="cb43-486"><a href="#cb43-486" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb43-487"><a href="#cb43-487" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb43-488"><a href="#cb43-488" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-fold: show</span></span>
+<span id="cb43-489"><a href="#cb43-489" aria-hidden="true" tabindex="-1"></a>lr <span class="op">=</span> <span class="fl">0.01</span></span>
+<span id="cb43-490"><a href="#cb43-490" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> xb, yb <span class="kw">in</span> dls[<span class="dv">0</span>]:</span>
+<span id="cb43-491"><a href="#cb43-491" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> my_loss(myModel(xb), yb)</span>
+<span id="cb43-492"><a href="#cb43-492" aria-hidden="true" tabindex="-1"></a>    loss.backward()</span>
+<span id="cb43-493"><a href="#cb43-493" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb43-494"><a href="#cb43-494" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> p <span class="kw">in</span> w1, b1, w2, b2:</span>
+<span id="cb43-495"><a href="#cb43-495" aria-hidden="true" tabindex="-1"></a>            p.data <span class="op">=</span> p.data<span class="op">-</span>p.grad.data<span class="op">*</span>lr</span>
+<span id="cb43-496"><a href="#cb43-496" aria-hidden="true" tabindex="-1"></a>            p.grad.zero_()</span>
+<span id="cb43-497"><a href="#cb43-497" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Loss: "</span><span class="op">+</span><span class="bu">str</span>(loss.item()))  <span class="co"># Prints loss for each minibatch</span></span>
+<span id="cb43-498"><a href="#cb43-498" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb43-499"><a href="#cb43-499" aria-hidden="true" tabindex="-1"></a>Hmmm.... sometimes when I run this I see the loss stay around the same value, other times it drops just a little before stabilizing... </span>
+<span id="cb43-500"><a href="#cb43-500" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-501"><a href="#cb43-501" aria-hidden="true" tabindex="-1"></a>We are going to need a better way to look at the trending of the loss function across iterations, so we may as well make that function now:</span>
+<span id="cb43-502"><a href="#cb43-502" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-505"><a href="#cb43-505" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb43-506"><a href="#cb43-506" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb43-507"><a href="#cb43-507" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-fold: show</span></span>
+<span id="cb43-508"><a href="#cb43-508" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-509"><a href="#cb43-509" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-510"><a href="#cb43-510" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> calc_grad(xb, yb, model, f_loss):</span>
+<span id="cb43-511"><a href="#cb43-511" aria-hidden="true" tabindex="-1"></a>    preds <span class="op">=</span> model(xb)</span>
+<span id="cb43-512"><a href="#cb43-512" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> f_loss(preds, yb)</span>
+<span id="cb43-513"><a href="#cb43-513" aria-hidden="true" tabindex="-1"></a>    loss.backward()</span>
+<span id="cb43-514"><a href="#cb43-514" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> loss.data.item()  <span class="co"># Return the loss (see why later)</span></span>
+<span id="cb43-515"><a href="#cb43-515" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-516"><a href="#cb43-516" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-517"><a href="#cb43-517" aria-hidden="true" tabindex="-1"></a>calc_grad(mini_x, mini_y, myModel, my_loss)</span>
+<span id="cb43-518"><a href="#cb43-518" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb43-519"><a href="#cb43-519" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-520"><a href="#cb43-520" aria-hidden="true" tabindex="-1"></a>This is another step towards modularizing (if that is a word) our code. Making use of that last function, our training loop now looks like this:</span>
+<span id="cb43-521"><a href="#cb43-521" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-524"><a href="#cb43-524" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb43-525"><a href="#cb43-525" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb43-526"><a href="#cb43-526" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-fold: show</span></span>
+<span id="cb43-527"><a href="#cb43-527" aria-hidden="true" tabindex="-1"></a><span class="co"># Initializing weights again for a fresh start</span></span>
+<span id="cb43-528"><a href="#cb43-528" aria-hidden="true" tabindex="-1"></a>w1 <span class="op">=</span> init_params((<span class="dv">8</span><span class="op">*</span><span class="dv">8</span>, <span class="dv">1</span>))</span>
+<span id="cb43-529"><a href="#cb43-529" aria-hidden="true" tabindex="-1"></a>b1 <span class="op">=</span> init_params(<span class="dv">1</span>)</span>
+<span id="cb43-530"><a href="#cb43-530" aria-hidden="true" tabindex="-1"></a>w2 <span class="op">=</span> init_params((<span class="dv">1</span>, <span class="dv">10</span>))</span>
+<span id="cb43-531"><a href="#cb43-531" aria-hidden="true" tabindex="-1"></a>b2 <span class="op">=</span> init_params(<span class="dv">1</span>)</span>
+<span id="cb43-532"><a href="#cb43-532" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-533"><a href="#cb43-533" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"PreTrain Accuracy: "</span><span class="op">+</span><span class="bu">str</span>(validate_epoch(myModel)))</span>
+<span id="cb43-534"><a href="#cb43-534" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-535"><a href="#cb43-535" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-536"><a href="#cb43-536" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train_epoch(model, lr, params, f_loss):</span>
+<span id="cb43-537"><a href="#cb43-537" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> xb, yb <span class="kw">in</span> dls[<span class="dv">0</span>]:</span>
+<span id="cb43-538"><a href="#cb43-538" aria-hidden="true" tabindex="-1"></a>        calc_grad(xb, yb, model, f_loss)</span>
+<span id="cb43-539"><a href="#cb43-539" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb43-540"><a href="#cb43-540" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> p <span class="kw">in</span> w1, b1, w2, b2:</span>
+<span id="cb43-541"><a href="#cb43-541" aria-hidden="true" tabindex="-1"></a>                p.data <span class="op">=</span> p.data<span class="op">-</span>p.grad.data<span class="op">*</span>lr</span>
+<span id="cb43-542"><a href="#cb43-542" aria-hidden="true" tabindex="-1"></a>                p.grad.zero_()</span>
+<span id="cb43-543"><a href="#cb43-543" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-544"><a href="#cb43-544" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-545"><a href="#cb43-545" aria-hidden="true" tabindex="-1"></a>train_epoch(myModel, <span class="fl">0.01</span>, [w1, b1, w2, b2], my_loss)</span>
+<span id="cb43-546"><a href="#cb43-546" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"PostTrain Accuracy: "</span><span class="op">+</span><span class="bu">str</span>(validate_epoch(myModel)))</span>
+<span id="cb43-547"><a href="#cb43-547" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb43-550"><a href="#cb43-550" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb43-551"><a href="#cb43-551" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb43-552"><a href="#cb43-552" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-fold: show</span></span>
+<span id="cb43-553"><a href="#cb43-553" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb43-556"><a href="#cb43-556" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb43-557"><a href="#cb43-557" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb43-558"><a href="#cb43-558" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-fold: show</span></span>
+<span id="cb43-559"><a href="#cb43-559" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb43-562"><a href="#cb43-562" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb43-563"><a href="#cb43-563" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb43-564"><a href="#cb43-564" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-fold: show</span></span>
+<span id="cb43-565"><a href="#cb43-565" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb43-568"><a href="#cb43-568" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb43-569"><a href="#cb43-569" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb43-570"><a href="#cb43-570" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-fold: show</span></span>
+<span id="cb43-571"><a href="#cb43-571" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb43-574"><a href="#cb43-574" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb43-575"><a href="#cb43-575" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb43-576"><a href="#cb43-576" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-fold: show</span></span>
+<span id="cb43-577"><a href="#cb43-577" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb43-580"><a href="#cb43-580" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb43-581"><a href="#cb43-581" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb43-582"><a href="#cb43-582" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-fold: show</span></span>
+<span id="cb43-583"><a href="#cb43-583" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb43-586"><a href="#cb43-586" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb43-587"><a href="#cb43-587" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb43-588"><a href="#cb43-588" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-fold: show</span></span>
+<span id="cb43-589"><a href="#cb43-589" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb43-592"><a href="#cb43-592" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb43-593"><a href="#cb43-593" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb43-594"><a href="#cb43-594" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-fold: show</span></span>
+<span id="cb43-595"><a href="#cb43-595" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb43-598"><a href="#cb43-598" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb43-599"><a href="#cb43-599" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb43-600"><a href="#cb43-600" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-fold: show</span></span>
+<span id="cb43-601"><a href="#cb43-601" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb43-604"><a href="#cb43-604" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb43-605"><a href="#cb43-605" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-line-numbers: true</span></span>
+<span id="cb43-606"><a href="#cb43-606" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-fold: show</span></span>
+<span id="cb43-607"><a href="#cb43-607" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

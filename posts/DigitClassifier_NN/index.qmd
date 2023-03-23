@@ -150,7 +150,7 @@ valid_dl = DataLoader(valid_dset, batch_size=5, shuffle=true)
 dls = DataLoaders(dl, valid_dl)
 ```
 
-## Building The NN Foundation
+## Laying The NN Foundations
 Every NN needs weights and biases. We're going to want to initialize lots of them, and in differently shaped structures, so first we define a function to help us do that:
 
 ```{python}
@@ -168,6 +168,8 @@ Note that any memory structures created with that function will also store their
 Now we can generate our weights and biases. We define the structure sizes with our input and output size in mind, and the principles of matrix multiplication. 
 
 The general structure we will start with will be, of course, an initial layer with one neuron for each input, which will yield a single activation per input. After a nonlinearty, the second layer will have 10 weights and biases, such that the output is a 1D vector of size 10, per input. Each output neuron will represent an estimation of likelihood that the integer is that which the neuron represents (0-9).
+
+@fig-Layer1 shows the start of the proces... A row in the input batch represents a single image. At the end of the 1^st^ layer, it is reduced to a single activation value to be passed through a non-linearity prior to going through the 2^nd^ layer
 
 ![Visualizing Layer 1](Layer 1 Diagram.png){#fig-Layer1}  
 
@@ -192,17 +194,365 @@ b2 = init_params(1)
     - 1 bias; it will be broadcast such that the same bias is added to all instances in our batch. See @fig-Layer1
  - Layer 2:
     - 10 weights, to generate one output neuron per category/class to assign. 
-    - 10 biases, one *for each* output neuron
+    - 1 bias, to be *broadcast* across each input vector.^[Increasing the size of the bias vector so as to have a unique bias for each output neuron will be an opportunity to increase the capacity of the model.]
+
+We will use the basic [ReLU](https://deepai.org/machine-learning-glossary-and-terms/relu) activation function as the non-linearity between the two linear layers.
+
+## Building the NN
+
+Similarly to our parameter generation function, we want o make our little network into a function block so that we can treat it as a black box to plug and play with other code sections:
+```{python}
+# | code-line-numbers: true
+# | code-fold: show
+
+
+def myModel(xb):
+    res = xb@w1+b1
+    res = res.max(tensor(0.))
+    res = res@w2+b2  # returns 10 features for each input
+    return res
+
+
+```
+
+Let's take it for a spin! We'll manually identify a subset of our training dataset for testing purposes.
+```{python}
+# | code-line-numbers: true
+mini_samp = 5
+mini_x = train_x[:mini_samp]
+mini_y = train_y[:mini_samp]
+```
+```{python}
+# | code-line-numbers: true
+# | code-fold: show
+res = myModel(mini_x)
+res, res.shape
+```
+Excellent! For the 5 input images passed in, we have an output that is 5 vectors of size 10, that is, each input has 10 output values, one for each possible classification outcome 0 through 9. 
+
+And note that the result tensor retains the gradient! This comes into play in the next step.
+
+## Calculating Loss
+
+Loss is the measure of the neural networks success. The most critical characteristic of a loss function is that it be differentiable with a smooth gradient. But just because the math doesn't break doesn't mean the function will eb any good. There are a variety of well understood functions that can be used, with selection being a matter of preference as well as the use case at hand.
+
+Since we are assigning a single class to the input, from multiple options, we'll use the SoftMax function. It reduces all outputs to a number between 0 and 1, with a given number being exponentially closer to one, the larger it is compared to the other numbers in the set. 
+
+This is a double-hitter: it allows the net to learn to win by giving the correct digit's output neuron the highest activation, while also motivating the reduction in activation of the incorrect neurons. 
 
 ```{python}
 # | code-line-numbers: true
+# | code-fold: show
+
+
+def my_loss(preds, target, lr=0.01):
+    maxes = F.softmax(preds, dim=-1)
+    correctIndices = [r[t] for r, t in zip(maxes, target)]
+    resy = [-torch.log(tens) for tens in correctIndices]
+    return sum(resy)
+
+
+```
+Keep in mind that we need to ensure these functions can work with different batch sizes. Fortunately, the PyTorch built in functions are designed for this. 
+
+Our function first takes the SoftMax of the outputs for each input. Then, it pulls out the resulting value for the index of the correct class. Recall, this will be a number between 0 and 1. If we took this number alone as our loss, measure, there would be a couple of issues.
+
+First of all, convention is that we want to *reduce* loss in the course of our optimization. But we have defined the index of the *highest* softmax result as our classification integer. So that doesn't jive. Secondly, it isn't desirable to have the measure of loss constrained to such a small range 0 to 1, because this essentially reduces the information we're getting - large differences in inputs will show very small changes in loss. For effective learning, we would want a strong learning signal, i.e. small changes to input parameters reflecting meaningful differences in the measure of loss.
+
+The solution? First, taking the log of the SoftMax activation. As the following code shows, a difference of 0.001 in the input to the log function creates a differences of more than 0.01 in the output, an order of magnitude difference.
+
+```{python}
+# | code-line-numbers: true
+# | code-fold: show
+torch.log(Tensor([.5, .499]))
+```
+
+After the log, we took the negative of those values. That's because the log of a number between 0 and 1 will always be negative, getting absolutely larger the further from 1 it is. Seeing as we want the output to be absolutely smaller the closer to 1 it is, taking the negative accomplishes this perfectly.
+
+Lastly, we summed the loss measure across the samples in the mini batch since we want to optimize globally, not just for individual samples.
+
+So let's test it!
+
+```{python}
+# | code-line-numbers: true
+# Testing the loss function works(assuming mini_x of 3 samples)
+lossResults = my_loss(myModel(mini_x), mini_y)
+lossResults
+```
+This output might look nice, but it's a roll of the dice!
+
+::: {.callout-warning}
+## Beware Of Implementing Your Own Math
+While the formula for the SoftMax is easy enough to understand, Our home-brewed version won't work. I tried to do so at first and had all kinds of headaches arising from arithmetic underflow in the outcomes! How the hell do you deal with that? The best solution: Use the function implementation baked into the PyTorch libraries! Let the pro's handle those *deep* issues. We're still riding on training wheels!
+:::
+
+It turns out the `-log` of the SoftMax is the Cross Entropy Loss Function. And just importing it from the PyTorch library will save us from the pitfall described in the preceding blurb... So here is our final loss function!
+```{python}
+# | code-line-numbers: true
+
+
+def my_loss(preds, target):
+    loss_fn = nn.CrossEntropyLoss()
+    # Turn tensor of singleton tensors one per target into a single tensor with all as elements
+    tgts = target.view(-1)
+    return loss_fn(preds, tgts)  # Nice
+```
+
+Now if you're reading this you're probably thinking that *gradient descent* is the next step here, so as to reduce the loss between minibatches, but we'll take a quick detour first.
+
+## Measuring Accuracy
+Before going further, let's take a minute to set up some functions we'll need in the training process. The first yields the percentage accuracy of the model across a batch, and the second function builds on that to iterate across the batchers in our valdiation set and yield the accuracy rate across a whole epoch^[An epoch is a full pass through the entire data set, in a context where we will make multiple passes (epochs) so as to keep learning.].
+```{python}
+# | code-line-numbers: true
+
+
+def batch_accuracy(mdl, xb, yb):
+    otpts = mdl(xb)  # Get output activations from model
+    # The indices of the max activation is the predicted digit of the input
+    preds = otpts.max(dim=-1).indices
+    # Types must be tensors to return sequence of true/false
+    correct = preds == yb.view(-1)
+    #                    Use view to take it from shape=[5,1] to [5], same as preds. else will broadcast and end result all messed up
+    return correct.float().mean()
+
+
+def validate_epoch(mdl):
+    outcomes = [batch_accuracy(mdl, xb, yb) for xb, yb in valid_dl]
+    return round(torch.stack(outcomes).mean().item(), 4)
+
+
+```
+
+It's always good to double check these functions are working as intended after making them... Let's grab some validation set data, double checking along the way that the outputs (integer assignment) match the input (drawings of digit):
+```{python}
+# | code-line-numbers: true
+validIter = iter(dls[1])
+xv, yv = next(validIter)
+for i in range(len(xv)):
+    show_image(xv[i].view((8, 8)))
+    print(yv[i].data.item())
+```
+
+Ok nice, now lets see that our validation function is yielding the correct accuracy score on classifying a mini batch. Since we haven't trained the model yet we'll expect the performacne to be junk but that doesn't mean we can't test the % accuracy function.
+```{python}
+# | code-line-numbers: true
+validIter = iter(dls[1])
+xv, yv = next(validIter)
+o = myModel(xv)
+print(o.max(dim=-1).indices, yv, batch_accuracy(myModel, xv, yv))
+```
+We want to see the last number spit out be an accurate representation of how many numbers match between the first and second tensor output. I don't know what the final blog output will be since the inputs to the neural net are random every time, but I re ran this code cell a number of times, seeing correct assignments of one or two integers to confirm the functions were working as expected.
+
+## Execute Training
+
+Alright now we get to the good stuff! First we'll make an iterator to load our test dataset.
+```{python}
+# | code-line-numbers: true
+testLoader = iter(dls[0])
+```
+
+And now we we will run our first training loop... the steps are:
+
+- Define learning rate^[The learning rate is the factor by which we will multiply the gradient when adding the negative gradient to each parameter so as to update it for the next learning iteration.].
+- Pull out a minibatch of inputs and target values from the test data set.
+- Calculate the loss on this batch by passing the outputs from the model through the loss function
+- Execute the `.backward()` method to calculate the gradient for all parameters.
+- The next bits will be executed with torch.no_grad(), because we don't want the math inherent to calibrating the parameters themselves to have its gradient captured.
+- Having the gradient stored in the tensor object of each parameter, update each parameter by subtracting the gadient multiplied by the learning rate.
+- Reset the gradient to zero for the next learning iteration.
+
+
+```{python}
+# | code-line-numbers: true
+# | code-fold: show
+lr = 0.01
+xb, yb = next(testLoader)
+loss = my_loss(myModel(xb), yb)
+loss.backward()
+with torch.no_grad():
+    for p in w1, b1, w2, b2:
+        p.data = p.data-p.grad.data*lr
+        p.grad.zero_()
+print("Loss before training: "+str(loss.item()) +
+      "  |   Loss after training: "+str(my_loss(myModel(xb), yb).item()))
+```
+Success! Our measure of loss has reduced after re running the same batch with the adjusted N parameters. Across a large enough dataset^[The changes to parameters can be so small that the actual outcome on any single run doesn't change across a few inputs. But with enough learning iterations we will see the desired outcome.], we would expect to see a reduced error rate associated with this.
+
+Let's try it again, this time printing out the average values of the parameters in the weights and bias vectors, to get a sense for how much they change from one iteration to the next.
+
+```{python}
+if type(w1.grad) == NoneType:
+    print(tensor([(x.data.mean()) for x in [w1, b1, w2, b2]]))
+else:
+    print("Average parameters: ", tensor(
+        [(x.data.mean(), x.grad.data.mean()) for x in [w1, b1, w2, b2]]))
+    for p in w1, b1, w2, b2:
+        p.grad.zero_()
+
+# Run the learning (copied from last cell):
+lr = 0.01
+xb, yb = next(testLoader)
+loss = my_loss(myModel(xb), yb)
+loss.backward()
+with torch.no_grad():
+    for p in w1, b1, w2, b2:
+        p.data = p.data-p.grad.data*lr
+        p.grad.zero_()
+print("Loss before training: "+str(loss.item()) +
+      "  |   Loss after training: "+str(my_loss(myModel(xb), yb).item()))
+
+# Print average param values again:
+if type(w1.grad) == NoneType:
+    print(tensor([(x.data.mean()) for x in [w1, b1, w2, b2]]))
+else:
+    print("Average parameters: ", tensor(
+        [(x.data.mean(), x.grad.data.mean()) for x in [w1, b1, w2, b2]]))
+    for p in w1, b1, w2, b2:
+        p.grad.zero_()
+```
+
+What we see here is that our change in paramters created a reduction in the measure of loss, *even though* it wasn't even identifiable at 4 decimal points accuracy!
+
+So let's take it to the next level. We trained on one minibatch of data. Let's try doing a whole epoch- iterating over every minibatch in the training set.
+
+First, we'll reset our weights to random numbers, clearing the slate of that last learning:
+
+```{python}
+# | code-line-numbers: true
+w1 = init_params((8*8, 1))
+b1 = init_params(1)
+w2 = init_params((1, 10))
+b2 = init_params(1)
+
+# Print average param values again:
+if type(w1.grad) == NoneType:
+    print(tensor([(x.data.mean()) for x in [w1, b1, w2, b2]]))
+else:
+    print("Average parameters: ", tensor(
+        [(x.data.mean(), x.grad.data.mean()) for x in [w1, b1, w2, b2]]))
+    for p in w1, b1, w2, b2:
+        p.grad.zero_()
+```
+
+And now execute learning.
+```{python}
+# | code-line-numbers: true
+# | code-fold: show
+lr = 0.01
+for xb, yb in dls[0]:
+    loss = my_loss(myModel(xb), yb)
+    loss.backward()
+    with torch.no_grad():
+        for p in w1, b1, w2, b2:
+            p.data = p.data-p.grad.data*lr
+            p.grad.zero_()
+    print("Loss: "+str(loss.item()))  # Prints loss for each minibatch
+```
+Hmmm.... sometimes when I run this I see the loss stay around the same value, other times it drops just a little before stabilizing... 
+
+We are going to need a better way to look at the trending of the loss function across iterations, so we may as well make that function now:
+
+```{python}
+# | code-line-numbers: true
+# | code-fold: show
+
+
+def calc_grad(xb, yb, model, f_loss):
+    preds = model(xb)
+    loss = f_loss(preds, yb)
+    loss.backward()
+    return loss.data.item()  # Return the loss (see why later)
+
+
+calc_grad(mini_x, mini_y, myModel, my_loss)
+```
+
+This is another step towards modularizing (if that is a word) our code. Making use of that last function, our training loop now looks like this:
+
+```{python}
+# | code-line-numbers: true
+# | code-fold: show
+# Initializing weights again for a fresh start
+w1 = init_params((8*8, 1))
+b1 = init_params(1)
+w2 = init_params((1, 10))
+b2 = init_params(1)
+
+print("PreTrain Accuracy: "+str(validate_epoch(myModel)))
+
+
+def train_epoch(model, lr, params, f_loss):
+    for xb, yb in dls[0]:
+        calc_grad(xb, yb, model, f_loss)
+        with torch.no_grad():
+            for p in w1, b1, w2, b2:
+                p.data = p.data-p.grad.data*lr
+                p.grad.zero_()
+
+
+train_epoch(myModel, 0.01, [w1, b1, w2, b2], my_loss)
+print("PostTrain Accuracy: "+str(validate_epoch(myModel)))
+```
+UH OH!
+::: {.callout-note collapse="true"}
+## Overfitting
+
+Our loss is going down, but our error is erratic, staying the same, or going up! This is an indicator that we've reached a point where the mathematical strategy we're using to optimize is now playing games with us. The modifications *do* reduce loss, but that is no longer aligned with an improvement with the task. Recall that a loss function *should* always correlate with NN efficacy, but this can break down at the fringes.
+:::
+
+Is this a problem? Yes! But one that can be solved. Overall we are still in good territory.. We know the math and programming is working from a nuts and bolts perspective. What this indicates to us is that we need to tune the *metaparameters* of our neural network function. How many layers are there? How wide are the layers? We may be in a situation where the NN doesn't have sufficient *capacity*^[(Further reading)[https://machinelearningmastery.com/how-to-control-neural-network-model-capacity-with-nodes-and-layers/] on capacity.] to get us the outcomes we're looking for.
+
+## Optimize Network 
+
+We've built an NN from first principles now, putting together the building blocks of parameter initialization, running the algebra through the net, backpropagation to compute the gradient, and parameter calibration through the gradient descent method. This all executing repeatedly across batches of data.
+
+Before we adjust the network structure to optimize the outcomes, let's define a yet higher encapsulation function to further condense the commands needed to execute this whole process:
+
+```{python}
+# | code-line-numbers: true
+# | code-fold: show
+class BasicOptim:
+    def __init__(self,params,lr): self.params,self.lr = list(params),lr
+
+    def step(self, *args, **kwargs):
+        for p in self.params: p.data -= p.grad.data * self.lr
+
+    def zero_grad(self, *args, **kwargs):
+        for p in self.params: p.grad = None
 ```
 ```{python}
 # | code-line-numbers: true
+# | code-fold: show
 ```
 ```{python}
 # | code-line-numbers: true
+# | code-fold: show
 ```
 ```{python}
 # | code-line-numbers: true
+# | code-fold: show
+```
+```{python}
+# | code-line-numbers: true
+# | code-fold: show
+```
+```{python}
+# | code-line-numbers: true
+# | code-fold: show
+```
+```{python}
+# | code-line-numbers: true
+# | code-fold: show
+```
+```{python}
+# | code-line-numbers: true
+# | code-fold: show
+```
+```{python}
+# | code-line-numbers: true
+# | code-fold: show
+```
+```{python}
+# | code-line-numbers: true
+# | code-fold: show
 ```
