@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="David De Sa">
-<meta name="dcterms.date" content="2023-03-14">
+<meta name="dcterms.date" content="2023-03-23">
 
 <title>Davids Coding - A Simple Digit Classifier</title>
 <style>
@@ -199,7 +199,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">March 14, 2023</p>
+        <p class="date">March 23, 2023</p>
       </div>
     </div>
     
@@ -377,7 +377,7 @@ Understand Your Input!
 <span id="cb3-7"><a href="#cb3-7"></a>[<span class="bu">len</span>(test[i]) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>)], [<span class="bu">len</span>(train[i]) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>)]</span>
 <span id="cb3-8"><a href="#cb3-8"></a>show_image(stacked[<span class="dv">3</span>][<span class="dv">0</span>])  <span class="co"># Check sample</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="153">
+<div class="cell-output cell-output-display" data-execution_count="203">
 <pre><code>&lt;Axes: &gt;</code></pre>
 </div>
 <div class="cell-output cell-output-display">
@@ -395,7 +395,7 @@ Understand Your Input!
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1"></a><span class="bu">type</span>(train), <span class="bu">type</span>(train[<span class="dv">0</span>]), <span class="bu">type</span>(train[<span class="dv">0</span>][<span class="dv">0</span>]), [</span>
 <span id="cb5-2"><a href="#cb5-2"></a>    <span class="bu">type</span>(test), <span class="bu">type</span>(test[<span class="dv">0</span>]), <span class="bu">type</span>(test[<span class="dv">0</span>][<span class="dv">0</span>])]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="154">
+<div class="cell-output cell-output-display" data-execution_count="204">
 <pre><code>(list, torch.Tensor, torch.Tensor, [list, torch.Tensor, torch.Tensor])</code></pre>
 </div>
 </div>
@@ -409,7 +409,7 @@ Understand Your Input!
 <span id="cb7-3"><a href="#cb7-3"></a>test <span class="op">=</span> torch.stack(test)</span>
 <span id="cb7-4"><a href="#cb7-4"></a>train.shape, test.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="155">
+<div class="cell-output cell-output-display" data-execution_count="205">
 <pre><code>(torch.Size([10, 154, 8, 8]), torch.Size([10, 20, 8, 8]))</code></pre>
 </div>
 </div>
@@ -432,7 +432,7 @@ Understand Your Input!
 <span id="cb9-9"><a href="#cb9-9"></a>test_y <span class="op">=</span> tensor(test_y).unsqueeze(<span class="op">-</span><span class="dv">1</span>)</span>
 <span id="cb9-10"><a href="#cb9-10"></a>train_x.shape, test_x.shape, train_y.shape, test_y.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="156">
+<div class="cell-output cell-output-display" data-execution_count="206">
 <pre><code>(torch.Size([1540, 64]),
  torch.Size([200, 64]),
  torch.Size([1540, 1]),
@@ -557,12 +557,12 @@ Matrix Multiplication!
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1"></a>res <span class="op">=</span> myModel(mini_x)</span>
 <span id="cb16-2"><a href="#cb16-2"></a>res, res.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="162">
-<pre><code>(tensor([[ 0.5014, -0.1381,  0.3341, -0.5494,  0.0923,  0.0446,  0.1236, -0.2028, -0.8230,  0.0943],
-         [-0.0880, -0.0880, -0.0880, -0.0880, -0.0880, -0.0880, -0.0880, -0.0880, -0.0880, -0.0880],
-         [-0.0880, -0.0880, -0.0880, -0.0880, -0.0880, -0.0880, -0.0880, -0.0880, -0.0880, -0.0880],
-         [ 0.8627, -0.1689,  0.5929, -0.8322,  0.2028,  0.1259,  0.2533, -0.2731, -1.2736,  0.2061],
-         [ 0.6818, -0.1535,  0.4633, -0.6906,  0.1475,  0.0852,  0.1883, -0.2379, -1.0480,  0.1501]], grad_fn=&lt;AddBackward0&gt;),
+<div class="cell-output cell-output-display" data-execution_count="212">
+<pre><code>(tensor([[-0.5597,  0.2744, -0.3157,  0.2799,  0.0328,  0.3295,  0.1971, -0.2445, -0.4771, -0.1101],
+         [-0.6673,  0.3459, -0.3709,  0.3525,  0.0524,  0.4128,  0.2520, -0.2844, -0.5670, -0.1212],
+         [-0.7400,  0.3942, -0.4082,  0.4016,  0.0657,  0.4691,  0.2890, -0.3114, -0.6277, -0.1287],
+         [-0.4700,  0.2148, -0.2696,  0.2193,  0.0165,  0.2600,  0.1513, -0.2112, -0.4022, -0.1009],
+         [-0.5622,  0.2761, -0.3170,  0.2816,  0.0333,  0.3315,  0.1984, -0.2454, -0.4792, -0.1104]], grad_fn=&lt;AddBackward0&gt;),
  torch.Size([5, 10]))</code></pre>
 </div>
 </div>
@@ -593,7 +593,7 @@ Matrix Multiplication!
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1"></a>torch.log(Tensor([<span class="fl">.5</span>, <span class="fl">.499</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="164">
+<div class="cell-output cell-output-display" data-execution_count="214">
 <pre><code>tensor([-0.6931, -0.6951])</code></pre>
 </div>
 </div>
@@ -607,8 +607,8 @@ Matrix Multiplication!
 <span id="cb21-2"><a href="#cb21-2"></a>lossResults <span class="op">=</span> my_loss(myModel(mini_x), mini_y)</span>
 <span id="cb21-3"><a href="#cb21-3"></a>lossResults</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="165">
-<pre><code>tensor([9.6742], grad_fn=&lt;AddBackward0&gt;)</code></pre>
+<div class="cell-output cell-output-display" data-execution_count="215">
+<pre><code>tensor([14.4973], grad_fn=&lt;AddBackward0&gt;)</code></pre>
 </div>
 </div>
 <p>This output might look nice, but it’s a roll of the dice!</p>
@@ -671,10 +671,10 @@ Beware Of Implementing Your Own Math
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>2
-5
-5
+3
+3
 6
-5</code></pre>
+8</code></pre>
 </div>
 <div class="cell-output cell-output-display">
 <p><img src="index_files/figure-html/cell-19-output-2.png" width="93" height="93"></p>
@@ -702,11 +702,11 @@ Beware Of Implementing Your Own Math
 <span id="cb27-4"><a href="#cb27-4"></a><span class="bu">print</span>(o.<span class="bu">max</span>(dim<span class="op">=-</span><span class="dv">1</span>).indices, yv, batch_accuracy(myModel, xv, yv))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>tensor([0, 0, 0, 0, 0]) tensor([[2],
-        [5],
-        [4],
+<pre><code>tensor([5, 5, 5, 5, 5]) tensor([[0],
         [2],
-        [7]]) tensor(0.)</code></pre>
+        [5],
+        [0],
+        [1]]) tensor(0.2000)</code></pre>
 </div>
 </div>
 <p>We want to see the last number spit out be an accurate representation of how many numbers match between the first and second tensor output. I don’t know what the final blog output will be since the inputs to the neural net are random every time, but I re ran this code cell a number of times, seeing correct assignments of one or two integers to confirm the functions were working as expected.</p>
@@ -745,7 +745,7 @@ Beware Of Implementing Your Own Math
 <span id="cb30-10"><a href="#cb30-10"></a>      <span class="st">"  |   Loss after training: "</span><span class="op">+</span><span class="bu">str</span>(my_loss(myModel(xb), yb).item()))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Loss before training: 2.166391134262085  |   Loss after training: 2.128875494003296</code></pre>
+<pre><code>Loss before training: 2.3810155391693115  |   Loss after training: 2.3350515365600586</code></pre>
 </div>
 </div>
 <p>Success! Our measure of loss has reduced after re running the same batch with the adjusted N parameters. Across a large enough dataset<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>, we would expect to see a reduced error rate associated with this.</p>
@@ -783,15 +783,15 @@ Beware Of Implementing Your Own Math
 <span id="cb32-28"><a href="#cb32-28" aria-hidden="true" tabindex="-1"></a>        p.grad.zero_()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Average parameters:  tensor([[ 0.0089,  0.0000],
-        [-0.2002,  0.0000],
-        [ 0.0158,  0.0000],
-        [-0.0880,  0.0000]])
-Loss before training: 2.3750314712524414  |   Loss after training: 2.2788596153259277
-Average parameters:  tensor([[ 0.0056,  0.0000],
-        [-0.2009,  0.0000],
-        [ 0.0158,  0.0000],
-        [-0.0880,  0.0000]])</code></pre>
+<pre><code>Average parameters:  tensor([[ 0.0079,  0.0000],
+        [-0.0091,  0.0000],
+        [-0.0001,  0.0000],
+        [-0.0585,  0.0000]])
+Loss before training: 2.317502021789551  |   Loss after training: 2.2996890544891357
+Average parameters:  tensor([[ 0.0072,  0.0000],
+        [-0.0092,  0.0000],
+        [-0.0001,  0.0000],
+        [-0.0585,  0.0000]])</code></pre>
 </div>
 </div>
 <p>What we see here is that our change in paramters created a reduction in the measure of loss, <em>even though</em> it wasn’t even identifiable at 4 decimal points accuracy!</p>
@@ -815,7 +815,7 @@ Average parameters:  tensor([[ 0.0056,  0.0000],
 <span id="cb34-13"><a href="#cb34-13"></a>        p.grad.zero_()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>tensor([-0.0092,  0.0586, -0.0181,  0.0441])</code></pre>
+<pre><code>tensor([-0.0298, -0.0852, -0.0206, -0.0224])</code></pre>
 </div>
 </div>
 <p>And now execute learning.</p>
@@ -833,68 +833,68 @@ Average parameters:  tensor([[ 0.0056,  0.0000],
 <span id="cb36-9"><a href="#cb36-9"></a>    <span class="bu">print</span>(<span class="st">"Loss: "</span><span class="op">+</span><span class="bu">str</span>(loss.item()))  <span class="co"># Prints loss for each minibatch</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Loss: 2.3092572689056396
-Loss: 2.3070898056030273
-Loss: 2.279873847961426
-Loss: 2.299700975418091
-Loss: 2.3294894695281982
-Loss: 2.2483794689178467
-Loss: 2.2599990367889404
-Loss: 2.2512316703796387
-Loss: 2.214446544647217
-Loss: 2.2277822494506836
-Loss: 2.284849166870117
-Loss: 2.312006950378418
-Loss: 2.2981650829315186
-Loss: 2.262256383895874
-Loss: 2.2364144325256348
-Loss: 2.3340601921081543
-Loss: 2.2104058265686035
-Loss: 2.288947105407715
-Loss: 2.197528123855591
-Loss: 2.2138283252716064
-Loss: 2.2586519718170166
-Loss: 2.261087417602539
-Loss: 2.2488608360290527
-Loss: 2.309180736541748
-Loss: 2.1308231353759766
-Loss: 2.248782157897949
-Loss: 2.2957956790924072
-Loss: 2.1855602264404297
-Loss: 2.19143009185791
-Loss: 2.2647206783294678
-Loss: 2.2990355491638184
-Loss: 2.1905486583709717
-Loss: 2.1928904056549072
-Loss: 2.235351324081421
-Loss: 2.1064484119415283
-Loss: 2.200840950012207
-Loss: 2.2063705921173096
-Loss: 2.2134134769439697
-Loss: 2.1750693321228027
-Loss: 2.0795021057128906
-Loss: 2.209078788757324
-Loss: 2.2800421714782715
-Loss: 2.2853426933288574
-Loss: 2.1894330978393555
-Loss: 2.2865498065948486
-Loss: 2.1055185794830322
-Loss: 2.39882755279541
-Loss: 2.2075142860412598
-Loss: 2.2027504444122314
-Loss: 2.2549381256103516
-Loss: 2.183372974395752
-Loss: 2.288393259048462
-Loss: 2.3011252880096436
-Loss: 2.1168272495269775
-Loss: 2.236140489578247
-Loss: 2.309600591659546
-Loss: 2.266310691833496
-Loss: 2.3014066219329834
-Loss: 2.2966113090515137
-Loss: 2.1549787521362305
-Loss: 2.3276114463806152
-Loss: 2.188946008682251</code></pre>
+<pre><code>Loss: 2.3089029788970947
+Loss: 2.3026552200317383
+Loss: 2.3036789894104004
+Loss: 2.299530267715454
+Loss: 2.3146543502807617
+Loss: 2.295773983001709
+Loss: 2.3114850521087646
+Loss: 2.312140703201294
+Loss: 2.305482864379883
+Loss: 2.3025853633880615
+Loss: 2.296191930770874
+Loss: 2.3044071197509766
+Loss: 2.3025853633880615
+Loss: 2.3025853633880615
+Loss: 2.3013594150543213
+Loss: 2.3110408782958984
+Loss: 2.305534601211548
+Loss: 2.3025853633880615
+Loss: 2.297464370727539
+Loss: 2.2984910011291504
+Loss: 2.3149735927581787
+Loss: 2.3091654777526855
+Loss: 2.3044753074645996
+Loss: 2.3025853633880615
+Loss: 2.3103907108306885
+Loss: 2.3025853633880615
+Loss: 2.3025853633880615
+Loss: 2.3118462562561035
+Loss: 2.301429510116577
+Loss: 2.300888776779175
+Loss: 2.3073575496673584
+Loss: 2.3025853633880615
+Loss: 2.3025853633880615
+Loss: 2.3043949604034424
+Loss: 2.3025853633880615
+Loss: 2.2923624515533447
+Loss: 2.3025853633880615
+Loss: 2.3025853633880615
+Loss: 2.2961018085479736
+Loss: 2.304161787033081
+Loss: 2.2973952293395996
+Loss: 2.3025853633880615
+Loss: 2.3025853633880615
+Loss: 2.3025853633880615
+Loss: 2.3019461631774902
+Loss: 2.303677797317505
+Loss: 2.3008153438568115
+Loss: 2.3025853633880615
+Loss: 2.2960872650146484
+Loss: 2.3025853633880615
+Loss: 2.3028862476348877
+Loss: 2.2993662357330322
+Loss: 2.3038816452026367
+Loss: 2.3073089122772217
+Loss: 2.29280161857605
+Loss: 2.3034892082214355
+Loss: 2.3089585304260254
+Loss: 2.3039684295654297
+Loss: 2.30177903175354
+Loss: 2.3025853633880615
+Loss: 2.299685478210449
+Loss: 2.3098132610321045</code></pre>
 </div>
 </div>
 <p>Hmmm…. sometimes when I run this I see the loss stay around the same value, other times it drops just a little before stabilizing…</p>
@@ -911,8 +911,8 @@ Loss: 2.188946008682251</code></pre>
 <span id="cb38-7"><a href="#cb38-7"></a></span>
 <span id="cb38-8"><a href="#cb38-8"></a>calc_grad(mini_x, mini_y, myModel, my_loss)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="175">
-<pre><code>1.2909009456634521</code></pre>
+<div class="cell-output cell-output-display" data-execution_count="225">
+<pre><code>2.3025851249694824</code></pre>
 </div>
 </div>
 <p>This is another step towards modularizing (if that is a word) our code. Making use of that last function, our training loop now looks like this:</p>
@@ -941,8 +941,8 @@ Loss: 2.188946008682251</code></pre>
 <span id="cb40-20"><a href="#cb40-20"></a><span class="bu">print</span>(<span class="st">"PostTrain Accuracy: "</span><span class="op">+</span><span class="bu">str</span>(validate_epoch(myModel)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>PreTrain Accuracy: 0.1
-PostTrain Accuracy: 0.095</code></pre>
+<pre><code>PreTrain Accuracy: 0.09
+PostTrain Accuracy: 0.1</code></pre>
 </div>
 </div>
 <p>UH OH!</p>
@@ -1005,11 +1005,11 @@ Overfitting
 <span id="cb44-2"><a href="#cb44-2"></a>res <span class="op">=</span> train_epoch(myModel, my_opt, <span class="fl">0.01</span>, [w1, b1, w2, b2], my_loss)</span>
 <span id="cb44-3"><a href="#cb44-3"></a>res.mean(), res</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="179">
-<pre><code>(tensor(2.1113),
- tensor([2.1727, 2.1663, 2.0695, 2.1316, 2.2692, 2.1689, 2.1601, 2.0804, 2.1868, 2.1906, 2.1560, 2.1524, 2.0359, 2.1283, 2.1430, 2.2051, 1.9769, 2.0961, 2.0176, 2.1386, 2.2709, 2.0840, 1.9853, 2.0606,
-         2.0599, 2.1409, 2.2199, 2.1658, 2.2592, 2.0537, 2.1110, 2.1378, 1.8936, 2.1199, 2.0695, 2.2069, 2.0783, 2.2406, 2.0670, 2.3089, 2.1119, 2.0228, 2.0822, 2.2582, 2.2144, 2.0121, 2.1787, 2.1135,
-         1.9802, 2.1734, 2.0478, 1.9944, 2.2512, 2.1172, 1.8155, 1.9884, 2.0986, 2.1239, 1.9616, 2.0232, 2.0387, 2.1111]))</code></pre>
+<div class="cell-output cell-output-display" data-execution_count="229">
+<pre><code>(tensor(2.0516),
+ tensor([2.2995, 2.1674, 1.8490, 2.2199, 2.0592, 1.9886, 1.9089, 2.1189, 1.9221, 2.2172, 1.8646, 2.0680, 1.9976, 2.1243, 2.1113, 2.0379, 2.3080, 2.0574, 2.0447, 1.8639, 1.9598, 1.9709, 2.1587, 2.2716,
+         2.1667, 2.0777, 2.0421, 2.1068, 1.9676, 2.0037, 2.0020, 2.0820, 2.0589, 1.9614, 2.1646, 2.1836, 1.9012, 2.1544, 2.1017, 1.8865, 1.9585, 2.0961, 2.1407, 1.8869, 2.1004, 2.0525, 1.7599, 2.1563,
+         2.1390, 2.1625, 2.0392, 2.1607, 1.9849, 2.0615, 1.9621, 1.9761, 2.1602, 1.9650, 1.9886, 2.1052, 2.0060, 1.8893]))</code></pre>
 </div>
 </div>
 <p>Great: bug free. But… still this issue of the loss bouncing around withot a clear improvement trend…</p>
@@ -1064,7 +1064,7 @@ Overfitting
 <span id="cb47-2"><a href="#cb47-2"></a>my_try.run(numE<span class="op">=</span><span class="dv">50</span>, wkLr<span class="op">=</span><span class="fl">0.001</span>)</span>
 <span id="cb47-3"><a href="#cb47-3"></a>my_try.res.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="181">
+<div class="cell-output cell-output-display" data-execution_count="231">
 <pre><code>torch.Size([50, 62])</code></pre>
 </div>
 </div>
@@ -1095,7 +1095,7 @@ Overfitting
 <div class="cell-output cell-output-display">
 <div id="fig-val1" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="index_files/figure-html/fig-val1-output-1.png" width="605" height="414" class="figure-img"></p>
+<p><img src="index_files/figure-html/fig-val1-output-1.png" width="595" height="414" class="figure-img"></p>
 <p></p><figcaption class="figure-caption">Figure&nbsp;4: Prediction accuracy across epochs</figcaption><p></p>
 </figure>
 </div>
@@ -1160,12 +1160,12 @@ Visualizing V2 Of Our NN
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb53"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb53-1"><a href="#cb53-1"></a>mdlV2(mini_x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="186">
-<pre><code>tensor([[-0.0741,  0.4756,  0.5822,  0.4326,  0.2553,  0.5501, -0.2200,  0.2218, -0.3623,  0.2731],
-        [-0.1407,  0.5034,  0.8288,  0.6345,  0.3647,  0.3791,  0.1495,  0.1369, -0.1036,  0.0505],
-        [-0.1021,  0.5190,  0.9082,  0.8023,  0.3172,  0.4556, -0.1059,  0.2171,  0.1598,  0.3602],
-        [ 0.0493,  0.5355,  0.4144,  0.1151,  0.1907,  0.4963, -0.2816, -0.0100, -0.5155,  0.2292],
-        [ 0.1100,  0.7335,  0.9442,  0.2924,  0.4416,  0.4241,  0.0301, -0.2154, -0.2476,  0.2678]], grad_fn=&lt;AddBackward0&gt;)</code></pre>
+<div class="cell-output cell-output-display" data-execution_count="236">
+<pre><code>tensor([[-0.3376,  0.2335,  0.0899, -0.3816,  0.3013,  0.3804,  0.2879,  0.3500,  0.1701,  0.0681],
+        [-0.0732,  0.0330,  0.1219, -0.1864,  0.0446,  0.2158,  0.4660,  0.0515,  0.3962, -0.5011],
+        [-0.1899, -0.0934,  0.1381, -0.2746,  0.0784,  0.3310,  0.4186,  0.0863,  0.4079, -0.6188],
+        [-0.3665,  0.2661,  0.2646, -0.4887,  0.2982,  0.1492,  0.3429,  0.2664,  0.4471, -0.1568],
+        [-0.3377,  0.0690,  0.3718, -0.4352,  0.1145,  0.2599,  0.3576,  0.1508,  0.5164, -0.3415]], grad_fn=&lt;AddBackward0&gt;)</code></pre>
 </div>
 </div>
 <p>Run it!</p>
@@ -1219,7 +1219,7 @@ Visualizing V2 Of Our NN
 <span id="cb56-22"><a href="#cb56-22"></a>df, acc <span class="op">=</span> confMtx(mdlV2)</span>
 <span id="cb56-23"><a href="#cb56-23"></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="188">
+<div class="cell-output cell-output-display" data-execution_count="238">
 
 <div>
 
@@ -1282,13 +1282,13 @@ Visualizing V2 Of Our NN
     <tr>
       <th>3</th>
       <td>0</td>
-      <td>1</td>
       <td>0</td>
+      <td>2</td>
       <td>15</td>
       <td>0</td>
       <td>0</td>
       <td>0</td>
-      <td>2</td>
+      <td>1</td>
       <td>2</td>
       <td>0</td>
     </tr>
@@ -1308,11 +1308,11 @@ Visualizing V2 Of Our NN
     <tr>
       <th>5</th>
       <td>0</td>
+      <td>1</td>
       <td>0</td>
       <td>0</td>
       <td>0</td>
-      <td>0</td>
-      <td>20</td>
+      <td>19</td>
       <td>0</td>
       <td>0</td>
       <td>0</td>
@@ -1321,12 +1321,12 @@ Visualizing V2 Of Our NN
     <tr>
       <th>6</th>
       <td>0</td>
-      <td>1</td>
+      <td>2</td>
       <td>0</td>
       <td>0</td>
       <td>0</td>
       <td>0</td>
-      <td>19</td>
+      <td>18</td>
       <td>0</td>
       <td>0</td>
       <td>0</td>
@@ -1360,15 +1360,15 @@ Visualizing V2 Of Our NN
     <tr>
       <th>9</th>
       <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
       <td>1</td>
       <td>0</td>
       <td>0</td>
-      <td>0</td>
-      <td>0</td>
-      <td>0</td>
-      <td>0</td>
-      <td>1</td>
-      <td>18</td>
+      <td>2</td>
+      <td>17</td>
     </tr>
   </tbody>
 </table>
@@ -1381,7 +1381,7 @@ Visualizing V2 Of Our NN
 <div class="sourceCode cell-code" id="cb57"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Accuracy on validation set: "</span><span class="op">+</span><span class="bu">str</span>(acc))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Accuracy on validation set: 0.915</code></pre>
+<pre><code>Accuracy on validation set: 0.9</code></pre>
 </div>
 </div>
 <p></p><figcaption class="figure-caption">Figure&nbsp;6: Confusion Matrix. Left Axis: Actual Number. Top Axis: Predicted Number.</figcaption><p></p>
@@ -1496,7 +1496,7 @@ Visualizing V2 Of Our NN
 <div class="sourceCode cell-code" id="cb61"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb61-1"><a href="#cb61-1"></a>df, acc <span class="op">=</span> confMtx(mdlV3)</span>
 <span id="cb61-2"><a href="#cb61-2"></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="192">
+<div class="cell-output cell-output-display" data-execution_count="242">
 
 <div>
 
@@ -1721,13 +1721,13 @@ Visualizing V2 Of Our NN
   <tbody>
     <tr>
       <th>0</th>
-      <td>18</td>
+      <td>16</td>
       <td>0</td>
       <td>0</td>
       <td>0</td>
       <td>1</td>
       <td>0</td>
-      <td>1</td>
+      <td>3</td>
       <td>0</td>
       <td>0</td>
       <td>0</td>
@@ -1761,27 +1761,27 @@ Visualizing V2 Of Our NN
     <tr>
       <th>3</th>
       <td>0</td>
+      <td>1</td>
+      <td>2</td>
+      <td>14</td>
       <td>0</td>
       <td>0</td>
-      <td>19</td>
       <td>0</td>
-      <td>0</td>
-      <td>0</td>
-      <td>0</td>
+      <td>2</td>
       <td>1</td>
       <td>0</td>
     </tr>
     <tr>
       <th>4</th>
       <td>0</td>
-      <td>1</td>
+      <td>4</td>
       <td>0</td>
       <td>0</td>
-      <td>17</td>
+      <td>16</td>
       <td>0</td>
       <td>0</td>
       <td>0</td>
-      <td>2</td>
+      <td>0</td>
       <td>0</td>
     </tr>
     <tr>
@@ -1790,22 +1790,22 @@ Visualizing V2 Of Our NN
       <td>0</td>
       <td>0</td>
       <td>0</td>
-      <td>2</td>
-      <td>18</td>
       <td>0</td>
+      <td>19</td>
       <td>0</td>
+      <td>1</td>
       <td>0</td>
       <td>0</td>
     </tr>
     <tr>
       <th>6</th>
       <td>0</td>
-      <td>2</td>
+      <td>3</td>
       <td>0</td>
       <td>0</td>
+      <td>1</td>
       <td>0</td>
-      <td>0</td>
-      <td>18</td>
+      <td>16</td>
       <td>0</td>
       <td>0</td>
       <td>0</td>
@@ -1813,9 +1813,9 @@ Visualizing V2 Of Our NN
     <tr>
       <th>7</th>
       <td>0</td>
-      <td>0</td>
-      <td>0</td>
       <td>1</td>
+      <td>0</td>
+      <td>0</td>
       <td>1</td>
       <td>0</td>
       <td>0</td>
@@ -1826,14 +1826,14 @@ Visualizing V2 Of Our NN
     <tr>
       <th>8</th>
       <td>0</td>
-      <td>3</td>
+      <td>4</td>
       <td>0</td>
       <td>0</td>
       <td>0</td>
       <td>0</td>
       <td>0</td>
       <td>0</td>
-      <td>17</td>
+      <td>16</td>
       <td>0</td>
     </tr>
     <tr>
@@ -1841,13 +1841,13 @@ Visualizing V2 Of Our NN
       <td>0</td>
       <td>0</td>
       <td>0</td>
-      <td>1</td>
       <td>0</td>
-      <td>2</td>
       <td>0</td>
-      <td>2</td>
+      <td>0</td>
+      <td>0</td>
+      <td>8</td>
       <td>1</td>
-      <td>14</td>
+      <td>11</td>
     </tr>
   </tbody>
 </table>
@@ -1890,7 +1890,7 @@ Visualizing V2 Of Our NN
 <div class="cell-output cell-output-display">
 <div id="fig-funlr1" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="index_files/figure-html/fig-funlr1-output-1.png" data-ref-parent="fig-lr" width="585" height="414" class="figure-img"></p>
+<p><img src="index_files/figure-html/fig-funlr1-output-1.png" data-ref-parent="fig-lr" width="575" height="430" class="figure-img"></p>
 <p></p><figcaption class="figure-caption">(a) Funnel model, lr=1</figcaption><p></p>
 </figure>
 </div>
@@ -1923,7 +1923,7 @@ Visualizing V2 Of Our NN
 <div class="cell-output cell-output-display">
 <div id="fig-funlr2" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="index_files/figure-html/fig-funlr2-output-1.png" data-ref-parent="fig-lr" width="585" height="414" class="figure-img"></p>
+<p><img src="index_files/figure-html/fig-funlr2-output-1.png" data-ref-parent="fig-lr" width="575" height="414" class="figure-img"></p>
 <p></p><figcaption class="figure-caption">(b) Funnel model, lr=0.1</figcaption><p></p>
 </figure>
 </div>
@@ -2284,7 +2284,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <div class="sourceCode" id="cb70" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
 <span id="cb70-2"><a href="#cb70-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "A Simple Digit Classifier"</span></span>
 <span id="cb70-3"><a href="#cb70-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "David De Sa"</span></span>
-<span id="cb70-4"><a href="#cb70-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> "2023-03-14"</span></span>
+<span id="cb70-4"><a href="#cb70-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> "2023-03-23"</span></span>
 <span id="cb70-5"><a href="#cb70-5" aria-hidden="true" tabindex="-1"></a><span class="an">categories:</span><span class="co"> [python, pyTorch, NeuralNetworks]</span></span>
 <span id="cb70-6"><a href="#cb70-6" aria-hidden="true" tabindex="-1"></a><span class="an">image:</span><span class="co"> "NN101_thumbnail.png"</span></span>
 <span id="cb70-7"><a href="#cb70-7" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
