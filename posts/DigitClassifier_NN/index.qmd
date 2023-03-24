@@ -9,7 +9,7 @@ format:
     code-fold: true
     toc: true
     code-tools: true
-draft: true
+draft: false
 ---
 
 ## TL;DR
@@ -700,6 +700,8 @@ Accuracy Increasing As Loss Reduces
 Fantastic! Like an Olympic high jumper, we vault just over the top of the target! Time for champagne?! Not so fast! These results are those from exeucting on the training set. Remember when we partitioned off the validation set? Let's see how the model does on that data.
 
 The point of a validation set is to increase cofnidence that our model hasn't faux-optimized by 'playing our game' so to speak, and learning to score well on test data while not actually generalizing across the domain of all possible inputs
+
+:::{#fig-V2conf}
 ```{python}
 # | code-line-numbers: true
 # | code-fold: show
@@ -707,51 +709,359 @@ The point of a validation set is to increase cofnidence that our model hasn't fa
 
 def confMtx(model):
     conf = torch.zeros([10, 10], dtype=torch.int32)
+    acc = 0
+    tot = 0
     for xv, yv in dls[1]:
         preds = model(xv).max(dim=-1).indices
+        tot += len(preds)
         for i in range(len(xv)):
             conf[yv[i].item()][preds[i].item()] += 1
+            if yv[i].item() == preds[i].item():
+                acc += 1
     df = pd.DataFrame(conf)
     df.style.set_properties(**{'font-size': '6pt'}
                             ).background_gradient('Greys')
     df.style.set_table_styles([dict(selector='th', props=[(
         'text-align', 'center')])]).set_properties(**{'text-align': 'center'})
     df.style.set_caption("Top Axis: Predicted value. Left Axis: Actual Value")
-    return df
+    return df, acc/tot
+
 
     # return df
-confMtx(mdlV2)
-```
-```{python}
-# | code-line-numbers: true
-# | code-fold: show
-```
-```{python}
-# | code-line-numbers: true
-# | code-fold: show
-```
-```{python}
-# | code-line-numbers: true
-# | code-fold: show
-```
-```{python}
-# | code-line-numbers: true
-# | code-fold: show
-```
-```{python}
-# | code-line-numbers: true
-# | code-fold: show
-```
-```{python}
-# | code-line-numbers: true
-# | code-fold: show
-```
-```{python}
-# | code-line-numbers: true
-# | code-fold: show
-```
-```{python}
-# | code-line-numbers: true
-# | code-fold: show
+df, acc = confMtx(mdlV2)
+df
 ```
 
+```{python}
+print("Accuracy on validation set: "+str(acc))
+```
+
+Confusion Matrix. Left Axis: Actual Number. Top Axis: Predicted Number.
+
+:::
+
+Excellent! The NN has learned to generalize. But, dear reader, I have lied to you
+
+# Outro
+
+## Getting Here
+When I was first working through this mini-project, the final outcome did not come so easily. There are a lot of meta-parameters that we can play with, which creates a large solution space to search. These include:
+
+ - Number of layers
+ - Number of neurons per layer
+ - Broadcasting a single bias vs using many unique biases
+ - Learning rate, including whether or not to change the learning rate across epochs, and if so, according to what function
+ - What non-linearity function to use
+ - What distribution (and with what parameters) to use for initializing parameters
+ - How many epochs to run
+ - What mini batch size to use
+ - Whether or not to shuffle the data
+
+That's a lot of possibilities- I'm still learning what the best practices are to make decisions on these matters. I sure did spend a good numbers of hours experimenting with what seemed like dead ends though! 
+
+What finally made the difference was reducing the variance of tha random distribution I was using to initialize my parameters. My earlier models were very naive, always defaulting to just selecting one digit or another. Looking back, my hypothesis is that the larger variance in initialization distribution led to the largest parameters dominating the NN through the layers. But it's difficult to make any conclusive statements like that.
+
+## Lessons Learned
+
+A number of great first lessons in NN's to take away from this case study. 
+
+First of all, the great structure provided by the FastAI course with regard to defining the various classes and functions whose interplay really enables quick and effective implementaiton of the strategy. This, I think, is *so* important. It's the difference between understanding the first principles of how this stuff works ( i.e. "A nail is driven into a beam by application of force to its head perpendicular to the recieving surface") vs. the making of the toolkit at hadn to implement the idea (i.e. "Here is a hammer! Get to work!) Here is a summary of this toolkit, from the outermost layer, in:
+
+ - A 'Trial' taking parameters like number of epochs, learning rate, the model, optimizer, parameters, and loss function
+ - An optimizer to execute the 'parameter adjustment' inherent to the learning process
+ - An function to run an epoch, givne all necessary inputs
+ - A function to execute the model on a batch, and calculate the gradient
+ - A function calculate loss
+ - A function to calculate inputs
+
+Another *important* lesson was not to understimate the pitfalls of implementing your own math. I thought I had my loss-function issue solved when I abandoned my `SoftMax` formula for PyTorch's pre-built function, but I was further humbled by the need to resort the built in `CrossEntropyLoss` function. Sometimes it really is so much easier to understand something in principle than it is to implement it; we could drown deep currents of complexity hidden by the birdges built by those who came before. We should know where they are so as to use them and not fall off.
+
+This case study also forced me to grapple with the whole matrix multiplication process to ensure I was understanding exactly how to define how many neurons each layer would have, and execute that in code, etc. it was a bit of a mental hurdle to go from just ahving done it on paper in the classroom to implementing with code. Though a lot easier to be sure!
+
+Another important and very actionable lesson to prod the solution space by testing orders of magnitude different meta parameters (learning rate, parameter initialization variance). This is important because one realistically has no basis on whihc to guess at how much or how little a meta parameter should vary when beginning to optimize an NN. By testing different orders of magnitude `(10,1,0.1,0.01 ...)` we can drop quickly and easily identify which are ain whihc to focus our efforts.
+
+Lastly, to have hope and keep fighting the good fight! I was having some real trouble with making an NN that didn't just naively default to one digit or another. But in the end, with enough experimentation and further study, I prevailed... exciting. And for your pleasure, I end this post with my NN cemetery, those failed networks that I couldn't get any good results out of. Although who knows, maybe they would perform better than my simple V2 model in the end, with a slight change to some metaparameter. After all, I had abandoned my V2 model after it didnt work at first, until I changed my parameter initialization much later, and decided it might be worth giving it another shot. You never know when you'll strike gold.
+
+## NN Graveyard
+
+Our dearly departed...
+
+### The Funnel
+Started wide and iteratively narrowing down to the output size over many layers.
+```{python}
+# | code-line-numbers: true
+# | code-fold: show
+W1v3 = init_params((8*8, 48), 1)  # 64 in, 32 out
+B1v3 = init_params(48, 1)  # Feature-specific biases added
+W2v3 = init_params((48, 32), 1)  # 32 in, 16 out
+B2v3 = init_params(32, 1)  # Feature-specific biases added
+W3v3 = init_params((32, 24), 1)  # 16 in, 10 out
+B3v3 = init_params(24, 1)  # Feature-specific biases added
+W4v3 = init_params((24, 18), 1)  # 16 in, 10 out
+B4v3 = init_params(18, 1)
+W5v3 = init_params((18, 14), 1)
+B5v3 = init_params(14, 1)
+W6v3 = init_params((14, 10), 1)
+B6v3 = init_params(10, 1)
+
+
+def mdlV3(xb):
+    res = xb@W1v3+B1v3
+    res = res.max(tensor(0.))
+    res = res@W2v3+B2v3
+    res = res.max(tensor(0.))
+    res = res@W3v3+B3v3
+    res = res.max(tensor(0.))
+    res = res@W4v3+B4v3
+    res = res.max(tensor(0.))
+    res = res@W5v3+B5v3
+    res = res.max(tensor(0.))
+    res = res@W6v3+B6v3
+    return res
+
+```
+### Bad Parameter Initialization
+Notice that in the above, I had the parameter initialization with a variance of 1 passed to the random number generator distribution. And so I kept getting **junk** results like the following!
+```{python}
+# | label: fig-funnel
+# | fig-cap: "'Funnel' model loss and accuracy across epochs"
+# | code-line-numbers: true
+# | code-fold: show
+
+
+my_try = cTrial(model=mdlV3, opt=BasicOptim([W1v3, B1v3, W2v3, B2v3, W3v3, B3v3, W4v3, B4v3, W5v3, B5v3, W6v3, B6v3], 0.01), params=[
+                W1v3, B1v3, W2v3, B2v3, W3v3, B3v3, W4v3, B4v3, W5v3, B5v3, W6v3, B6v3])
+my_try.run(numE=50, wkLr=0.001)
+
+plt.plot(my_try.res.mean(dim=1)[1:])
+plt.plot(my_try.valids)
+plt.plot([0.9 for x in my_try.valids])
+```
+
+What does a flat lining accuracy mean exactly? The confusion matrix tells all^[*"Tonight at 9, only on Fox!"*]...
+```{python}
+# | code-line-numbers: true
+df, acc = confMtx(mdlV3)
+df
+```
+Yup.. Literally every input yields an output of `0`, so naturally, given the data set composition, its dead right, *10% of the time*!
+
+### Better Parameter Initialization
+But looks at what happens when we put the variance of the number generator to 0.1, its default!
+```{python}
+# | code-line-numbers: true
+# | label: fig-funnel_try2
+# | fig-cap: "Retrying the 'Funnel model', with smaller initial parameter variation"
+W1v3 = init_params((8*8, 48))  # 64 in, 32 out
+B1v3 = init_params(48)  # Feature-specific biases added
+W2v3 = init_params((48, 32))  # 32 in, 16 out
+B2v3 = init_params(32)  # Feature-specific biases added
+W3v3 = init_params((32, 24))  # 16 in, 10 out
+B3v3 = init_params(24)  # Feature-specific biases added
+W4v3 = init_params((24, 18))  # 16 in, 10 out
+B4v3 = init_params(18)
+W5v3 = init_params((18, 14))
+B5v3 = init_params(14,)
+W6v3 = init_params((14, 10))
+B6v3 = init_params(10)
+
+my_try = cTrial(model=mdlV3, opt=BasicOptim([W1v3, B1v3, W2v3, B2v3, W3v3, B3v3, W4v3, B4v3, W5v3, B5v3, W6v3, B6v3], 0.01), params=[
+                W1v3, B1v3, W2v3, B2v3, W3v3, B3v3, W4v3, B4v3, W5v3, B5v3, W6v3, B6v3])
+my_try.run(numE=50, wkLr=0.001)
+
+plt.plot(my_try.res.mean(dim=1)[1:])
+plt.plot(my_try.valids)
+plt.plot([0.9 for x in my_try.valids])
+```
+And the confusion matrix:
+
+```{python}
+# | code-line-numbers: true
+# | label: fig-funnel_try2conf
+# | fig-cap: "Retrying the 'Funnel model', Confusion Matrix"
+df, acc = confMtx(mdlV3)
+df
+```
+
+### Different Learning Rates
+Lets use this model to illustrate how different results can be with different learning rates. 
+
+::: {#fig-lr layout-ncol=4}
+```{python}
+# | code-line-numbers: true
+# | label: fig-Funlr1
+# | fig-cap: "Funnel model, lr=1"
+W1v3 = init_params((8*8, 48))  # 64 in, 32 out
+B1v3 = init_params(48)  # Feature-specific biases added
+W2v3 = init_params((48, 32))  # 32 in, 16 out
+B2v3 = init_params(32)  # Feature-specific biases added
+W3v3 = init_params((32, 24))  # 16 in, 10 out
+B3v3 = init_params(24)  # Feature-specific biases added
+W4v3 = init_params((24, 18))  # 16 in, 10 out
+B4v3 = init_params(18)
+W5v3 = init_params((18, 14))
+B5v3 = init_params(14,)
+W6v3 = init_params((14, 10))
+B6v3 = init_params(10)
+
+my_try = cTrial(model=mdlV3, opt=BasicOptim([W1v3, B1v3, W2v3, B2v3, W3v3, B3v3, W4v3, B4v3, W5v3, B5v3, W6v3, B6v3], 0.1), params=[
+                W1v3, B1v3, W2v3, B2v3, W3v3, B3v3, W4v3, B4v3, W5v3, B5v3, W6v3, B6v3])
+my_try.run(numE=50, wkLr=1)
+
+plt.plot(my_try.res.mean(dim=1)[1:])
+plt.plot(my_try.valids)
+plt.plot([0.9 for x in my_try.valids])
+```
+```{python}
+# | code-line-numbers: true
+# | label: fig-Funlr2
+# | fig-cap: "Funnel model, lr=0.1"
+W1v3 = init_params((8*8, 48))  # 64 in, 32 out
+B1v3 = init_params(48)  # Feature-specific biases added
+W2v3 = init_params((48, 32))  # 32 in, 16 out
+B2v3 = init_params(32)  # Feature-specific biases added
+W3v3 = init_params((32, 24))  # 16 in, 10 out
+B3v3 = init_params(24)  # Feature-specific biases added
+W4v3 = init_params((24, 18))  # 16 in, 10 out
+B4v3 = init_params(18)
+W5v3 = init_params((18, 14))
+B5v3 = init_params(14,)
+W6v3 = init_params((14, 10))
+B6v3 = init_params(10)
+
+my_try = cTrial(model=mdlV3, opt=BasicOptim([W1v3, B1v3, W2v3, B2v3, W3v3, B3v3, W4v3, B4v3, W5v3, B5v3, W6v3, B6v3], 0.1), params=[
+                W1v3, B1v3, W2v3, B2v3, W3v3, B3v3, W4v3, B4v3, W5v3, B5v3, W6v3, B6v3])
+my_try.run(numE=50, wkLr=0.1)
+
+plt.plot(my_try.res.mean(dim=1)[1:])
+plt.plot(my_try.valids)
+plt.plot([0.9 for x in my_try.valids])
+```
+```{python}
+# | code-line-numbers: true
+# | label: fig-Funlr3
+# | fig-cap: "Funnel model, lr=.01"
+W1v3 = init_params((8*8, 48))  # 64 in, 32 out
+B1v3 = init_params(48)  # Feature-specific biases added
+W2v3 = init_params((48, 32))  # 32 in, 16 out
+B2v3 = init_params(32)  # Feature-specific biases added
+W3v3 = init_params((32, 24))  # 16 in, 10 out
+B3v3 = init_params(24)  # Feature-specific biases added
+W4v3 = init_params((24, 18))  # 16 in, 10 out
+B4v3 = init_params(18)
+W5v3 = init_params((18, 14))
+B5v3 = init_params(14,)
+W6v3 = init_params((14, 10))
+B6v3 = init_params(10)
+
+my_try = cTrial(model=mdlV3, opt=BasicOptim([W1v3, B1v3, W2v3, B2v3, W3v3, B3v3, W4v3, B4v3, W5v3, B5v3, W6v3, B6v3], 0.01), params=[
+                W1v3, B1v3, W2v3, B2v3, W3v3, B3v3, W4v3, B4v3, W5v3, B5v3, W6v3, B6v3])
+my_try.run(numE=50, wkLr=0.01)
+
+plt.plot(my_try.res.mean(dim=1)[1:])
+plt.plot(my_try.valids)
+plt.plot([0.9 for x in my_try.valids])
+```
+```{python}
+# | code-line-numbers: true
+# | label: fig-Funlr4
+# | fig-cap: "Funnel model, lr=0.001"
+W1v3 = init_params((8*8, 48))  # 64 in, 32 out
+B1v3 = init_params(48)  # Feature-specific biases added
+W2v3 = init_params((48, 32))  # 32 in, 16 out
+B2v3 = init_params(32)  # Feature-specific biases added
+W3v3 = init_params((32, 24))  # 16 in, 10 out
+B3v3 = init_params(24)  # Feature-specific biases added
+W4v3 = init_params((24, 18))  # 16 in, 10 out
+B4v3 = init_params(18)
+W5v3 = init_params((18, 14))
+B5v3 = init_params(14,)
+W6v3 = init_params((14, 10))
+B6v3 = init_params(10)
+
+my_try = cTrial(model=mdlV3, opt=BasicOptim([W1v3, B1v3, W2v3, B2v3, W3v3, B3v3, W4v3, B4v3, W5v3, B5v3, W6v3, B6v3], 0.01), params=[
+                W1v3, B1v3, W2v3, B2v3, W3v3, B3v3, W4v3, B4v3, W5v3, B5v3, W6v3, B6v3])
+my_try.run(numE=50, wkLr=0.001)
+
+plt.plot(my_try.res.mean(dim=1)[1:])
+plt.plot(my_try.valids)
+plt.plot([0.9 for x in my_try.valids])
+```
+
+Trial outcomes with different learning rates.
+
+:::
+
+Smaller learning rates are characterized by smoother loss curves since they traverse a smaller region of the solution space. It's a double edged sword, though. On the one hand, a small learning rate can help hone in on a local optimum. That might be undesirable early on in the learnign process though, as the random initialization may put us in a region of parameter space where the nearest local optimum isn't great with respect to the optima across the wider parameter space. A larger learning rate can help us take large steps from an initial poor position to a much better swath of parameter space, where a smaller rate can then hone in to better results.
+
+### The Wormhole
+Along my wanderings in the desert, I thought to try having the network layer structure narrow rapidly but extend across many layers. This implementation has 12 layers, with the last 8 all having 10 neurons in and out.
+```{python}
+# | code-line-numbers: true
+# | code-fold: show
+W1v4 = init_params((8*8, 32), 0.001)  # 64 in, 32 out
+B1v4 = init_params(32, 0.001)  # Feature-specific biases added
+W2v4 = init_params((32, 16), 0.001)  # 32 in, 16 out
+B2v4 = init_params(16, 0.001)  # Feature-specific biases added
+W3v4 = init_params((16, 10), 0.001)  # 16 in, 10 out
+B3v4 = init_params(10, 0.001)  # Feature-specific biases added
+W4v4 = init_params((10, 10), 0.001)  # 16 in, 10 out
+B4v4 = init_params(10, 0.001)
+W5v4 = init_params((10, 10), 0.001)
+B5v4 = init_params(10, 0.001)
+W6v4 = init_params((10, 10), 0.001)
+B6v4 = init_params(10, 0.001)
+W7v4 = init_params((10, 10), 0.001)
+B7v4 = init_params(10, 0.001)
+W8v4 = init_params((10, 10), 0.001)
+B8v4 = init_params(10, 0.001)
+W9v4 = init_params((10, 10), 0.001)
+B9v4 = init_params(10, 0.001)
+W10v4 = init_params((10, 10), 0.001)
+B10v4 = init_params(10, 0.001)
+W11v4 = init_params((10, 10), 0.001)
+B11v4 = init_params(10, 0.001)
+W12v4 = init_params((10, 10), 0.001)
+B12v4 = init_params(10, 0.001)
+
+
+def mdlV4(xb):
+    res = xb@W1v4+B1v4
+    res = res.max(tensor(0.))
+    res = res@W2v4+B2v4
+    res = res.max(tensor(0.))
+    res = res@W3v4+B3v4
+    res = res.max(tensor(0.))
+    res = res@W4v4+B4v4
+    res = res.max(tensor(0.))
+    res = res@W5v4+B5v4
+    res = res.max(tensor(0.))
+    res = res@W6v4+B6v4
+    res = res.max(tensor(0.))
+    res = res@W7v4+B7v4
+    res = res.max(tensor(0.))
+    res = res@W8v4+B8v4
+    res = res.max(tensor(0.))
+    res = res@W9v4+B9v4
+    res = res.max(tensor(0.))
+    res = res@W10v4+B10v4
+    res = res.max(tensor(0.))
+    res = res@W11v4+B11v4
+    res = res.max(tensor(0.))
+    res = res@W12v4+B12v4
+    return res
+
+
+```
+And trying it...
+```{python}
+# | code-line-numbers: true
+my_try = cTrial(model=mdlV4, opt=BasicOptim([W1v4, B1v4, W2v4, B2v4, W3v4, B3v4, W4v4, B4v4, W5v4, B5v4, W6v4, B6v4, W7v4, B7v4, W8v4, B8v4, W9v4, B9v4, W10v4, B10v4, W11v4, B11v4, W12v4, B12v4], 0.01), params=[
+                W1v4, B1v4, W2v4, B2v4, W3v4, B3v4, W4v4, B4v4, W5v4, B5v4, W6v4, B6v4, W7v4, B7v4, W8v4, B8v4, W9v4, B9v4, W10v4, B10v4, W11v4, B11v4, W12v4, B12v4])
+my_try.run(numE=20, wkLr=.1)
+plt.plot(my_try.res.mean(dim=1)[1:])
+plt.plot(my_try.valids)
+plt.plot([0.9 for x in my_try.valids])
+```
+
+Curiously, absolute garbage performance. After investigating, my best estimate is that the reason this doesn't perform well is that the larger number of layers leads to overblown activation values. but can't be sure. I tried starting with much smaller initialziation values to no effect, as well well larger and smaller learning rates. We'll leave this one as a lost cause. 

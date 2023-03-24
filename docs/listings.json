@@ -3,6 +3,7 @@
     "listing": "/index.html",
     "items": [
       "/posts/DigitClassifier/index.html",
+      "/posts/DigitClassifier_NN/index.html",
       "/posts/Excel_Data_Aggregator/index.html",
       "/posts/FunWithFactors/index.html"
     ]
