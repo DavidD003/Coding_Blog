@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/Musing_on_Capacity/index.html",
       "/posts/DigitClassifier_NN/index.html",
       "/posts/DigitClassifier/index.html",
       "/posts/Excel_Data_Aggregator/index.html",

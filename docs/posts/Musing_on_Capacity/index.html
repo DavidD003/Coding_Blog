@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.335">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="David De Sa">
+<meta name="dcterms.date" content="2023-03-27">
+
+<title>Davids Coding - Musings on Capacity</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../EigenFlower.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Davids Coding</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/daviddesa03/"><i class="bi bi-linkedin" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://youtube.com/@davidscoding"><i class="bi bi-youtube" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/DavidD003"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <div class="quarto-title-block"><div><h1 class="title">Musings on Capacity</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
+                                <div class="quarto-categories">
+                <div class="quarto-category">python</div>
+                <div class="quarto-category">pyTorch</div>
+                <div class="quarto-category">NeuralNetworks</div>
+                <div class="quarto-category">opinion</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>David De Sa </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">March 27, 2023</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#tldr" id="toc-tldr" class="nav-link active" data-scroll-target="#tldr">TL;DR</a></li>
+  <li><a href="#capacity" id="toc-capacity" class="nav-link" data-scroll-target="#capacity">Capacity</a></li>
+  <li><a href="#whats-in-a-word" id="toc-whats-in-a-word" class="nav-link" data-scroll-target="#whats-in-a-word">What’s In A Word?</a></li>
+  <li><a href="#words-as-projections-into-higher-spaces" id="toc-words-as-projections-into-higher-spaces" class="nav-link" data-scroll-target="#words-as-projections-into-higher-spaces">Words As Projections Into Higher Spaces</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="tldr" class="level2">
+<h2 class="anchored" data-anchor-id="tldr">TL;DR</h2>
+<p>ChatGPT seems to be the real deal, but I wonder how much it’s answers break down in funky domains.</p>
+</section>
+<section id="capacity" class="level1">
+<h1>Capacity</h1>
+<p>The capacity of a model (as I understand it) is the measure of its output space relative to the true domain space.</p>
+<p>This is one of those times where I really feel thats a good way of describing it though I suspect many might moan and groan and accuse me of bloviating again. But when you think of the complexity of tasks that neural nets are performing these days, I think you have to carry these more abstract definitions in their full meaning to probe into questions surrounding these tools.</p>
+<p>For example, consider this image generated by the AI Dall-E<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>:</p>
+<div id="fig-gtr" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="guitar.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;1: Procedurally generated images from the same prompt</figcaption><p></p>
+</figure>
+</div>
+<p>What is the true domain space of possible outcomes for the prompt given? There are so many possible outcomes, we can simplify it to say they’re infinite. What I had in mind when writing this prompt was an image of a guitar with a mass of ghostly , near indistinct hands on the instrument, as if seeing a ghostly snapshot of a playback of every song ever played on it, at the same time. But it would seem that the <em>output space</em> of this model is much more limited than our imagination might suggest. As evidence I would simply point to the fact that each example output image features a guitar that is in the same position and orientation. I have to wonder, if we generated a million outputs for this prompt, how many would share this feature? Another example you’ll probably enjoy a lot more: in <a href="https://www.youtube.com/watch?v=-_VYGvHpED8">this video</a> where each phrase in the lyrics to Bohemian Rhapsody is used as a Dall-E prompt, you can see a significant bent toward images of female figures standing alone with their back to the viewer.</p>
+<p>I don’t mean to be condescending about this, in the least. The implemention is amazing! But I see an analogue here with the promise of open world gaming: “Go anywhere, do anything, be anyone!”.. when in reality, your interactions with that virtual world are limited by the inputs available to you, and the ways in which those inputs have been programmed to yield some outcome in that world. It seems to be the promise of ChatGPT and Dall-E, indeed the entire domain of generative content creation, is this promise of an infinite domain of creative and created outcomes, but I have to wonder in which ways the capacities of these models, and thus their outcomes, are limited.</p>
+</section>
+<section id="whats-in-a-word" class="level1">
+<h1>What’s In A Word?</h1>
+<p>I absolutely subscribe to the notion that words have power, in the sense that they both form and inform our thoughts, beliefs, and actions. A few words can throw the world into disorder, such as yelling fire in a crowded room<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>. Words are conceptual handles by which we can grip an idea, interact with it, understand, and deploy it. I think the key thing is that, while we might <em>experience</em> or ponder thoughts or ideas we can’t put words to, whether because they’re low resolution or completely novel, we cannot <em>share</em> those thoughts without the right words to communicate them. I see language as a compression tool used for transferring the indefinite world of thought in one mind into that of another. Unfortunately, this free and open-source compression tool corrupts a lot of data along the way; it’s the root of all communication <strong>and</strong> miscommunication.</p>
+<p>But as I mentioned earlier, words don’t just allow us to give form to our thoughts, but sometimes it can go the other way as well- the availability of a word leads to it being used, and the fact of that word having been used then impinges on which word might come next. For example, when was the last time you heard someone say ‘wreak’ without it being followed by ‘havoc’? I’m sure these notions of recursive dependence are a sore subject for the pro’s in the world of large language models, but it leads me to wonder about the capacity of LLM’s with respect to computation.</p>
+</section>
+<section id="words-as-projections-into-higher-spaces" class="level1">
+<h1>Words As Projections Into Higher Spaces</h1>
+<p>I was and am truly amazed at ChatGPT’s seeming ability to abstract from language so as to draw conclusions and connections. My little test was to ask it about guitar chords. I provided the finger positions for an unorthodox chord ( 0,7,9,0,9 ) and asked it to name it. It told me it was a Bb6/9 chord, but an online tool purpose-made for this task reported it to be a E7sus2 chord. What I can tell you for sure is that I don’t have the music theory chops to know which is right, but when I asked GPT to make me a chord sequence suing that chord, and then to provide me with the finger positions to play each chord in the sequence, the finger positions it gave me for the ‘Bb6/9’ were not remotely similar, and the sound didn’t bear any resemblance either except for the presence of one or two of the same notes. Also, when I asked it to name the chord for which it had just given me the positions, it switched its decision to a Bmaj7 chord, a much more common choice.</p>
+<p>Where am I going with this? Just the notion that I would really hesitate to take any answers the model may provide as gospel, and most especially when they can’t be validated against any source of truth. I find it difficult to truly believe that a language model, anchored in words as it is, and constrained by them per the last section of this post, can truly achieve thought in the way that humans can. I see it as the problem of the <a href="https://en.wikipedia.org/wiki/One-way_function">one-way function</a><a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>: the domain of abstract thought is the input, in this example, my understanding of the relationship between a guitars tuning, the fret positions on the neck, and the cloud of ideas around music theory and naming chords; one’s own facility with language is the one-way function, and the words used to describe the thought is the output. If language is a true one way function, it should be impossible to retrieve the full space of thought from the words alone. And yet, here we have this existence-proof, the implementaiton of chatGPT as a counter to this notion.</p>
+<p>But I’m not yet convinced. Convinced that the capacity of the model is delivered as promised. Another entertaining example. In <a href="https://youtu.be/rSCNW1OCk_M?t=306">this video</a> you can see ChatGPt playing chess, communicating with the standard notation for moves, and it is more than happy to make illegal moves. I thought this was hilariously unexpected, on it’s face, but it got me thinking about all this. It tells me that in this domain, this wierd niche of reality (the game of chess), where text characters refer to pieces indexed to positions, constrained in their movement in a manner simple to describe visually or by numeric descriptions of offets, but a horribly strange function to learn and interpret if reduced to text alone, in this domain the task reveals the possibility that GPT, as great as it is at understanding how context affects the usage of words in relation to each other, can’t quite grasp the higher space of ideas that these strange sequences of characters are referring to.</p>
+<p>These are just a couple of examples, but again. Something to chew on. Let’s remember to keep our grains of salt handy for when we go consulting the oracle. Just because a function doesn’t throw an error doesn’t mean the output is correct. Though perhaps this is more readily explained by this example from one of my first image classification deployments:</p>
+<div id="fig-ai" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="AI.jpg" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;2: I might be deadweight, but I am not a dumbbell!</figcaption><p></p>
+</figure>
+</div>
+<p>And remember; Garbage In, Garbage Out.</p>
+
+
+<!-- -->
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>https://openai.com/product/dall-e-2<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>My mind races to many more examples… All those thoughts that start with <a href="https://allthatsinteresting.com/call-of-the-void">‘What if I just…’</a><a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>I laugh at myself because I used chatGPT to remind me of what the terminology was for that kind of thing.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb1" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Musings on Capacity"</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "David De Sa"</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> "2023-03-27"</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="an">categories:</span><span class="co"> [python, pyTorch, NeuralNetworks, opinion]</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="an">image:</span><span class="co"> "thumb.png"</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">    code-fold: true</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co">    toc: true</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools: true</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="an">draft:</span><span class="co"> false</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="fu">## TL;DR</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>ChatGPT seems to be the real deal, but I wonder how much it's answers break down in funky domains.</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="fu"># Capacity</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>The capacity of a model (as I understand it) is the measure of its output space relative to the true domain space. </span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>This is one of those times where I really feel thats a good way of describing it though I suspect many might moan and groan and accuse me of bloviating again. But when you think of the complexity of tasks that neural nets are performing these days, I think you have to carry these more abstract definitions in their full meaning to probe into questions surrounding these tools.</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>For example, consider this image generated by the AI Dall-E^<span class="co">[</span><span class="ot">https://openai.com/product/dall-e-2</span><span class="co">]</span>:</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="al">![Procedurally generated images from the same prompt](guitar.png)</span>{#fig-gtr}</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>What is the true domain space of possible outcomes for the prompt given? There are so many possible outcomes, we can simplify it to say they're infinite. What I had in mind when writing this prompt was an image of a guitar with a mass of ghostly , near indistinct hands on the instrument, as if seeing a ghostly snapshot of a playback of every song ever played on it, at the same time. But it would seem that the *output space* of this model is much more limited than our imagination might suggest. As evidence I would simply point to the fact that each example output image features a guitar that is in the same position and orientation. I have to wonder, if we generated a million outputs for this prompt, how many would share this feature? Another example you'll probably enjoy a lot more: in <span class="co">[</span><span class="ot">this video</span><span class="co">](https://www.youtube.com/watch?v=-_VYGvHpED8)</span> where each phrase in the lyrics to Bohemian Rhapsody is used as a Dall-E prompt, you can see a significant bent toward images of female figures standing alone with their back to the viewer.</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>I don't mean to be condescending about this, in the least. The implemention is amazing! But I see an analogue here with the promise of open world gaming: "Go anywhere, do anything, be anyone!".. when in reality, your interactions with that virtual world are limited by the inputs available to you, and the ways in which those inputs have been programmed to yield some outcome in that world. It seems to be the promise of ChatGPT and Dall-E, indeed the entire domain of generative content creation, is this promise of an infinite domain of creative and created outcomes, but I have to wonder in which ways the capacities of these models, and thus their outcomes, are limited.</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="fu"># What's In A Word?</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>I absolutely subscribe to the notion that words have power, in the sense that they both form and inform our thoughts, beliefs, and actions. A few words can throw the world into disorder, such as yelling fire in a crowded room^<span class="co">[</span><span class="ot">My mind races to many more examples... All those thoughts that start with ['What if I just...'](https://allthatsinteresting.com/call-of-the-void)</span><span class="co">]</span>. Words are conceptual handles by which we can grip an idea, interact with it, understand, and deploy it. I think the key thing is that, while we might *experience* or ponder thoughts or ideas we can't put words to, whether because they're low resolution or completely novel, we cannot *share* those thoughts without the right words to communicate them. I see language as a compression tool used for transferring the indefinite world of thought in one mind into that of another. Unfortunately, this free and open-source compression tool corrupts a lot of data along the way; it's the root of all communication **and** miscommunication.</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>But as I mentioned earlier, words don't just allow us to give form to our thoughts, but sometimes it can go the other way as well- the availability of a word leads to it being used, and the fact of that word having been used then impinges on which word might come next. For example, when was the last time you heard someone say 'wreak' without it being followed by 'havoc'? I'm sure these notions of recursive dependence are a sore subject for the pro's in the world of large language models, but it leads me to wonder about the capacity of LLM's with respect to computation.</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a><span class="fu"># Words As Projections Into Higher Spaces</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>I was and am truly amazed at ChatGPT's seeming ability to abstract from language so as to draw conclusions and connections. My little test was to ask it about guitar chords. I provided the finger positions for an unorthodox chord ( 0,7,9,0,9 ) and asked it to name it. It told me it was a Bb6/9 chord, but an online tool purpose-made for this task reported it to be a E7sus2 chord. What I can tell you for sure is that I don't have the music theory chops to know which is right, but when I asked GPT to make me a chord sequence suing that chord, and then to provide me with the finger positions to play each chord in the sequence, the finger positions it gave me for the 'Bb6/9' were not remotely similar, and the sound didn't bear any resemblance either except for the presence of one or two of the same notes. Also, when I asked it to name the chord for which it had just given me the positions, it switched its decision to a Bmaj7 chord, a much more common choice.</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>Where am I going with this? Just the notion that I would really hesitate to take any answers the model may provide as gospel, and most especially when they can't be validated against any source of truth. I find it difficult to truly believe that a language model, anchored in words as it is, and constrained by them per the last section of this post, can truly achieve thought in the way that humans can. I see it as the problem of the <span class="co">[</span><span class="ot">one-way function</span><span class="co">](https://en.wikipedia.org/wiki/One-way_function)</span>^<span class="co">[</span><span class="ot">I laugh at myself because I used chatGPT to remind me of what the terminology was for that kind of thing.</span><span class="co">]</span>: the domain of abstract thought is the input, in this example, my understanding of the relationship between a guitars tuning, the fret positions on the neck, and the cloud of ideas around music theory and naming chords; one's own facility with language is the one-way function, and the words used to describe the thought is the output. If language is a true one way function, it should be impossible to retrieve the full space of thought from the words alone. And yet, here we have this existence-proof, the implementaiton of chatGPT as a counter to this notion.</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>But I'm not yet convinced. Convinced that the capacity of the model is delivered as promised. Another entertaining example. In <span class="co">[</span><span class="ot">this video</span><span class="co">](https://youtu.be/rSCNW1OCk_M?t=306)</span> you can see ChatGPt playing chess, communicating with the standard notation for moves, and it is more than happy to make illegal moves. I thought this was hilariously unexpected, on it's face, but it got me thinking about all this. It tells me that in this domain, this wierd niche of reality (the game of chess), where text characters refer to pieces indexed to positions, constrained in their movement in a manner simple to describe visually or by numeric descriptions of offets, but a horribly strange function to learn and interpret if reduced to text alone, in this domain the task reveals the possibility that GPT, as great as it is at understanding how context affects the usage of words in relation to each other, can't quite grasp the higher space of ideas that these strange sequences of characters are referring to.</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>These are just a couple of examples, but again. Something to chew on. Let's remember to keep our grains of salt handy for when we go consulting the oracle. Just because a function doesn't throw an error doesn't mean the output is correct. Though perhaps this is more readily explained by this example from one of my first image classification deployments:</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a><span class="al">![I might be deadweight, but I am not a dumbbell!](AI.jpg)</span>{#fig-ai}</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>And remember; Garbage In, Garbage Out.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+</body></html>
