@@ -2,7 +2,7 @@
 title: "Broadcasting and Heuristic Digit Classification"
 author: "David De Sa"
 date: "2023-03-18"
-categories: [python, pyTorch, Neuralnetworks]
+categories: [python, pyTorch, NeuralNetworks]
 image: "Cube_thumb.png"
 format:
   html:

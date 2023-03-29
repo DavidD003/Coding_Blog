@@ -181,7 +181,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
                                 <div class="quarto-categories">
                 <div class="quarto-category">python</div>
                 <div class="quarto-category">pyTorch</div>
-                <div class="quarto-category">Neuralnetworks</div>
+                <div class="quarto-category">NeuralNetworks</div>
               </div>
                   </div>
   </div>
@@ -343,7 +343,7 @@ Understand Your Input!
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1"></a>mnist.keys()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="81">
+<div class="cell-output cell-output-display" data-execution_count="3">
 <pre><code>dict_keys(['data', 'target', 'frame', 'feature_names', 'target_names', 'images', 'DESCR'])</code></pre>
 </div>
 </div>
@@ -354,7 +354,7 @@ Understand Your Input!
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1"></a><span class="co"># Observing y value for data sequence</span></span>
 <span id="cb5-2"><a href="#cb5-2"></a>mnist[<span class="st">"target"</span>], <span class="st">"# targets: "</span> <span class="op">+</span> <span class="bu">str</span>(<span class="bu">len</span>(mnist[<span class="st">"target"</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="82">
+<div class="cell-output cell-output-display" data-execution_count="4">
 <pre><code>(array([0, 1, 2, ..., 8, 9, 8]), '# targets: 1797')</code></pre>
 </div>
 </div>
@@ -365,7 +365,7 @@ Understand Your Input!
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1"></a>n0 <span class="op">=</span> [[n <span class="cf">for</span> n <span class="kw">in</span> mnist[<span class="st">"data"</span>][<span class="dv">0</span>][i <span class="op">*</span> <span class="dv">8</span>: i <span class="op">*</span> <span class="dv">8</span> <span class="op">+</span> <span class="dv">7</span>]] <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, <span class="dv">8</span>)]</span>
 <span id="cb7-2"><a href="#cb7-2"></a>n0, mnist[<span class="st">"images"</span>][<span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="83">
+<div class="cell-output cell-output-display" data-execution_count="5">
 <pre><code>([[0.0, 0.0, 5.0, 13.0, 9.0, 1.0, 0.0],
   [0.0, 0.0, 13.0, 15.0, 10.0, 15.0, 5.0],
   [0.0, 3.0, 15.0, 2.0, 0.0, 11.0, 8.0],
@@ -392,7 +392,7 @@ Understand Your Input!
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1"></a>Tensor(mnist[<span class="st">"data"</span>][<span class="dv">0</span>]).view(<span class="op">-</span><span class="dv">1</span>, <span class="dv">8</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="84">
+<div class="cell-output cell-output-display" data-execution_count="6">
 <pre><code>tensor([[ 0.,  0.,  5., 13.,  9.,  1.,  0.,  0.],
         [ 0.,  0., 13., 15., 10., 15.,  5.,  0.],
         [ 0.,  3., 15.,  2.,  0., 11.,  8.,  0.],
@@ -423,7 +423,7 @@ Tensor Views
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1"></a>[<span class="bu">str</span>(i) <span class="op">+</span> <span class="st">": "</span> <span class="op">+</span> <span class="bu">str</span>(<span class="bu">list</span>(mnist[<span class="st">"target"</span>]).count(i))</span>
 <span id="cb11-2"><a href="#cb11-2"></a> <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>)]  <span class="co"># Count of each digit in dataset</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="85">
+<div class="cell-output cell-output-display" data-execution_count="7">
 <pre><code>['0: 178',
  '1: 182',
  '2: 177',
@@ -518,7 +518,7 @@ Beware Naive Optimization
 <span id="cb14-8"><a href="#cb14-8"></a>lens <span class="op">=</span> [<span class="bu">len</span>(stacked[i]) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>)]</span>
 <span id="cb14-9"><a href="#cb14-9"></a>lens, <span class="bu">min</span>(lens)  <span class="co"># Confirm counts of samples</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="87">
+<div class="cell-output cell-output-display" data-execution_count="9">
 <pre><code>([178, 182, 177, 183, 181, 182, 181, 179, 174, 180], 174)</code></pre>
 </div>
 </div>
@@ -543,7 +543,7 @@ Beware Naive Optimization
 <span id="cb16-7"><a href="#cb16-7"></a>[<span class="bu">len</span>(test[i]) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>)], [<span class="bu">len</span>(train[i]) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>)]</span>
 <span id="cb16-8"><a href="#cb16-8"></a>show_image(stacked[<span class="dv">3</span>][<span class="dv">0</span>])  <span class="co"># Check sample</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="88">
+<div class="cell-output cell-output-display" data-execution_count="10">
 <pre><code>&lt;Axes: &gt;</code></pre>
 </div>
 <div class="cell-output cell-output-display">
@@ -561,7 +561,7 @@ Beware Naive Optimization
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1"></a><span class="bu">type</span>(train), <span class="bu">type</span>(train[<span class="dv">0</span>]), <span class="bu">type</span>(train[<span class="dv">0</span>][<span class="dv">0</span>]), [</span>
 <span id="cb18-2"><a href="#cb18-2"></a>    <span class="bu">type</span>(test), <span class="bu">type</span>(test[<span class="dv">0</span>]), <span class="bu">type</span>(test[<span class="dv">0</span>][<span class="dv">0</span>])]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="89">
+<div class="cell-output cell-output-display" data-execution_count="11">
 <pre><code>(list, torch.Tensor, torch.Tensor, [list, torch.Tensor, torch.Tensor])</code></pre>
 </div>
 </div>
@@ -575,7 +575,7 @@ Beware Naive Optimization
 <span id="cb20-3"><a href="#cb20-3"></a>test <span class="op">=</span> torch.stack(test)</span>
 <span id="cb20-4"><a href="#cb20-4"></a>train.shape, test.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="90">
+<div class="cell-output cell-output-display" data-execution_count="12">
 <pre><code>(torch.Size([10, 154, 8, 8]), torch.Size([10, 20, 8, 8]))</code></pre>
 </div>
 </div>
@@ -686,7 +686,7 @@ Comparing Differences Between Pictures?
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1"></a><span class="co">"L1 loss: "</span><span class="op">+</span><span class="bu">str</span>(F.l1_loss(test[<span class="dv">0</span>][<span class="dv">18</span>], means[<span class="dv">0</span>]).item()), <span class="st">"MSE Loss: "</span> <span class="op">+</span> <span class="op">\</span></span>
 <span id="cb24-2"><a href="#cb24-2"></a>    <span class="bu">str</span>(F.mse_loss(test[<span class="dv">0</span>][<span class="dv">18</span>], means[<span class="dv">0</span>]).sqrt().item())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="93">
+<div class="cell-output cell-output-display" data-execution_count="15">
 <pre><code>('L1 loss: 1.9119317531585693', 'MSE Loss: 3.072631359100342')</code></pre>
 </div>
 </div>
@@ -716,7 +716,7 @@ Comparing Differences Between Pictures?
 <div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1"></a><span class="co">"L1 loss: "</span><span class="op">+</span><span class="bu">str</span>(F.l1_loss(test[<span class="dv">7</span>][<span class="dv">0</span>], means[<span class="dv">0</span>]).item()), <span class="st">"MSE Loss: "</span> <span class="op">+</span> <span class="op">\</span></span>
 <span id="cb27-2"><a href="#cb27-2"></a>    <span class="bu">str</span>(F.mse_loss(test[<span class="dv">7</span>][<span class="dv">0</span>], means[<span class="dv">0</span>]).sqrt().item())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="95">
+<div class="cell-output cell-output-display" data-execution_count="17">
 <pre><code>('L1 loss: 4.754464149475098', 'MSE Loss: 6.698919296264648')</code></pre>
 </div>
 </div>
@@ -760,7 +760,7 @@ Coding The L1 Norm
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1"></a>means.shape, train.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="98">
+<div class="cell-output cell-output-display" data-execution_count="20">
 <pre><code>(torch.Size([10, 8, 8]), torch.Size([10, 154, 8, 8]))</code></pre>
 </div>
 </div>
@@ -789,7 +789,7 @@ Broadcasting
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1"></a>train.shape, means.unsqueeze(<span class="dv">1</span>).shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="99">
+<div class="cell-output cell-output-display" data-execution_count="21">
 <pre><code>(torch.Size([10, 154, 8, 8]), torch.Size([10, 1, 8, 8]))</code></pre>
 </div>
 </div>
@@ -1005,162 +1005,162 @@ Unsqueezed shape of train data   : torch.Size([1, 10, 154, 8, 8])</code></pre>
 <div class="cell-output cell-output-stdout">
 <pre><code>accuracy: 89.94%</code></pre>
 </div>
-<div class="cell-output cell-output-display" data-execution_count="104">
+<div class="cell-output cell-output-display" data-execution_count="26">
 
 <style type="text/css">
-#T_e5ea1 th {
+#T_8096c th {
   text-align: center;
 }
-#T_e5ea1_row0_col0, #T_e5ea1_row0_col1, #T_e5ea1_row0_col2, #T_e5ea1_row0_col3, #T_e5ea1_row0_col4, #T_e5ea1_row0_col5, #T_e5ea1_row0_col6, #T_e5ea1_row0_col7, #T_e5ea1_row0_col8, #T_e5ea1_row0_col9, #T_e5ea1_row1_col0, #T_e5ea1_row1_col1, #T_e5ea1_row1_col2, #T_e5ea1_row1_col3, #T_e5ea1_row1_col4, #T_e5ea1_row1_col5, #T_e5ea1_row1_col6, #T_e5ea1_row1_col7, #T_e5ea1_row1_col8, #T_e5ea1_row1_col9, #T_e5ea1_row2_col0, #T_e5ea1_row2_col1, #T_e5ea1_row2_col2, #T_e5ea1_row2_col3, #T_e5ea1_row2_col4, #T_e5ea1_row2_col5, #T_e5ea1_row2_col6, #T_e5ea1_row2_col7, #T_e5ea1_row2_col8, #T_e5ea1_row2_col9, #T_e5ea1_row3_col0, #T_e5ea1_row3_col1, #T_e5ea1_row3_col2, #T_e5ea1_row3_col3, #T_e5ea1_row3_col4, #T_e5ea1_row3_col5, #T_e5ea1_row3_col6, #T_e5ea1_row3_col7, #T_e5ea1_row3_col8, #T_e5ea1_row3_col9, #T_e5ea1_row4_col0, #T_e5ea1_row4_col1, #T_e5ea1_row4_col2, #T_e5ea1_row4_col3, #T_e5ea1_row4_col4, #T_e5ea1_row4_col5, #T_e5ea1_row4_col6, #T_e5ea1_row4_col7, #T_e5ea1_row4_col8, #T_e5ea1_row4_col9, #T_e5ea1_row5_col0, #T_e5ea1_row5_col1, #T_e5ea1_row5_col2, #T_e5ea1_row5_col3, #T_e5ea1_row5_col4, #T_e5ea1_row5_col5, #T_e5ea1_row5_col6, #T_e5ea1_row5_col7, #T_e5ea1_row5_col8, #T_e5ea1_row5_col9, #T_e5ea1_row6_col0, #T_e5ea1_row6_col1, #T_e5ea1_row6_col2, #T_e5ea1_row6_col3, #T_e5ea1_row6_col4, #T_e5ea1_row6_col5, #T_e5ea1_row6_col6, #T_e5ea1_row6_col7, #T_e5ea1_row6_col8, #T_e5ea1_row6_col9, #T_e5ea1_row7_col0, #T_e5ea1_row7_col1, #T_e5ea1_row7_col2, #T_e5ea1_row7_col3, #T_e5ea1_row7_col4, #T_e5ea1_row7_col5, #T_e5ea1_row7_col6, #T_e5ea1_row7_col7, #T_e5ea1_row7_col8, #T_e5ea1_row7_col9, #T_e5ea1_row8_col0, #T_e5ea1_row8_col1, #T_e5ea1_row8_col2, #T_e5ea1_row8_col3, #T_e5ea1_row8_col4, #T_e5ea1_row8_col5, #T_e5ea1_row8_col6, #T_e5ea1_row8_col7, #T_e5ea1_row8_col8, #T_e5ea1_row8_col9, #T_e5ea1_row9_col0, #T_e5ea1_row9_col1, #T_e5ea1_row9_col2, #T_e5ea1_row9_col3, #T_e5ea1_row9_col4, #T_e5ea1_row9_col5, #T_e5ea1_row9_col6, #T_e5ea1_row9_col7, #T_e5ea1_row9_col8, #T_e5ea1_row9_col9 {
+#T_8096c_row0_col0, #T_8096c_row0_col1, #T_8096c_row0_col2, #T_8096c_row0_col3, #T_8096c_row0_col4, #T_8096c_row0_col5, #T_8096c_row0_col6, #T_8096c_row0_col7, #T_8096c_row0_col8, #T_8096c_row0_col9, #T_8096c_row1_col0, #T_8096c_row1_col1, #T_8096c_row1_col2, #T_8096c_row1_col3, #T_8096c_row1_col4, #T_8096c_row1_col5, #T_8096c_row1_col6, #T_8096c_row1_col7, #T_8096c_row1_col8, #T_8096c_row1_col9, #T_8096c_row2_col0, #T_8096c_row2_col1, #T_8096c_row2_col2, #T_8096c_row2_col3, #T_8096c_row2_col4, #T_8096c_row2_col5, #T_8096c_row2_col6, #T_8096c_row2_col7, #T_8096c_row2_col8, #T_8096c_row2_col9, #T_8096c_row3_col0, #T_8096c_row3_col1, #T_8096c_row3_col2, #T_8096c_row3_col3, #T_8096c_row3_col4, #T_8096c_row3_col5, #T_8096c_row3_col6, #T_8096c_row3_col7, #T_8096c_row3_col8, #T_8096c_row3_col9, #T_8096c_row4_col0, #T_8096c_row4_col1, #T_8096c_row4_col2, #T_8096c_row4_col3, #T_8096c_row4_col4, #T_8096c_row4_col5, #T_8096c_row4_col6, #T_8096c_row4_col7, #T_8096c_row4_col8, #T_8096c_row4_col9, #T_8096c_row5_col0, #T_8096c_row5_col1, #T_8096c_row5_col2, #T_8096c_row5_col3, #T_8096c_row5_col4, #T_8096c_row5_col5, #T_8096c_row5_col6, #T_8096c_row5_col7, #T_8096c_row5_col8, #T_8096c_row5_col9, #T_8096c_row6_col0, #T_8096c_row6_col1, #T_8096c_row6_col2, #T_8096c_row6_col3, #T_8096c_row6_col4, #T_8096c_row6_col5, #T_8096c_row6_col6, #T_8096c_row6_col7, #T_8096c_row6_col8, #T_8096c_row6_col9, #T_8096c_row7_col0, #T_8096c_row7_col1, #T_8096c_row7_col2, #T_8096c_row7_col3, #T_8096c_row7_col4, #T_8096c_row7_col5, #T_8096c_row7_col6, #T_8096c_row7_col7, #T_8096c_row7_col8, #T_8096c_row7_col9, #T_8096c_row8_col0, #T_8096c_row8_col1, #T_8096c_row8_col2, #T_8096c_row8_col3, #T_8096c_row8_col4, #T_8096c_row8_col5, #T_8096c_row8_col6, #T_8096c_row8_col7, #T_8096c_row8_col8, #T_8096c_row8_col9, #T_8096c_row9_col0, #T_8096c_row9_col1, #T_8096c_row9_col2, #T_8096c_row9_col3, #T_8096c_row9_col4, #T_8096c_row9_col5, #T_8096c_row9_col6, #T_8096c_row9_col7, #T_8096c_row9_col8, #T_8096c_row9_col9 {
   text-align: center;
 }
 </style>
-<table id="T_e5ea1">
+<table id="T_8096c">
   <thead>
     <tr>
       <th class="blank level0">&nbsp;</th>
-      <th id="T_e5ea1_level0_col0" class="col_heading level0 col0">0</th>
-      <th id="T_e5ea1_level0_col1" class="col_heading level0 col1">1</th>
-      <th id="T_e5ea1_level0_col2" class="col_heading level0 col2">2</th>
-      <th id="T_e5ea1_level0_col3" class="col_heading level0 col3">3</th>
-      <th id="T_e5ea1_level0_col4" class="col_heading level0 col4">4</th>
-      <th id="T_e5ea1_level0_col5" class="col_heading level0 col5">5</th>
-      <th id="T_e5ea1_level0_col6" class="col_heading level0 col6">6</th>
-      <th id="T_e5ea1_level0_col7" class="col_heading level0 col7">7</th>
-      <th id="T_e5ea1_level0_col8" class="col_heading level0 col8">8</th>
-      <th id="T_e5ea1_level0_col9" class="col_heading level0 col9">9</th>
+      <th id="T_8096c_level0_col0" class="col_heading level0 col0">0</th>
+      <th id="T_8096c_level0_col1" class="col_heading level0 col1">1</th>
+      <th id="T_8096c_level0_col2" class="col_heading level0 col2">2</th>
+      <th id="T_8096c_level0_col3" class="col_heading level0 col3">3</th>
+      <th id="T_8096c_level0_col4" class="col_heading level0 col4">4</th>
+      <th id="T_8096c_level0_col5" class="col_heading level0 col5">5</th>
+      <th id="T_8096c_level0_col6" class="col_heading level0 col6">6</th>
+      <th id="T_8096c_level0_col7" class="col_heading level0 col7">7</th>
+      <th id="T_8096c_level0_col8" class="col_heading level0 col8">8</th>
+      <th id="T_8096c_level0_col9" class="col_heading level0 col9">9</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th id="T_e5ea1_level0_row0" class="row_heading level0 row0">0</th>
-      <td id="T_e5ea1_row0_col0" class="data row0 col0">153</td>
-      <td id="T_e5ea1_row0_col1" class="data row0 col1">0</td>
-      <td id="T_e5ea1_row0_col2" class="data row0 col2">0</td>
-      <td id="T_e5ea1_row0_col3" class="data row0 col3">0</td>
-      <td id="T_e5ea1_row0_col4" class="data row0 col4">1</td>
-      <td id="T_e5ea1_row0_col5" class="data row0 col5">0</td>
-      <td id="T_e5ea1_row0_col6" class="data row0 col6">0</td>
-      <td id="T_e5ea1_row0_col7" class="data row0 col7">0</td>
-      <td id="T_e5ea1_row0_col8" class="data row0 col8">0</td>
-      <td id="T_e5ea1_row0_col9" class="data row0 col9">0</td>
+      <th id="T_8096c_level0_row0" class="row_heading level0 row0">0</th>
+      <td id="T_8096c_row0_col0" class="data row0 col0">153</td>
+      <td id="T_8096c_row0_col1" class="data row0 col1">0</td>
+      <td id="T_8096c_row0_col2" class="data row0 col2">0</td>
+      <td id="T_8096c_row0_col3" class="data row0 col3">0</td>
+      <td id="T_8096c_row0_col4" class="data row0 col4">1</td>
+      <td id="T_8096c_row0_col5" class="data row0 col5">0</td>
+      <td id="T_8096c_row0_col6" class="data row0 col6">0</td>
+      <td id="T_8096c_row0_col7" class="data row0 col7">0</td>
+      <td id="T_8096c_row0_col8" class="data row0 col8">0</td>
+      <td id="T_8096c_row0_col9" class="data row0 col9">0</td>
     </tr>
     <tr>
-      <th id="T_e5ea1_level0_row1" class="row_heading level0 row1">1</th>
-      <td id="T_e5ea1_row1_col0" class="data row1 col0">0</td>
-      <td id="T_e5ea1_row1_col1" class="data row1 col1">124</td>
-      <td id="T_e5ea1_row1_col2" class="data row1 col2">8</td>
-      <td id="T_e5ea1_row1_col3" class="data row1 col3">1</td>
-      <td id="T_e5ea1_row1_col4" class="data row1 col4">0</td>
-      <td id="T_e5ea1_row1_col5" class="data row1 col5">2</td>
-      <td id="T_e5ea1_row1_col6" class="data row1 col6">4</td>
-      <td id="T_e5ea1_row1_col7" class="data row1 col7">0</td>
-      <td id="T_e5ea1_row1_col8" class="data row1 col8">4</td>
-      <td id="T_e5ea1_row1_col9" class="data row1 col9">11</td>
+      <th id="T_8096c_level0_row1" class="row_heading level0 row1">1</th>
+      <td id="T_8096c_row1_col0" class="data row1 col0">0</td>
+      <td id="T_8096c_row1_col1" class="data row1 col1">124</td>
+      <td id="T_8096c_row1_col2" class="data row1 col2">8</td>
+      <td id="T_8096c_row1_col3" class="data row1 col3">1</td>
+      <td id="T_8096c_row1_col4" class="data row1 col4">0</td>
+      <td id="T_8096c_row1_col5" class="data row1 col5">2</td>
+      <td id="T_8096c_row1_col6" class="data row1 col6">4</td>
+      <td id="T_8096c_row1_col7" class="data row1 col7">0</td>
+      <td id="T_8096c_row1_col8" class="data row1 col8">4</td>
+      <td id="T_8096c_row1_col9" class="data row1 col9">11</td>
     </tr>
     <tr>
-      <th id="T_e5ea1_level0_row2" class="row_heading level0 row2">2</th>
-      <td id="T_e5ea1_row2_col0" class="data row2 col0">0</td>
-      <td id="T_e5ea1_row2_col1" class="data row2 col1">6</td>
-      <td id="T_e5ea1_row2_col2" class="data row2 col2">136</td>
-      <td id="T_e5ea1_row2_col3" class="data row2 col3">4</td>
-      <td id="T_e5ea1_row2_col4" class="data row2 col4">0</td>
-      <td id="T_e5ea1_row2_col5" class="data row2 col5">0</td>
-      <td id="T_e5ea1_row2_col6" class="data row2 col6">0</td>
-      <td id="T_e5ea1_row2_col7" class="data row2 col7">2</td>
-      <td id="T_e5ea1_row2_col8" class="data row2 col8">5</td>
-      <td id="T_e5ea1_row2_col9" class="data row2 col9">1</td>
+      <th id="T_8096c_level0_row2" class="row_heading level0 row2">2</th>
+      <td id="T_8096c_row2_col0" class="data row2 col0">0</td>
+      <td id="T_8096c_row2_col1" class="data row2 col1">6</td>
+      <td id="T_8096c_row2_col2" class="data row2 col2">136</td>
+      <td id="T_8096c_row2_col3" class="data row2 col3">4</td>
+      <td id="T_8096c_row2_col4" class="data row2 col4">0</td>
+      <td id="T_8096c_row2_col5" class="data row2 col5">0</td>
+      <td id="T_8096c_row2_col6" class="data row2 col6">0</td>
+      <td id="T_8096c_row2_col7" class="data row2 col7">2</td>
+      <td id="T_8096c_row2_col8" class="data row2 col8">5</td>
+      <td id="T_8096c_row2_col9" class="data row2 col9">1</td>
     </tr>
     <tr>
-      <th id="T_e5ea1_level0_row3" class="row_heading level0 row3">3</th>
-      <td id="T_e5ea1_row3_col0" class="data row3 col0">1</td>
-      <td id="T_e5ea1_row3_col1" class="data row3 col1">0</td>
-      <td id="T_e5ea1_row3_col2" class="data row3 col2">1</td>
-      <td id="T_e5ea1_row3_col3" class="data row3 col3">143</td>
-      <td id="T_e5ea1_row3_col4" class="data row3 col4">0</td>
-      <td id="T_e5ea1_row3_col5" class="data row3 col5">0</td>
-      <td id="T_e5ea1_row3_col6" class="data row3 col6">0</td>
-      <td id="T_e5ea1_row3_col7" class="data row3 col7">4</td>
-      <td id="T_e5ea1_row3_col8" class="data row3 col8">2</td>
-      <td id="T_e5ea1_row3_col9" class="data row3 col9">3</td>
+      <th id="T_8096c_level0_row3" class="row_heading level0 row3">3</th>
+      <td id="T_8096c_row3_col0" class="data row3 col0">1</td>
+      <td id="T_8096c_row3_col1" class="data row3 col1">0</td>
+      <td id="T_8096c_row3_col2" class="data row3 col2">1</td>
+      <td id="T_8096c_row3_col3" class="data row3 col3">143</td>
+      <td id="T_8096c_row3_col4" class="data row3 col4">0</td>
+      <td id="T_8096c_row3_col5" class="data row3 col5">0</td>
+      <td id="T_8096c_row3_col6" class="data row3 col6">0</td>
+      <td id="T_8096c_row3_col7" class="data row3 col7">4</td>
+      <td id="T_8096c_row3_col8" class="data row3 col8">2</td>
+      <td id="T_8096c_row3_col9" class="data row3 col9">3</td>
     </tr>
     <tr>
-      <th id="T_e5ea1_level0_row4" class="row_heading level0 row4">4</th>
-      <td id="T_e5ea1_row4_col0" class="data row4 col0">1</td>
-      <td id="T_e5ea1_row4_col1" class="data row4 col1">3</td>
-      <td id="T_e5ea1_row4_col2" class="data row4 col2">0</td>
-      <td id="T_e5ea1_row4_col3" class="data row4 col3">0</td>
-      <td id="T_e5ea1_row4_col4" class="data row4 col4">143</td>
-      <td id="T_e5ea1_row4_col5" class="data row4 col5">0</td>
-      <td id="T_e5ea1_row4_col6" class="data row4 col6">0</td>
-      <td id="T_e5ea1_row4_col7" class="data row4 col7">7</td>
-      <td id="T_e5ea1_row4_col8" class="data row4 col8">0</td>
-      <td id="T_e5ea1_row4_col9" class="data row4 col9">0</td>
+      <th id="T_8096c_level0_row4" class="row_heading level0 row4">4</th>
+      <td id="T_8096c_row4_col0" class="data row4 col0">1</td>
+      <td id="T_8096c_row4_col1" class="data row4 col1">3</td>
+      <td id="T_8096c_row4_col2" class="data row4 col2">0</td>
+      <td id="T_8096c_row4_col3" class="data row4 col3">0</td>
+      <td id="T_8096c_row4_col4" class="data row4 col4">143</td>
+      <td id="T_8096c_row4_col5" class="data row4 col5">0</td>
+      <td id="T_8096c_row4_col6" class="data row4 col6">0</td>
+      <td id="T_8096c_row4_col7" class="data row4 col7">7</td>
+      <td id="T_8096c_row4_col8" class="data row4 col8">0</td>
+      <td id="T_8096c_row4_col9" class="data row4 col9">0</td>
     </tr>
     <tr>
-      <th id="T_e5ea1_level0_row5" class="row_heading level0 row5">5</th>
-      <td id="T_e5ea1_row5_col0" class="data row5 col0">1</td>
-      <td id="T_e5ea1_row5_col1" class="data row5 col1">0</td>
-      <td id="T_e5ea1_row5_col2" class="data row5 col2">0</td>
-      <td id="T_e5ea1_row5_col3" class="data row5 col3">1</td>
-      <td id="T_e5ea1_row5_col4" class="data row5 col4">1</td>
-      <td id="T_e5ea1_row5_col5" class="data row5 col5">131</td>
-      <td id="T_e5ea1_row5_col6" class="data row5 col6">3</td>
-      <td id="T_e5ea1_row5_col7" class="data row5 col7">0</td>
-      <td id="T_e5ea1_row5_col8" class="data row5 col8">0</td>
-      <td id="T_e5ea1_row5_col9" class="data row5 col9">17</td>
+      <th id="T_8096c_level0_row5" class="row_heading level0 row5">5</th>
+      <td id="T_8096c_row5_col0" class="data row5 col0">1</td>
+      <td id="T_8096c_row5_col1" class="data row5 col1">0</td>
+      <td id="T_8096c_row5_col2" class="data row5 col2">0</td>
+      <td id="T_8096c_row5_col3" class="data row5 col3">1</td>
+      <td id="T_8096c_row5_col4" class="data row5 col4">1</td>
+      <td id="T_8096c_row5_col5" class="data row5 col5">131</td>
+      <td id="T_8096c_row5_col6" class="data row5 col6">3</td>
+      <td id="T_8096c_row5_col7" class="data row5 col7">0</td>
+      <td id="T_8096c_row5_col8" class="data row5 col8">0</td>
+      <td id="T_8096c_row5_col9" class="data row5 col9">17</td>
     </tr>
     <tr>
-      <th id="T_e5ea1_level0_row6" class="row_heading level0 row6">6</th>
-      <td id="T_e5ea1_row6_col0" class="data row6 col0">1</td>
-      <td id="T_e5ea1_row6_col1" class="data row6 col1">1</td>
-      <td id="T_e5ea1_row6_col2" class="data row6 col2">0</td>
-      <td id="T_e5ea1_row6_col3" class="data row6 col3">0</td>
-      <td id="T_e5ea1_row6_col4" class="data row6 col4">1</td>
-      <td id="T_e5ea1_row6_col5" class="data row6 col5">0</td>
-      <td id="T_e5ea1_row6_col6" class="data row6 col6">151</td>
-      <td id="T_e5ea1_row6_col7" class="data row6 col7">0</td>
-      <td id="T_e5ea1_row6_col8" class="data row6 col8">0</td>
-      <td id="T_e5ea1_row6_col9" class="data row6 col9">0</td>
+      <th id="T_8096c_level0_row6" class="row_heading level0 row6">6</th>
+      <td id="T_8096c_row6_col0" class="data row6 col0">1</td>
+      <td id="T_8096c_row6_col1" class="data row6 col1">1</td>
+      <td id="T_8096c_row6_col2" class="data row6 col2">0</td>
+      <td id="T_8096c_row6_col3" class="data row6 col3">0</td>
+      <td id="T_8096c_row6_col4" class="data row6 col4">1</td>
+      <td id="T_8096c_row6_col5" class="data row6 col5">0</td>
+      <td id="T_8096c_row6_col6" class="data row6 col6">151</td>
+      <td id="T_8096c_row6_col7" class="data row6 col7">0</td>
+      <td id="T_8096c_row6_col8" class="data row6 col8">0</td>
+      <td id="T_8096c_row6_col9" class="data row6 col9">0</td>
     </tr>
     <tr>
-      <th id="T_e5ea1_level0_row7" class="row_heading level0 row7">7</th>
-      <td id="T_e5ea1_row7_col0" class="data row7 col0">0</td>
-      <td id="T_e5ea1_row7_col1" class="data row7 col1">0</td>
-      <td id="T_e5ea1_row7_col2" class="data row7 col2">0</td>
-      <td id="T_e5ea1_row7_col3" class="data row7 col3">0</td>
-      <td id="T_e5ea1_row7_col4" class="data row7 col4">1</td>
-      <td id="T_e5ea1_row7_col5" class="data row7 col5">1</td>
-      <td id="T_e5ea1_row7_col6" class="data row7 col6">0</td>
-      <td id="T_e5ea1_row7_col7" class="data row7 col7">152</td>
-      <td id="T_e5ea1_row7_col8" class="data row7 col8">0</td>
-      <td id="T_e5ea1_row7_col9" class="data row7 col9">0</td>
+      <th id="T_8096c_level0_row7" class="row_heading level0 row7">7</th>
+      <td id="T_8096c_row7_col0" class="data row7 col0">0</td>
+      <td id="T_8096c_row7_col1" class="data row7 col1">0</td>
+      <td id="T_8096c_row7_col2" class="data row7 col2">0</td>
+      <td id="T_8096c_row7_col3" class="data row7 col3">0</td>
+      <td id="T_8096c_row7_col4" class="data row7 col4">1</td>
+      <td id="T_8096c_row7_col5" class="data row7 col5">1</td>
+      <td id="T_8096c_row7_col6" class="data row7 col6">0</td>
+      <td id="T_8096c_row7_col7" class="data row7 col7">152</td>
+      <td id="T_8096c_row7_col8" class="data row7 col8">0</td>
+      <td id="T_8096c_row7_col9" class="data row7 col9">0</td>
     </tr>
     <tr>
-      <th id="T_e5ea1_level0_row8" class="row_heading level0 row8">8</th>
-      <td id="T_e5ea1_row8_col0" class="data row8 col0">0</td>
-      <td id="T_e5ea1_row8_col1" class="data row8 col1">15</td>
-      <td id="T_e5ea1_row8_col2" class="data row8 col2">2</td>
-      <td id="T_e5ea1_row8_col3" class="data row8 col3">2</td>
-      <td id="T_e5ea1_row8_col4" class="data row8 col4">0</td>
-      <td id="T_e5ea1_row8_col5" class="data row8 col5">4</td>
-      <td id="T_e5ea1_row8_col6" class="data row8 col6">2</td>
-      <td id="T_e5ea1_row8_col7" class="data row8 col7">2</td>
-      <td id="T_e5ea1_row8_col8" class="data row8 col8">119</td>
-      <td id="T_e5ea1_row8_col9" class="data row8 col9">8</td>
+      <th id="T_8096c_level0_row8" class="row_heading level0 row8">8</th>
+      <td id="T_8096c_row8_col0" class="data row8 col0">0</td>
+      <td id="T_8096c_row8_col1" class="data row8 col1">15</td>
+      <td id="T_8096c_row8_col2" class="data row8 col2">2</td>
+      <td id="T_8096c_row8_col3" class="data row8 col3">2</td>
+      <td id="T_8096c_row8_col4" class="data row8 col4">0</td>
+      <td id="T_8096c_row8_col5" class="data row8 col5">4</td>
+      <td id="T_8096c_row8_col6" class="data row8 col6">2</td>
+      <td id="T_8096c_row8_col7" class="data row8 col7">2</td>
+      <td id="T_8096c_row8_col8" class="data row8 col8">119</td>
+      <td id="T_8096c_row8_col9" class="data row8 col9">8</td>
     </tr>
     <tr>
-      <th id="T_e5ea1_level0_row9" class="row_heading level0 row9">9</th>
-      <td id="T_e5ea1_row9_col0" class="data row9 col0">0</td>
-      <td id="T_e5ea1_row9_col1" class="data row9 col1">3</td>
-      <td id="T_e5ea1_row9_col2" class="data row9 col2">0</td>
-      <td id="T_e5ea1_row9_col3" class="data row9 col3">5</td>
-      <td id="T_e5ea1_row9_col4" class="data row9 col4">4</td>
-      <td id="T_e5ea1_row9_col5" class="data row9 col5">1</td>
-      <td id="T_e5ea1_row9_col6" class="data row9 col6">0</td>
-      <td id="T_e5ea1_row9_col7" class="data row9 col7">6</td>
-      <td id="T_e5ea1_row9_col8" class="data row9 col8">2</td>
-      <td id="T_e5ea1_row9_col9" class="data row9 col9">133</td>
+      <th id="T_8096c_level0_row9" class="row_heading level0 row9">9</th>
+      <td id="T_8096c_row9_col0" class="data row9 col0">0</td>
+      <td id="T_8096c_row9_col1" class="data row9 col1">3</td>
+      <td id="T_8096c_row9_col2" class="data row9 col2">0</td>
+      <td id="T_8096c_row9_col3" class="data row9 col3">5</td>
+      <td id="T_8096c_row9_col4" class="data row9 col4">4</td>
+      <td id="T_8096c_row9_col5" class="data row9 col5">1</td>
+      <td id="T_8096c_row9_col6" class="data row9 col6">0</td>
+      <td id="T_8096c_row9_col7" class="data row9 col7">6</td>
+      <td id="T_8096c_row9_col8" class="data row9 col8">2</td>
+      <td id="T_8096c_row9_col9" class="data row9 col9">133</td>
     </tr>
   </tbody>
 </table>
@@ -1393,7 +1393,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Broadcasting and Heuristic Digit Classification"</span></span>
 <span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "David De Sa"</span></span>
 <span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> "2023-03-18"</span></span>
-<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a><span class="an">categories:</span><span class="co"> [python, pyTorch, Neuralnetworks]</span></span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a><span class="an">categories:</span><span class="co"> [python, pyTorch, NeuralNetworks]</span></span>
 <span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a><span class="an">image:</span><span class="co"> "Cube_thumb.png"</span></span>
 <span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
 <span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
